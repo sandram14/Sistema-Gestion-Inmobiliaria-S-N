@@ -1,0 +1,177 @@
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1A3020;
+}
+
+.bgImage {
+  position: absolute;
+  inset: 0;
+  background-image: url('https://turismoitaipu.com.br/wp-content/uploads/2025/02/ciudad-del-este-gazeta-do-povo.jpg');
+  background-size: cover;
+  background-position: center 30%;
+}
+
+.bgOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(26, 48, 32, 0.88) 0%,
+    rgba(35, 65, 42, 0.62) 45%,
+    rgba(20, 38, 26, 0.82) 100%
+  );
+}
+
+.bgGlow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 20% 75%, rgba(168, 214, 111, 0.07) 0%, transparent 70%);
+}
+
+.content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 120px 2rem 80px;
+  max-width: 1100px;
+  width: 100%;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(168, 214, 111, 0.12);
+  border: 1px solid rgba(168, 214, 111, 0.3);
+  border-radius: 100px;
+  padding: 6px 18px;
+  margin-bottom: 32px;
+}
+
+.badgeDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #A8D66F;
+  animation: efPulse 2s infinite;
+}
+
+.badgeText {
+  color: #A8D66F;
+  font-size: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.headline {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(38px, 6vw, 78px);
+  font-weight: 300;
+  color: white;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  margin-bottom: 22px;
+  max-width: 820px;
+}
+
+.headlineAccent {
+  font-style: italic;
+  color: #A8D66F;
+}
+
+.subtitle {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 18px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  line-height: 1.65;
+  max-width: 520px;
+  margin-bottom: 44px;
+}
+
+.ctaRow {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 56px;
+  align-items: center;
+}
+
+.ctaBtn {
+  padding: 16px 36px;
+  background: #A8D66F;
+  border: none;
+  border-radius: 12px;
+  color: #23412A;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  letter-spacing: -0.01em;
+}
+
+.ctaBtn:hover {
+  transform: translateY(-2px);
+  background: #BDE688;
+}
+
+.scrollIndicator {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+}
+
+.scrollLabel {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 11px;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.scrollLine {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(168, 214, 111, 0.5), transparent);
+  animation: efScrollPulse 2s ease-in-out infinite;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .content {
+    padding: 100px 1.25rem 64px;
+  }
+  .subtitle {
+    font-size: 16px;
+    margin-bottom: 32px;
+  }
+  .ctaBtn {
+    width: 100%;
+    padding: 15px 28px;
+  }
+  .ctaRow {
+    width: 100%;
+    margin-bottom: 40px;
+  }
+  .scrollIndicator {
+    display: none;
+  }
+}

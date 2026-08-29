@@ -1,0 +1,113 @@
+.container {
+  padding: 80px 2rem;
+  color: #1A3020; /* Verde muy oscuro para el texto base */
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+ 
+}
+
+.title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 3rem;
+  color: #122618; /* Verde oscuro profundo */
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #3D5A45; /* Verde medio oscuro para subtítulo */
+  margin-bottom: 3rem;
+  font-size: 1.1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.card {
+  background: #F8FAF7; /* Blanco hueso / verde casi imperceptible */
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid #E2E8E0;
+  box-shadow: 0 4px 12px rgba(26, 48, 32, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: #2D5A38;
+  box-shadow: 0 8px 20px rgba(26, 48, 32, 0.12);
+}
+
+.avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+  border: 3px solid #2D5A38; /* Borde verde oscuro */
+}
+
+.name {
+  font-size: 1.4rem;
+  margin-bottom: 0.2rem;
+  color: #1A3020;
+}
+
+.role {
+  color: #2D5A38; /* Verde corporativo */
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.specialty {
+  font-size: 0.85rem;
+  color: #4A6B52;
+  margin-bottom: 1.2rem;
+}
+
+.info {
+  font-size: 0.9rem;
+  color: #2B4232;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.button {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: none;
+  background: #1A3020; /* Botón verde oscuro elegante */
+  color: #FFFFFF;
+  font-weight: bold;
+  font-size: 0.95rem;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.2s;
+}
+
+.button:hover {
+  background: #2D5A38;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .container {
+    padding: 64px 1.25rem;
+  }
+  .title {
+    font-size: 2.2rem;
+  }
+  .grid {
+    gap: 1.25rem;
+  }
+}

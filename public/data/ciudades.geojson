@@ -1,0 +1,73 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -54.64027,
+                    -25.403628
+                ]
+            },
+            "properties": {
+                "id": "05",
+                "ciudad": "HERNANDARIAS",
+                "departamento": "ALTO PARANA",
+                "totalBarrios": 2,
+                "color": "#3D6050"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -54.612944,
+                    -25.561293
+                ]
+            },
+            "properties": {
+                "id": "02",
+                "ciudad": "PRESIDENTE FRANCO",
+                "departamento": "ALTO PARANA",
+                "totalBarrios": 2,
+                "color": "#345A3E"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -54.641961,
+                    -25.505118
+                ]
+            },
+            "properties": {
+                "id": "01",
+                "ciudad": "CIUDAD DEL ESTE",
+                "departamento": "ALTO PARANA",
+                "totalBarrios": 4,
+                "color": "#526B3A"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -54.749167,
+                    -25.491106
+                ]
+            },
+            "properties": {
+                "id": "11",
+                "ciudad": "MINGA GUAZÚ",
+                "departamento": "ALTO PARANA",
+                "totalBarrios": 4,
+                "color": "#2E5438"
+            }
+        }
+    ]
+}

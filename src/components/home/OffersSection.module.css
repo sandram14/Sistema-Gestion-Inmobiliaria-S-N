@@ -1,0 +1,238 @@
+.section {
+  background: #F4F5EE;
+  padding: 90px 40px;
+}
+
+.grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: stretch;
+}
+
+/* ── Panel de ofertas ─────────────────────────────────────────────────── */
+.ofertasPanel {
+  background: white;
+  border-radius: 28px;
+  border: 1px solid #ECECE3;
+  padding: 52px 48px;
+}
+
+.eyebrow {
+  color: #3A6B46;
+  font-size: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(28px, 3.4vw, 44px);
+  font-weight: 300;
+  color: #1A1A1A;
+  margin: 10px 0 36px;
+  letter-spacing: -0.02em;
+}
+
+.titleAccent {
+  font-style: italic;
+  color: #3A6B46;
+}
+
+.loading {
+  color: #6B7280;
+  font-family: 'Outfit', sans-serif;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+/* ── Tarjeta de oferta ────────────────────────────────────────────────── */
+.card {
+  background: white;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1.5px solid #EEEEE6;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(35, 65, 42, 0.12);
+}
+
+.cardImg {
+  position: relative;
+  height: 160px;
+  background: linear-gradient(135deg, #3A6B46, #1A3020);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardImgPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardImgIcon {
+  font-size: 40px;
+}
+
+.cardBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #23412A;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+
+.cardTag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #A8D66F;
+  color: #23412A;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  padding: 4px 10px;
+  border-radius: 100px;
+  letter-spacing: 0.06em;
+}
+
+.cardBody {
+  padding: 16px 18px;
+}
+
+.cardPrice {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 19px;
+  color: #23412A;
+  margin-bottom: 4px;
+}
+
+.cardTitle {
+  font-size: 13px;
+  font-family: 'Outfit', sans-serif;
+  color: #374151;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.cardSpecs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cardSpec {
+  font-size: 12px;
+  color: #6B7280;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* ── Panel "Sobre nosotros" ───────────────────────────────────────────── */
+.nosotrosPanel {
+  background: #1A3020;
+  border-radius: 28px;
+  padding: 52px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.eyebrowLight {
+  color: rgba(168, 214, 111, 0.65);
+  font-size: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.subtitle {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 300;
+  color: white;
+  line-height: 1.2;
+  margin-bottom: 18px;
+  letter-spacing: -0.02em;
+}
+
+.subtitleAccent {
+  font-style: italic;
+  color: #A8D66F;
+}
+
+.nosotrosText {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14.5px;
+  font-family: 'Outfit', sans-serif;
+  line-height: 1.75;
+  margin-bottom: 20px;
+}
+
+.nosotrosImg {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  border-radius: 28px;
+  margin-bottom: 20px;
+}
+
+.nosotrosBtn {
+  align-self: flex-start;
+  padding: 13px 26px;
+  background: #A8D66F;
+  border: none;
+  border-radius: 10px;
+  color: #23412A;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 8px;
+}
+
+.nosotrosBtn:hover {
+  background: #BDE688;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding: 56px 1.25rem;
+  }
+  .ofertasPanel,
+  .nosotrosPanel {
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+  .cardsGrid {
+    grid-template-columns: 1fr;
+  }
+}
