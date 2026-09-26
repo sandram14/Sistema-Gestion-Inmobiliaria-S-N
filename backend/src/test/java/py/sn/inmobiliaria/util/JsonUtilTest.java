@@ -25,7 +25,8 @@ class JsonUtilTest {
     void fechasSeSerializanComoTextoIso() throws Exception {
         HealthResponse health = new HealthResponse("ok", "svc", "0.1.0", "desarrollo", "21",
                 OffsetDateTime.of(2026, 9, 26, 10, 15, 30, 0, ZoneOffset.ofHours(-3)),
-                HealthResponse.EstadoBaseDatos.noConfigurada());
+                HealthResponse.EstadoBaseDatos.noConfigurada(),
+                HealthResponse.EstadoJpa.noConfigurada());
 
         JsonNode json = JsonUtil.mapper().readTree(JsonUtil.mapper().writeValueAsString(health));
 

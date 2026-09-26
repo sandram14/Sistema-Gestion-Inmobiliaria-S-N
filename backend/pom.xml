@@ -6,7 +6,7 @@
 
     <groupId>py.sn</groupId>
     <artifactId>sn-inmobiliaria-backend</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <packaging>war</packaging>
 
     <name>S&amp;N Inmobiliaria - Backend</name>
@@ -25,6 +25,7 @@
         <logback.version>1.5.6</logback.version>
         <postgresql.version>42.7.3</postgresql.version>
         <hikaricp.version>5.1.0</hikaricp.version>
+        <hibernate.version>6.6.58.Final</hibernate.version>
         <junit.version>5.10.3</junit.version>
     </properties>
 
@@ -32,7 +33,8 @@
         Cada dependencia se agrega en la fase donde se usa:
         Fase 3: Servlet API, Jackson, logging, JUnit.
         Fase 4: driver PostgreSQL + pool de conexiones HikariCP.
-        Fase 5 (Hibernate) y Fase 10 (BCrypt, Validator) vendrán después.
+        Fase 5: Hibernate (trae Jakarta Persistence 3.1).
+        Fase 10 (BCrypt, Validator) vendrá después.
     -->
     <dependencyManagement>
         <dependencies>
@@ -82,6 +84,13 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>${hikaricp.version}</version>
+        </dependency>
+
+        <!-- JPA / Hibernate ORM -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
         </dependency>
 
         <!-- Logging -->

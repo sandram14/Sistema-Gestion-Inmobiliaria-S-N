@@ -19,6 +19,19 @@ Genera `backend/target/sn-inmobiliaria.war`.
 
 Las pruebas unitarias no necesitan base de datos.
 
+### Prueba de integración con Hibernate (necesita la base de Docker)
+
+`ModeloJpaIntegracionTest` solo se ejecuta si `DB_URL` está definida. Levanta Hibernate
+contra la base real, valida el esquema, lee las propiedades con sus relaciones y prueba
+escrituras que siempre se deshacen (la base queda igual).
+
+```powershell
+$env:DB_URL = "jdbc:postgresql://localhost:5433/sn_inmobiliaria"
+$env:DB_USER = "sn_app"
+$env:DB_PASSWORD = "<la de docker/.env>"
+mvn -f backend/pom.xml test
+```
+
 ## Ejecutar localmente (Tomcat 10.1 en Docker)
 
 PowerShell, desde la raíz del repositorio:
@@ -54,12 +67,12 @@ también como variable de entorno.
 
 | Paquete        | Responsabilidad                                               |
 |----------------|---------------------------------------------------------------|
-| `config`       | Arranque (`AppContextListener`) y configuración (`AppConfig`) |
+| `config`       | Arranque (`AppContextListener`), configuración, pool de conexiones, `JpaProvider` (Hibernate) y `TxRunner` (transacciones) |
 | `controller`   | Servlets de la API (`ApiServlet` es la base común)            |
 | `filter`       | Filtros HTTP (UTF-8, autenticación admin en la Fase 10)       |
 | `service`      | Reglas de negocio y transacciones                             |
 | `repository`   | DAOs con consultas parametrizadas                             |
-| `model`        | Entidades JPA                                                 |
+| `model`        | Entidades JPA (una por tabla; Hibernate valida el esquema al arrancar) |
 | `dto`          | Objetos de entrada (`request`) y salida (`response`)          |
 | `mapper`       | Conversión entidad ↔ DTO y GeoJSON                            |
 | `integration`  | Servicios externos (Gemini)                                   |
@@ -70,5 +83,5 @@ también como variable de entorno.
 
 | Método | Ruta          | Descripción                    |
 |--------|---------------|--------------------------------|
-| GET    | `/api/health` | Estado del backend y de la base (200 ok / 503 degradado) |
+| GET    | `/api/health` | Estado del backend, la base y Hibernate (200 ok / 503 degradado) |
 | *      | `/api/*`      | Cualquier otra ruta → 404 JSON |
