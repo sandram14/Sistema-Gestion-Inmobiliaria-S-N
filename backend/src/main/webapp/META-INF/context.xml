@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Configuración específica de Tomcat para esta aplicación -->
+<Context>
+    <!-- SameSite=Lax: la cookie de sesión no se envía en peticiones iniciadas por otros sitios (protección CSRF) -->
+    <CookieProcessor sameSiteCookies="lax"/>
+</Context>
