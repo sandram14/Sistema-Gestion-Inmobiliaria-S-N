@@ -1,24 +1,35 @@
 package py.sn.inmobiliaria.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import py.sn.inmobiliaria.repository.SaludBaseDatosDao;
+import py.sn.inmobiliaria.repository.impl.JdbcSaludBaseDatosDao;
+import py.sn.inmobiliaria.service.SaludService;
+
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Collections;
 
 /**
  * Punto de arranque de la aplicación ("raíz de composición").
  *
  * <p>Tomcat lo ejecuta una sola vez al desplegar el WAR. Aquí se construyen
- * los objetos compartidos (configuración y, en fases siguientes,
- * EntityManagerFactory, DAOs y services) y se guardan en el ServletContext
- * para que los Servlets los obtengan en su {@code init()}.</p>
+ * los objetos compartidos (configuración, pool de conexiones, DAOs y services)
+ * y se guardan en el ServletContext para que los Servlets los obtengan en su
+ * {@code init()}. Es el reemplazo manual de lo que Spring haría automáticamente.</p>
  */
 @WebListener
 public class AppContextListener implements ServletContextListener {
 
     private static final Logger log = LoggerFactory.getLogger(AppContextListener.class);
+
+    private HikariDataSource dataSource;
 
     @Override
     public void contextInitialized(ServletContextEvent evento) {
@@ -27,11 +38,43 @@ public class AppContextListener implements ServletContextListener {
         contexto.setAttribute(AppConfig.ATRIBUTO_CONTEXTO, config);
 
         log.info("Iniciando {} v{} (entorno: {})", config.nombre(), config.version(), config.entorno());
+
+        SaludBaseDatosDao saludDao = null;
+        if (config.baseDatos().isPresent()) {
+            BaseDatosConfig bd = config.baseDatos().get();
+            dataSource = DataSourceFactory.crear(bd);
+            saludDao = new JdbcSaludBaseDatosDao(dataSource);
+            log.info("Pool de conexiones creado para {}", bd.url());
+        } else {
+            log.warn("Base de datos NO configurada: defina DB_URL, DB_USER y DB_PASSWORD");
+        }
+
+        contexto.setAttribute(SaludService.class.getName(), new SaludService(config, saludDao));
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent evento) {
         log.info("Deteniendo la aplicación");
-        // En fases siguientes: cerrar el EntityManagerFactory y el pool de conexiones.
+        if (dataSource != null) {
+            dataSource.close();
+        }
+        desregistrarDriversJdbc();
+    }
+
+    /**
+     * Quita del DriverManager los drivers cargados por esta aplicación, para que
+     * Tomcat pueda liberar la memoria al redesplegar (evita la advertencia de "memory leak").
+     */
+    private void desregistrarDriversJdbc() {
+        ClassLoader cargadorApp = Thread.currentThread().getContextClassLoader();
+        for (Driver driver : Collections.list(DriverManager.getDrivers())) {
+            if (driver.getClass().getClassLoader() == cargadorApp) {
+                try {
+                    DriverManager.deregisterDriver(driver);
+                } catch (SQLException e) {
+                    log.warn("No se pudo desregistrar el driver {}", driver, e);
+                }
+            }
+        }
     }
 }

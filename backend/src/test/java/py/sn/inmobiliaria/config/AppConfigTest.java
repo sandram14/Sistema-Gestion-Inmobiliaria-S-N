@@ -45,4 +45,31 @@ class AppConfigTest {
 
         assertEquals("desarrollo", config.entorno());
     }
+
+    @Test
+    void conLasTresVariablesDbLaBaseQuedaConfigurada() {
+        AppConfig config = AppConfig.desde(Map.of(
+                "DB_URL", "jdbc:postgresql://localhost:5433/sn_inmobiliaria",
+                "DB_USER", "sn_app",
+                "DB_PASSWORD", "secreta"), new Properties());
+
+        assertTrue(config.baseDatos().isPresent());
+        assertEquals("sn_app", config.baseDatos().get().usuario());
+    }
+
+    @Test
+    void siFaltaLaContrasenaLaBaseNoQuedaConfigurada() {
+        AppConfig config = AppConfig.desde(Map.of(
+                "DB_URL", "jdbc:postgresql://localhost:5433/sn_inmobiliaria",
+                "DB_USER", "sn_app"), new Properties());
+
+        assertTrue(config.baseDatos().isEmpty());
+    }
+
+    @Test
+    void laContrasenaNuncaApareceEnToString() {
+        BaseDatosConfig bd = new BaseDatosConfig("jdbc:postgresql://db/x", "sn_app", "secreta");
+
+        assertFalse(bd.toString().contains("secreta"));
+    }
 }

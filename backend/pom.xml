@@ -6,7 +6,7 @@
 
     <groupId>py.sn</groupId>
     <artifactId>sn-inmobiliaria-backend</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <packaging>war</packaging>
 
     <name>S&amp;N Inmobiliaria - Backend</name>
@@ -16,19 +16,23 @@
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.build.propertiesEncoding>UTF-8</project.build.propertiesEncoding>
 
         <!-- Versiones de dependencias -->
         <jakarta.servlet.version>6.0.0</jakarta.servlet.version> <!-- Servlet 6.0 = Tomcat 10.1 -->
         <jackson.version>2.17.2</jackson.version>
         <slf4j.version>2.0.13</slf4j.version>
         <logback.version>1.5.6</logback.version>
+        <postgresql.version>42.7.3</postgresql.version>
+        <hikaricp.version>5.1.0</hikaricp.version>
         <junit.version>5.10.3</junit.version>
     </properties>
 
     <!--
-        Fase 3: solo las dependencias que usa el esqueleto.
-        Hibernate, PostgreSQL, BCrypt y Hibernate Validator se agregan
-        en las fases donde se utilizan (4, 5 y 10).
+        Cada dependencia se agrega en la fase donde se usa:
+        Fase 3: Servlet API, Jackson, logging, JUnit.
+        Fase 4: driver PostgreSQL + pool de conexiones HikariCP.
+        Fase 5 (Hibernate) y Fase 10 (BCrypt, Validator) vendrán después.
     -->
     <dependencyManagement>
         <dependencies>
@@ -66,6 +70,18 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+        <!-- Base de datos: driver JDBC y pool de conexiones -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${hikaricp.version}</version>
         </dependency>
 
         <!-- Logging -->

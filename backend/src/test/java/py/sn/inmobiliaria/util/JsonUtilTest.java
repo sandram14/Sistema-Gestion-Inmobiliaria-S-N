@@ -24,12 +24,23 @@ class JsonUtilTest {
     @Test
     void fechasSeSerializanComoTextoIso() throws Exception {
         HealthResponse health = new HealthResponse("ok", "svc", "0.1.0", "desarrollo", "21",
-                OffsetDateTime.of(2026, 9, 26, 10, 15, 30, 0, ZoneOffset.ofHours(-3)));
+                OffsetDateTime.of(2026, 9, 26, 10, 15, 30, 0, ZoneOffset.ofHours(-3)),
+                HealthResponse.EstadoBaseDatos.noConfigurada());
 
         JsonNode json = JsonUtil.mapper().readTree(JsonUtil.mapper().writeValueAsString(health));
 
         assertTrue(json.get("horaServidor").isTextual());
         assertEquals("2026-09-26T10:15:30-03:00", json.get("horaServidor").asText());
+    }
+
+    @Test
+    void estadoBaseDatosOmiteVersionesCuandoNoHay() throws Exception {
+        JsonNode bd = JsonUtil.mapper().readTree(
+                JsonUtil.mapper().writeValueAsString(HealthResponse.EstadoBaseDatos.error()));
+
+        assertEquals("error", bd.get("estado").asText());
+        assertFalse(bd.has("postgresql"));
+        assertFalse(bd.has("postgis"));
     }
 
     @Test

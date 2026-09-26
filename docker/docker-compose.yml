@@ -1,0 +1,39 @@
+# =====================================================================
+# S&N Inmobiliaria - Docker Compose
+# =====================================================================
+# Fase 4: solo la base de datos (PostgreSQL 16 + PostGIS 3.4).
+# Los servicios backend y frontend se agregan en la Fase 16.
+#
+# Uso (desde la raíz del repositorio):
+#   docker compose -f docker/docker-compose.yml up -d
+# Las variables se leen de docker/.env (copiar desde docker/.env.example).
+# =====================================================================
+name: sn-inmobiliaria
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:?Definir DB_NAME en docker/.env}
+      POSTGRES_USER: ${DB_USER:?Definir DB_USER en docker/.env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Definir DB_PASSWORD en docker/.env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      TZ: America/Asuncion
+      PGTZ: America/Asuncion
+    ports:
+      # Puerto 5433 en la PC para no chocar con un PostgreSQL instalado en Windows
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../database:/database:ro
+      - ./db/00_init.sh:/docker-entrypoint-initdb.d/00_init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  pgdata:

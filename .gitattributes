@@ -1,0 +1,7 @@
+# Los scripts que se ejecutan dentro de contenedores Linux deben tener
+# finales de línea LF aunque el repositorio se use en Windows; con CRLF,
+# bash falla con errores como "$'\r': command not found".
+*.sh   text eol=lf
+*.sql  text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf

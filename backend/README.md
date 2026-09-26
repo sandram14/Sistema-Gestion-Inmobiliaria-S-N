@@ -7,7 +7,7 @@ Arquitectura: Controller (Servlet) → Service → Repository/DAO → JPA/Hibern
 
 - JDK 21
 - Maven 3.9+
-- Docker (para ejecutar Tomcat y, desde la Fase 4, PostgreSQL/PostGIS)
+- Docker (Tomcat y PostgreSQL/PostGIS; ver `docker/README.md` para levantar la base)
 
 ## Compilar y ejecutar pruebas
 
@@ -17,15 +17,22 @@ mvn -f backend/pom.xml clean package
 
 Genera `backend/target/sn-inmobiliaria.war`.
 
+Las pruebas unitarias no necesitan base de datos.
+
 ## Ejecutar localmente (Tomcat 10.1 en Docker)
 
 PowerShell, desde la raíz del repositorio:
 
 ```powershell
 docker run --rm -p 8080:8080 -e APP_ENV=desarrollo -e TZ=America/Asuncion `
+  -e DB_URL=jdbc:postgresql://host.docker.internal:5433/sn_inmobiliaria `
+  -e DB_USER=sn_app -e DB_PASSWORD=<la de docker/.env> `
   -v "${PWD}\backend\target\sn-inmobiliaria.war:/usr/local/tomcat/webapps/ROOT.war" `
   tomcat:10.1-jdk21-temurin
 ```
+
+`host.docker.internal` es el nombre con el que un contenedor llega a la PC anfitriona,
+donde Docker publica la base en el puerto 5433.
 
 Probar: `curl.exe -i http://localhost:8080/api/health`
 
@@ -35,9 +42,13 @@ Probar: `curl.exe -i http://localhost:8080/api/health`
 |-----------|--------------------------------------------------|--------------|
 | `APP_ENV` | `desarrollo` o `produccion`                      | `desarrollo` |
 | `LOG_LEVEL` | Nivel de log del paquete `py.sn.inmobiliaria`  | `INFO`       |
+| `DB_URL`    | URL JDBC de PostgreSQL                         | —            |
+| `DB_USER`   | Usuario de la base                             | —            |
+| `DB_PASSWORD` | Contraseña de la base                        | —            |
 
-Las credenciales de base de datos y la API key de Gemini se agregarán en sus fases,
-siempre como variables de entorno (nunca en el código ni en Git).
+Si falta alguna variable `DB_*`, el backend arranca igual y `/api/health` responde 503
+con `"baseDatos": {"estado": "no_configurada"}`. La API key de Gemini se agregará en su fase,
+también como variable de entorno.
 
 ## Estructura de paquetes (`py.sn.inmobiliaria`)
 
@@ -59,5 +70,5 @@ siempre como variables de entorno (nunca en el código ni en Git).
 
 | Método | Ruta          | Descripción                    |
 |--------|---------------|--------------------------------|
-| GET    | `/api/health` | Estado del backend             |
+| GET    | `/api/health` | Estado del backend y de la base (200 ok / 503 degradado) |
 | *      | `/api/*`      | Cualquier otra ruta → 404 JSON |
