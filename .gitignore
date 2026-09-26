@@ -1,13 +1,16 @@
-node_modules/
-dist/
-build/
-.cache/
-.env*
-.vite/
-vite.config.*.timestamp-*
-*.tsbuildinfo
-*-debug.log*
-logs/
-*.log
-.claude-replay.*
-.tmp-*
+# Secretos (nunca versionar)
+.env
+.env.*
+!.env.example
+# Java / Maven
+backend/target/
+# IDEs
+.idea/
+.vscode/
+*.iml
+.settings/
+.project
+.classpath
+# Sistema operativo
+.DS_Store
+Thumbs.db
