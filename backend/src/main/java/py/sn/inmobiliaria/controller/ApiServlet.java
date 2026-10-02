@@ -1,5 +1,7 @@
 package py.sn.inmobiliaria.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,7 +12,9 @@ import py.sn.inmobiliaria.dto.response.ErrorResponse;
 import py.sn.inmobiliaria.exception.ApiException;
 import py.sn.inmobiliaria.exception.MetodoNoPermitidoException;
 import py.sn.inmobiliaria.exception.ServicioNoDisponibleException;
+import py.sn.inmobiliaria.exception.ValidacionException;
 import py.sn.inmobiliaria.util.JsonUtil;
+import py.sn.inmobiliaria.util.RespuestaJson;
 
 import java.io.IOException;
 
@@ -113,14 +117,49 @@ public abstract class ApiServlet extends HttpServlet {
 
     /** Escribe {@code cuerpo} como JSON con el código HTTP indicado. */
     protected void escribirJson(HttpServletResponse resp, int estadoHttp, Object cuerpo) throws IOException {
-        resp.setStatus(estadoHttp);
-        resp.setContentType(TIPO_JSON);
-        resp.setCharacterEncoding("UTF-8");
-        if (resp.getHeader("Cache-Control") == null) {
-            // Por defecto las respuestas de la API no se guardan en caché
-            resp.setHeader("Cache-Control", "no-store");
+        RespuestaJson.escribir(resp, estadoHttp, cuerpo);
+    }
+
+    /** 204 No Content: la operación salió bien y no hay nada que devolver. */
+    protected void escribirSinContenido(HttpServletResponse resp) {
+        resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        resp.setHeader("Cache-Control", "no-store");
+    }
+
+    // ---- Lectura del cuerpo JSON ----
+
+    /** Tamaño máximo aceptado para un cuerpo JSON (los formularios del panel ocupan pocos KB). */
+    private static final int MAX_CUERPO = 64 * 1024;
+
+    /**
+     * Lee el cuerpo de la petición como JSON y lo convierte al DTO indicado.
+     *
+     * @throws ApiException 415 si no es JSON; 400 si está vacío, es demasiado grande,
+     *                      está mal formado o trae campos desconocidos
+     */
+    protected <T> T leerJson(HttpServletRequest req, Class<T> tipo) throws IOException {
+        String contentType = req.getContentType();
+        if (contentType == null || !contentType.toLowerCase().startsWith(TIPO_JSON)) {
+            throw new ApiException(415, "TIPO_NO_SOPORTADO", "El cuerpo debe enviarse como application/json");
         }
-        JsonUtil.mapper().writeValue(resp.getOutputStream(), cuerpo);
+        byte[] cuerpo = req.getInputStream().readNBytes(MAX_CUERPO + 1);
+        if (cuerpo.length > MAX_CUERPO) {
+            throw ValidacionException.deCampo("cuerpo", "El contenido es demasiado grande");
+        }
+        if (cuerpo.length == 0) {
+            throw ValidacionException.deCampo("cuerpo", "No se recibieron datos");
+        }
+        try {
+            T valor = JsonUtil.mapper().readValue(cuerpo, tipo);
+            if (valor == null) {
+                throw ValidacionException.deCampo("cuerpo", "No se recibieron datos");
+            }
+            return valor;
+        } catch (UnrecognizedPropertyException e) {
+            throw ValidacionException.deCampo(e.getPropertyName(), "Campo no permitido");
+        } catch (JsonProcessingException e) {
+            throw ValidacionException.deCampo("cuerpo", "El contenido no es un JSON válido o tiene tipos incorrectos");
+        }
     }
 
     private void escribirError(HttpServletResponse resp, int estadoHttp, ErrorResponse error) throws IOException {

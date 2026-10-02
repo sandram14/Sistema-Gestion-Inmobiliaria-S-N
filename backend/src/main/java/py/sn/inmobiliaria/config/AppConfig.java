@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Configuración de la aplicación.
@@ -20,6 +22,9 @@ import java.util.Properties;
  *   <li>{@code APP_ENV}: desarrollo | produccion (por defecto: desarrollo)</li>
  *   <li>{@code DB_URL}, {@code DB_USER}, {@code DB_PASSWORD}: conexión a PostgreSQL.
  *       Si falta alguna, la aplicación arranca igual y /api/health lo informa.</li>
+ *   <li>{@code APP_ORIGENES_PERMITIDOS}: orígenes extra (separados por coma) desde los que se
+ *       aceptan peticiones que modifican datos, por ejemplo {@code http://localhost:5174}.
+ *       El propio sitio siempre está permitido.</li>
  * </ul>
  */
 public final class AppConfig {
@@ -31,12 +36,15 @@ public final class AppConfig {
     private final String version;
     private final String entorno;
     private final BaseDatosConfig baseDatos; // null si no está configurada
+    private final Set<String> origenesPermitidos;
 
-    private AppConfig(String nombre, String version, String entorno, BaseDatosConfig baseDatos) {
+    private AppConfig(String nombre, String version, String entorno, BaseDatosConfig baseDatos,
+                      Set<String> origenesPermitidos) {
         this.nombre = nombre;
         this.version = version;
         this.entorno = entorno;
         this.baseDatos = baseDatos;
+        this.origenesPermitidos = origenesPermitidos;
     }
 
     /** Crea la configuración real: variables de entorno del sistema + app.properties. */
@@ -48,13 +56,13 @@ public final class AppConfig {
      * Crea la configuración a partir de valores explícitos.
      * Permite probarla sin depender de las variables de entorno de la máquina.
      */
-    static AppConfig desde(Map<String, String> entorno, Properties propiedades) {
+    public static AppConfig desde(Map<String, String> entorno, Properties propiedades) {
         Objects.requireNonNull(entorno, "entorno");
         Objects.requireNonNull(propiedades, "propiedades");
         String nombre = propiedades.getProperty("app.nombre", "sn-inmobiliaria-backend");
         String version = propiedades.getProperty("app.version", "desconocida");
         String appEnv = valorOPorDefecto(entorno.get("APP_ENV"), "desarrollo");
-        return new AppConfig(nombre, version, appEnv, leerBaseDatos(entorno));
+        return new AppConfig(nombre, version, appEnv, leerBaseDatos(entorno), leerOrigenes(entorno.get("APP_ORIGENES_PERMITIDOS")));
     }
 
     private static BaseDatosConfig leerBaseDatos(Map<String, String> entorno) {
@@ -65,6 +73,17 @@ public final class AppConfig {
             return null;
         }
         return new BaseDatosConfig(url, usuario, contrasena);
+    }
+
+    private static Set<String> leerOrigenes(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return Set.of();
+        }
+        return java.util.Arrays.stream(valor.split(","))
+                .map(String::trim)
+                .filter(o -> !o.isEmpty())
+                .map(o -> o.toLowerCase(java.util.Locale.ROOT))
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     private static Properties leerPropiedades() {
@@ -102,6 +121,11 @@ public final class AppConfig {
 
     public boolean esProduccion() {
         return "produccion".equalsIgnoreCase(entorno);
+    }
+
+    /** Orígenes adicionales permitidos (en minúsculas), según APP_ORIGENES_PERMITIDOS. */
+    public Set<String> origenesPermitidos() {
+        return origenesPermitidos;
     }
 
     /** Conexión a la base de datos, si las tres variables DB_* están definidas. */

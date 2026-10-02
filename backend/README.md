@@ -30,6 +30,7 @@ Las escrituras que hacen se deshacen siempre (la base queda igual).
 | `PropiedadDaoIntegracionTest` | Búsqueda pública con filtros, catálogos, imágenes, usuarios |
 | `UbicacionDaoIntegracionTest` | Consultas PostGIS: ciudades, polígonos GeoJSON, punto dentro de barrio |
 | `ServiciosIntegracionTest` | Crear/editar/eliminar propiedades, cambio de tipo, imágenes, búsqueda. Borra al final lo que crea |
+| `AuthIntegracionTest` | Login con el administrador real (requiere además `ADMIN_EMAIL` y `ADMIN_PASSWORD`) |
 | `CompatibilidadFrontendIntegracionTest` | El GeoJSON de la API coincide campo por campo con `frontend/public/data/propiedades.geojson` |
 
 ```powershell
@@ -65,6 +66,7 @@ Probar: `curl.exe -i http://localhost:8080/api/health`
 | `DB_URL`    | URL JDBC de PostgreSQL                         | —            |
 | `DB_USER`   | Usuario de la base                             | —            |
 | `DB_PASSWORD` | Contraseña de la base                        | —            |
+| `APP_ORIGENES_PERMITIDOS` | Orígenes extra que pueden modificar datos (coma) | — |
 
 Si falta alguna variable `DB_*`, el backend arranca igual y `/api/health` responde 503
 con `"baseDatos": {"estado": "no_configurada"}`. La API key de Gemini se agregará en su fase,
@@ -76,7 +78,8 @@ también como variable de entorno.
 |----------------|---------------------------------------------------------------|
 | `config`       | Arranque (`AppContextListener`), configuración, pool de conexiones, `JpaProvider` (Hibernate) y `TxRunner` (transacciones) |
 | `controller`   | Servlets de la API (`ApiServlet` es la base común)            |
-| `filter`       | Filtros HTTP (UTF-8, autenticación admin en la Fase 10)       |
+| `filter`       | Filtros HTTP: UTF-8 y `AuthFilter` (sesión + protección CSRF de `/api/admin/*`) |
+| `seguridad`    | BCrypt (`ContrasenaHasher`), `UsuarioSesion`, `LimitadorIntentos` |
 | `service`      | Reglas de negocio (`ReglasNegocio`), transacciones, validación (`service.validacion`) y traducción de errores de la base (`TraductorErroresBd`) |
 | `repository`   | DAOs con consultas parametrizadas                             |
 | `model`        | Entidades JPA (una por tabla; Hibernate valida el esquema al arrancar) |
@@ -108,6 +111,24 @@ Filtros de `/api/propiedades` (todos opcionales): `ciudadId`, `barrioId`,
 GET /api/propiedades?ciudadId=1&categoria=Vivienda&operacion=Alquiler&presupuestoMax=500&moneda=USD
 ```
 
+### Autenticación administrativa
+
+Sesión HTTP con cookie `JSESSIONID` (`HttpOnly`, `SameSite=Lax`; además `Secure` si `APP_ENV=produccion`).
+La sesión expira tras 30 minutos sin actividad.
+
+| Método | Ruta | Respuesta |
+|--------|------|-----------|
+| POST | `/api/admin/auth/login` | Cuerpo `{"email","password"}` → 200 `{"usuario": {...}}` y cookie de sesión |
+| POST | `/api/admin/auth/logout` | 204, cierra la sesión |
+| GET | `/api/admin/auth/me` | 200 `{"usuario": {...}}` o 401 |
+
+El filtro `AuthFilter` protege todo `/api/admin/*`:
+
+- sin sesión de administrador → 401 (salvo login y logout);
+- en POST/PUT/PATCH/DELETE exige `Content-Type: application/json` (o `multipart/form-data`)
+  y, si llega la cabecera `Origin`, que sea este mismo sitio o uno de `APP_ORIGENES_PERMITIDOS` → si no, 403/415;
+- 5 intentos fallidos de login (por IP y email) bloquean 15 minutos → 429.
+
 ### Errores
 
 Siempre en el mismo formato, sin detalles internos:
@@ -120,7 +141,11 @@ Siempre en el mismo formato, sin detalles internos:
 |------|--------|--------|
 | 400 | `VALIDACION` | Parámetros o datos inválidos (incluye Terreno + Alquiler) |
 | 404 | `NO_ENCONTRADO` | Recurso o ruta inexistente |
+| 401 | `NO_AUTENTICADO` | Sin sesión, sesión expirada o credenciales incorrectas |
+| 403 | `ACCESO_DENEGADO` | Origen no permitido o usuario sin permisos |
 | 405 | `METODO_NO_PERMITIDO` | Método HTTP no admitido |
+| 415 | `TIPO_NO_SOPORTADO` | El cuerpo no es JSON |
+| 429 | `DEMASIADOS_INTENTOS` | Demasiados logins fallidos |
 | 409 | `CONFLICTO` | Dato repetido (código, imagen principal, email) |
 | 422 | `REGLA_*` / `RESTRICCION` | Regla de negocio rechazada por la base |
 | 503 | `SERVICIO_NO_DISPONIBLE` | La base de datos no responde o no está configurada |

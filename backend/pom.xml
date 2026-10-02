@@ -6,7 +6,7 @@
 
     <groupId>py.sn</groupId>
     <artifactId>sn-inmobiliaria-backend</artifactId>
-    <version>0.7.0</version>
+    <version>0.8.0</version>
     <packaging>war</packaging>
 
     <name>S&amp;N Inmobiliaria - Backend</name>
@@ -26,6 +26,7 @@
         <postgresql.version>42.7.3</postgresql.version>
         <hikaricp.version>5.1.0</hikaricp.version>
         <hibernate.version>6.6.58.Final</hibernate.version>
+        <jbcrypt.version>0.4</jbcrypt.version>
         <junit.version>5.10.3</junit.version>
     </properties>
 
@@ -34,7 +35,8 @@
         Fase 3: Servlet API, Jackson, logging, JUnit.
         Fase 4: driver PostgreSQL + pool de conexiones HikariCP.
         Fase 5: Hibernate (trae Jakarta Persistence 3.1).
-        Fase 10 (BCrypt, Validator) vendrá después.
+        Fase 10: jBCrypt (hash de contraseñas). La validación de datos se resolvió en la
+        capa service (service.validacion), sin necesidad de Hibernate Validator.
     -->
     <dependencyManagement>
         <dependencies>
@@ -91,6 +93,13 @@
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>
+        </dependency>
+
+        <!-- Hash de contraseñas (BCrypt) -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>${jbcrypt.version}</version>
         </dependency>
 
         <!-- Logging -->

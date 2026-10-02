@@ -13,7 +13,6 @@ import py.sn.inmobiliaria.repository.ImagenDao;
 import py.sn.inmobiliaria.repository.PropiedadDao;
 import py.sn.inmobiliaria.repository.SaludBaseDatosDao;
 import py.sn.inmobiliaria.repository.UbicacionDao;
-import py.sn.inmobiliaria.repository.UsuarioDao;
 import py.sn.inmobiliaria.repository.impl.JdbcSaludBaseDatosDao;
 import py.sn.inmobiliaria.repository.impl.JdbcUbicacionDao;
 import py.sn.inmobiliaria.repository.impl.JpaCatalogoDao;
@@ -21,6 +20,9 @@ import py.sn.inmobiliaria.repository.impl.JpaConsultaDao;
 import py.sn.inmobiliaria.repository.impl.JpaImagenDao;
 import py.sn.inmobiliaria.repository.impl.JpaPropiedadDao;
 import py.sn.inmobiliaria.repository.impl.JpaUsuarioDao;
+import py.sn.inmobiliaria.seguridad.ContrasenaHasher;
+import py.sn.inmobiliaria.seguridad.LimitadorIntentos;
+import py.sn.inmobiliaria.service.AuthService;
 import py.sn.inmobiliaria.service.CatalogoService;
 import py.sn.inmobiliaria.service.PropiedadAdminService;
 import py.sn.inmobiliaria.service.PropiedadConsultaService;
@@ -57,6 +59,11 @@ public class AppContextListener implements ServletContextListener {
 
         log.info("Iniciando {} v{} (entorno: {})", config.nombre(), config.version(), config.entorno());
 
+        if (config.esProduccion()) {
+            // En producción el sitio va por HTTPS: la cookie de sesión solo viaja cifrada
+            contexto.getSessionCookieConfig().setSecure(true);
+        }
+
         SaludBaseDatosDao saludDao = null;
         LongSupplier propiedadesDisponibles = null;
 
@@ -75,7 +82,8 @@ public class AppContextListener implements ServletContextListener {
             CatalogoDao catalogoDao = new JpaCatalogoDao();
             ImagenDao imagenDao = new JpaImagenDao();
             UbicacionDao ubicacionDao = new JdbcUbicacionDao(dataSource);
-            registrar(contexto, UsuarioDao.class, new JpaUsuarioDao());   // login (Fase 10)
+            registrar(contexto, AuthService.class,
+                    new AuthService(tx, new JpaUsuarioDao(), new ContrasenaHasher(), new LimitadorIntentos()));
             registrar(contexto, ConsultaDao.class, new JpaConsultaDao()); // asistente (Fase 14)
 
             // Services: los Servlets de la Fase 9 los obtienen del ServletContext.
