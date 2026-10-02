@@ -30,6 +30,7 @@ Las escrituras que hacen se deshacen siempre (la base queda igual).
 | `PropiedadDaoIntegracionTest` | Búsqueda pública con filtros, catálogos, imágenes, usuarios |
 | `UbicacionDaoIntegracionTest` | Consultas PostGIS: ciudades, polígonos GeoJSON, punto dentro de barrio |
 | `ServiciosIntegracionTest` | Crear/editar/eliminar propiedades, cambio de tipo, imágenes, búsqueda. Borra al final lo que crea |
+| `CompatibilidadFrontendIntegracionTest` | El GeoJSON de la API coincide campo por campo con `frontend/public/data/propiedades.geojson` |
 
 ```powershell
 $env:DB_URL = "jdbc:postgresql://localhost:5433/sn_inmobiliaria"
@@ -79,8 +80,8 @@ también como variable de entorno.
 | `service`      | Reglas de negocio (`ReglasNegocio`), transacciones, validación (`service.validacion`) y traducción de errores de la base (`TraductorErroresBd`) |
 | `repository`   | DAOs con consultas parametrizadas                             |
 | `model`        | Entidades JPA (una por tabla; Hibernate valida el esquema al arrancar) |
-| `dto`          | Objetos de entrada (`request`) y salida (`response`)          |
-| `mapper`       | Conversión entidad ↔ DTO y GeoJSON                            |
+| `dto`          | Entrada (`request`) y salida (`response`, `response.geojson`, `response.admin`) |
+| `mapper`       | Conversión entidad → DTO: GeoJSON del mapa (`GeoJsonMapper`), panel (`PropiedadAdminMapper`), catálogos (`CatalogoMapper`) |
 | `integration`  | Servicios externos (Gemini)                                   |
 | `exception`    | Errores de la API → JSON `{ "error": { ... } }` (400 validación, 404, 409 conflicto, 422 regla de negocio, 503) |
 | `util`         | Utilidades (JSON)                                             |
