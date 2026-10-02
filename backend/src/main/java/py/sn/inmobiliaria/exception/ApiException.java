@@ -19,7 +19,12 @@ public class ApiException extends RuntimeException {
     }
 
     public ApiException(int estadoHttp, String codigo, String mensaje, Map<String, String> campos) {
-        super(mensaje);
+        this(estadoHttp, codigo, mensaje, campos, null);
+    }
+
+    /** Con causa técnica: queda en el log del servidor, nunca se envía al cliente. */
+    public ApiException(int estadoHttp, String codigo, String mensaje, Map<String, String> campos, Throwable causa) {
+        super(mensaje, causa);
         this.estadoHttp = estadoHttp;
         this.codigo = codigo;
         this.campos = campos == null ? Map.of() : Map.copyOf(campos);

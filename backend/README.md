@@ -29,6 +29,7 @@ Las escrituras que hacen se deshacen siempre (la base queda igual).
 | `ModeloJpaIntegracionTest` | Hibernate valida el esquema; entidades y relaciones; escrituras en cascada |
 | `PropiedadDaoIntegracionTest` | Búsqueda pública con filtros, catálogos, imágenes, usuarios |
 | `UbicacionDaoIntegracionTest` | Consultas PostGIS: ciudades, polígonos GeoJSON, punto dentro de barrio |
+| `ServiciosIntegracionTest` | Crear/editar/eliminar propiedades, cambio de tipo, imágenes, búsqueda. Borra al final lo que crea |
 
 ```powershell
 $env:DB_URL = "jdbc:postgresql://localhost:5433/sn_inmobiliaria"
@@ -75,13 +76,13 @@ también como variable de entorno.
 | `config`       | Arranque (`AppContextListener`), configuración, pool de conexiones, `JpaProvider` (Hibernate) y `TxRunner` (transacciones) |
 | `controller`   | Servlets de la API (`ApiServlet` es la base común)            |
 | `filter`       | Filtros HTTP (UTF-8, autenticación admin en la Fase 10)       |
-| `service`      | Reglas de negocio y transacciones                             |
+| `service`      | Reglas de negocio (`ReglasNegocio`), transacciones, validación (`service.validacion`) y traducción de errores de la base (`TraductorErroresBd`) |
 | `repository`   | DAOs con consultas parametrizadas                             |
 | `model`        | Entidades JPA (una por tabla; Hibernate valida el esquema al arrancar) |
 | `dto`          | Objetos de entrada (`request`) y salida (`response`)          |
 | `mapper`       | Conversión entidad ↔ DTO y GeoJSON                            |
 | `integration`  | Servicios externos (Gemini)                                   |
-| `exception`    | Errores de la API → JSON `{ "error": { ... } }`               |
+| `exception`    | Errores de la API → JSON `{ "error": { ... } }` (400 validación, 404, 409 conflicto, 422 regla de negocio, 503) |
 | `util`         | Utilidades (JSON)                                             |
 
 ## Endpoints disponibles

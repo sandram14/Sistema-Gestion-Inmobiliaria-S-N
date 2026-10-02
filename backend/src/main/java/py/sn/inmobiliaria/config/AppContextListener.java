@@ -21,7 +21,11 @@ import py.sn.inmobiliaria.repository.impl.JpaConsultaDao;
 import py.sn.inmobiliaria.repository.impl.JpaImagenDao;
 import py.sn.inmobiliaria.repository.impl.JpaPropiedadDao;
 import py.sn.inmobiliaria.repository.impl.JpaUsuarioDao;
+import py.sn.inmobiliaria.service.CatalogoService;
+import py.sn.inmobiliaria.service.PropiedadAdminService;
+import py.sn.inmobiliaria.service.PropiedadConsultaService;
 import py.sn.inmobiliaria.service.SaludService;
+import py.sn.inmobiliaria.service.UbicacionService;
 
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -66,15 +70,21 @@ public class AppContextListener implements ServletContextListener {
             contexto.setAttribute(TxRunner.class.getName(), tx);
 
             // DAOs: se crean una sola vez y se comparten (no guardan estado entre peticiones).
-            // Los services de la Fase 7 los recibirán desde aquí.
             saludDao = new JdbcSaludBaseDatosDao(dataSource);
             PropiedadDao propiedadDao = new JpaPropiedadDao();
-            registrar(contexto, PropiedadDao.class, propiedadDao);
-            registrar(contexto, CatalogoDao.class, new JpaCatalogoDao());
-            registrar(contexto, ImagenDao.class, new JpaImagenDao());
-            registrar(contexto, UsuarioDao.class, new JpaUsuarioDao());
-            registrar(contexto, ConsultaDao.class, new JpaConsultaDao());
-            registrar(contexto, UbicacionDao.class, new JdbcUbicacionDao(dataSource));
+            CatalogoDao catalogoDao = new JpaCatalogoDao();
+            ImagenDao imagenDao = new JpaImagenDao();
+            UbicacionDao ubicacionDao = new JdbcUbicacionDao(dataSource);
+            registrar(contexto, UsuarioDao.class, new JpaUsuarioDao());   // login (Fase 10)
+            registrar(contexto, ConsultaDao.class, new JpaConsultaDao()); // asistente (Fase 14)
+
+            // Services: los Servlets de la Fase 9 los obtienen del ServletContext.
+            UbicacionService ubicacionService = new UbicacionService(ubicacionDao);
+            registrar(contexto, UbicacionService.class, ubicacionService);
+            registrar(contexto, PropiedadConsultaService.class, new PropiedadConsultaService(tx, propiedadDao));
+            registrar(contexto, PropiedadAdminService.class,
+                    new PropiedadAdminService(tx, propiedadDao, catalogoDao, imagenDao, ubicacionDao));
+            registrar(contexto, CatalogoService.class, new CatalogoService(tx, catalogoDao, ubicacionService));
 
             propiedadesDisponibles = () -> tx.soloLectura(propiedadDao::contarDisponibles);
 
