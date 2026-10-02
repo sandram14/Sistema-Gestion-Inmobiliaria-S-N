@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import py.sn.inmobiliaria.dto.response.ErrorResponse;
 import py.sn.inmobiliaria.exception.ApiException;
 import py.sn.inmobiliaria.exception.MetodoNoPermitidoException;
+import py.sn.inmobiliaria.exception.ServicioNoDisponibleException;
 import py.sn.inmobiliaria.util.JsonUtil;
 
 import java.io.IOException;
@@ -85,7 +86,30 @@ public abstract class ApiServlet extends HttpServlet {
         throw new MetodoNoPermitidoException(req.getMethod());
     }
 
+    // ---- Acceso a los services ----
+
+    /**
+     * Obtiene un service creado por AppContextListener. Si no existe (la base de datos no
+     * está configurada), responde 503 en lugar de fallar con un error interno.
+     */
+    protected <T> T servicio(Class<T> tipo) {
+        Object instancia = getServletContext().getAttribute(tipo.getName());
+        if (instancia == null) {
+            throw new ServicioNoDisponibleException(
+                    "El servicio no está disponible: la base de datos no está configurada", null);
+        }
+        return tipo.cast(instancia);
+    }
+
     // ---- Utilidades de respuesta ----
+
+    /**
+     * Permite que el navegador guarde la respuesta durante {@code segundos}.
+     * Se usa para datos que casi no cambian (ciudades, polígonos de barrios).
+     */
+    protected void permitirCache(HttpServletResponse resp, int segundos) {
+        resp.setHeader("Cache-Control", "public, max-age=" + segundos);
+    }
 
     /** Escribe {@code cuerpo} como JSON con el código HTTP indicado. */
     protected void escribirJson(HttpServletResponse resp, int estadoHttp, Object cuerpo) throws IOException {

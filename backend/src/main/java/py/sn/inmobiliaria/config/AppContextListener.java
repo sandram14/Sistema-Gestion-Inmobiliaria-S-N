@@ -111,8 +111,10 @@ public class AppContextListener implements ServletContextListener {
             jpa.emf();
             log.info("Hibernate iniciado: el esquema de la base coincide con las entidades");
         } catch (RuntimeException e) {
+            // Se registra la causa técnica (por ejemplo, "Schema-validation: ..."), no el mensaje genérico
+            Throwable causa = e.getCause() != null ? e.getCause() : e;
             log.error("No se pudo iniciar Hibernate. Si el mensaje menciona 'Schema-validation', "
-                    + "una entidad no coincide con las tablas de /database", e);
+                    + "una entidad no coincide con las tablas de /database", causa);
         }
     }
 

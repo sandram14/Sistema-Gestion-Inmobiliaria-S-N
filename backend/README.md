@@ -88,7 +88,39 @@ también como variable de entorno.
 
 ## Endpoints disponibles
 
-| Método | Ruta          | Descripción                    |
-|--------|---------------|--------------------------------|
-| GET    | `/api/health` | Estado del backend, la base y Hibernate (200 ok / 503 degradado) |
-| *      | `/api/*`      | Cualquier otra ruta → 404 JSON |
+### API pública (sin autenticación)
+
+| Método | Ruta | Respuesta |
+|--------|------|-----------|
+| GET | `/api/health` | Estado del backend, la base y Hibernate (200 ok / 503 degradado) |
+| GET | `/api/ciudades` | FeatureCollection de puntos (caché 1 h) |
+| GET | `/api/barrios?ciudadId=` | FeatureCollection de polígonos; `ciudadId` opcional (caché 1 h) |
+| GET | `/api/propiedades` | FeatureCollection de propiedades Disponibles |
+| GET | `/api/propiedades/{codigo}` | Feature de una propiedad (`prop-001`) |
+| GET | `/api/catalogos` | Tipos, estados, operaciones, monedas, reglas y árbol de ubicaciones |
+| * | `/api/*` | Cualquier otra ruta → 404 JSON |
+
+Filtros de `/api/propiedades` (todos opcionales): `ciudadId`, `barrioId`,
+`categoria` (`Casa`, `Vivienda` o `Terreno`), `operacion` o `tipoOperacion` (`Venta`, `Alquiler`),
+`presupuestoMax` y `moneda` (`USD` por defecto, o `PYG`). Ejemplo:
+
+```
+GET /api/propiedades?ciudadId=1&categoria=Vivienda&operacion=Alquiler&presupuestoMax=500&moneda=USD
+```
+
+### Errores
+
+Siempre en el mismo formato, sin detalles internos:
+
+```json
+{ "error": { "codigo": "VALIDACION", "mensaje": "...", "campos": { "ciudadId": "Debe ser un número entero" } } }
+```
+
+| HTTP | Código | Cuándo |
+|------|--------|--------|
+| 400 | `VALIDACION` | Parámetros o datos inválidos (incluye Terreno + Alquiler) |
+| 404 | `NO_ENCONTRADO` | Recurso o ruta inexistente |
+| 405 | `METODO_NO_PERMITIDO` | Método HTTP no admitido |
+| 409 | `CONFLICTO` | Dato repetido (código, imagen principal, email) |
+| 422 | `REGLA_*` / `RESTRICCION` | Regla de negocio rechazada por la base |
+| 503 | `SERVICIO_NO_DISPONIBLE` | La base de datos no responde o no está configurada |

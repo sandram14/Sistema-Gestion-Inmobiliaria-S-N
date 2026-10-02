@@ -1,6 +1,7 @@
 package py.sn.inmobiliaria.mapper;
 
 import org.junit.jupiter.api.Test;
+import py.sn.inmobiliaria.prueba.Entidades;
 import py.sn.inmobiliaria.dto.response.admin.PropiedadDetalleDto;
 import py.sn.inmobiliaria.dto.response.admin.PropiedadResumenDto;
 

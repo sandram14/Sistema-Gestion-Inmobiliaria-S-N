@@ -2,6 +2,7 @@ package py.sn.inmobiliaria.config;
 
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import py.sn.inmobiliaria.exception.ServicioNoDisponibleException;
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -30,7 +31,8 @@ public final class JpaProvider implements AutoCloseable {
     /**
      * Devuelve el EntityManagerFactory, creándolo si todavía no existe.
      *
-     * @throws jakarta.persistence.PersistenceException si la base no responde o el esquema no coincide
+     * @throws ServicioNoDisponibleException (HTTP 503) si la base no responde o el esquema no coincide;
+     *                                       el detalle técnico queda como causa, solo para el log
      */
     public EntityManagerFactory emf() {
         EntityManagerFactory actual = emf;
@@ -38,8 +40,13 @@ public final class JpaProvider implements AutoCloseable {
             synchronized (this) {
                 actual = emf;
                 if (actual == null) {
-                    actual = Persistence.createEntityManagerFactory(UNIDAD_PERSISTENCIA,
-                            Map.of("jakarta.persistence.nonJtaDataSource", dataSource));
+                    try {
+                        actual = Persistence.createEntityManagerFactory(UNIDAD_PERSISTENCIA,
+                                Map.of("jakarta.persistence.nonJtaDataSource", dataSource));
+                    } catch (RuntimeException e) {
+                        throw new ServicioNoDisponibleException(
+                                "La base de datos no está disponible en este momento. Intente nuevamente.", e);
+                    }
                     emf = actual;
                 }
             }

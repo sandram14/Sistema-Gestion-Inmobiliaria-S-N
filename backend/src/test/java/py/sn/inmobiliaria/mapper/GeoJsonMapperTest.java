@@ -2,6 +2,7 @@ package py.sn.inmobiliaria.mapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
+import py.sn.inmobiliaria.prueba.Entidades;
 import py.sn.inmobiliaria.repository.UbicacionDao.BarrioGeo;
 import py.sn.inmobiliaria.repository.UbicacionDao.CiudadGeo;
 import py.sn.inmobiliaria.util.JsonUtil;
