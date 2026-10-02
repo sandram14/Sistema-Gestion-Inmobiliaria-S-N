@@ -7,16 +7,27 @@ import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import py.sn.inmobiliaria.repository.CatalogoDao;
+import py.sn.inmobiliaria.repository.ConsultaDao;
+import py.sn.inmobiliaria.repository.ImagenDao;
 import py.sn.inmobiliaria.repository.PropiedadDao;
 import py.sn.inmobiliaria.repository.SaludBaseDatosDao;
+import py.sn.inmobiliaria.repository.UbicacionDao;
+import py.sn.inmobiliaria.repository.UsuarioDao;
 import py.sn.inmobiliaria.repository.impl.JdbcSaludBaseDatosDao;
+import py.sn.inmobiliaria.repository.impl.JdbcUbicacionDao;
+import py.sn.inmobiliaria.repository.impl.JpaCatalogoDao;
+import py.sn.inmobiliaria.repository.impl.JpaConsultaDao;
+import py.sn.inmobiliaria.repository.impl.JpaImagenDao;
 import py.sn.inmobiliaria.repository.impl.JpaPropiedadDao;
+import py.sn.inmobiliaria.repository.impl.JpaUsuarioDao;
 import py.sn.inmobiliaria.service.SaludService;
 
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.function.LongSupplier;
 
 /**
  * Punto de arranque de la aplicación ("raíz de composición").
@@ -43,7 +54,7 @@ public class AppContextListener implements ServletContextListener {
         log.info("Iniciando {} v{} (entorno: {})", config.nombre(), config.version(), config.entorno());
 
         SaludBaseDatosDao saludDao = null;
-        PropiedadDao propiedadDao = null;
+        LongSupplier propiedadesDisponibles = null;
 
         if (config.baseDatos().isPresent()) {
             BaseDatosConfig bd = config.baseDatos().get();
@@ -54,15 +65,30 @@ public class AppContextListener implements ServletContextListener {
             TxRunner tx = new TxRunner(jpa);
             contexto.setAttribute(TxRunner.class.getName(), tx);
 
+            // DAOs: se crean una sola vez y se comparten (no guardan estado entre peticiones).
+            // Los services de la Fase 7 los recibirán desde aquí.
             saludDao = new JdbcSaludBaseDatosDao(dataSource);
-            propiedadDao = new JpaPropiedadDao(tx);
+            PropiedadDao propiedadDao = new JpaPropiedadDao();
+            registrar(contexto, PropiedadDao.class, propiedadDao);
+            registrar(contexto, CatalogoDao.class, new JpaCatalogoDao());
+            registrar(contexto, ImagenDao.class, new JpaImagenDao());
+            registrar(contexto, UsuarioDao.class, new JpaUsuarioDao());
+            registrar(contexto, ConsultaDao.class, new JpaConsultaDao());
+            registrar(contexto, UbicacionDao.class, new JdbcUbicacionDao(dataSource));
+
+            propiedadesDisponibles = () -> tx.soloLectura(propiedadDao::contarDisponibles);
 
             iniciarHibernate();
         } else {
             log.warn("Base de datos NO configurada: defina DB_URL, DB_USER y DB_PASSWORD");
         }
 
-        contexto.setAttribute(SaludService.class.getName(), new SaludService(config, saludDao, propiedadDao));
+        contexto.setAttribute(SaludService.class.getName(), new SaludService(config, saludDao, propiedadesDisponibles));
+    }
+
+    /** Guarda un objeto compartido en el ServletContext, usando el nombre de su tipo como clave. */
+    private static <T> void registrar(ServletContext contexto, Class<T> tipo, T instancia) {
+        contexto.setAttribute(tipo.getName(), instancia);
     }
 
     /**

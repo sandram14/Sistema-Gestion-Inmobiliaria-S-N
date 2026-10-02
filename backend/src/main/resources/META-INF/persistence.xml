@@ -33,6 +33,10 @@
                  y se niega a iniciar si una entidad no coincide con las tablas. Nunca lo modifica. -->
             <property name="hibernate.hbm2ddl.auto" value="validate"/>
 
+            <!-- Carga en lotes: al recorrer imágenes u operaciones de varias propiedades,
+                 Hibernate las trae de a 32 con una sola consulta (evita el problema "N+1") -->
+            <property name="hibernate.default_batch_fetch_size" value="32"/>
+
             <!-- Poner en true temporalmente para ver en el log el SQL que genera Hibernate -->
             <property name="hibernate.show_sql" value="false"/>
             <property name="hibernate.format_sql" value="true"/>

@@ -3,10 +3,10 @@ package py.sn.inmobiliaria.service;
 import org.junit.jupiter.api.Test;
 import py.sn.inmobiliaria.config.AppConfig;
 import py.sn.inmobiliaria.dto.response.HealthResponse;
-import py.sn.inmobiliaria.repository.PropiedadDao;
 import py.sn.inmobiliaria.repository.SaludBaseDatosDao;
 
 import java.sql.SQLException;
+import java.util.function.LongSupplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -20,7 +20,7 @@ class SaludServiceTest {
     private final AppConfig config = AppConfig.cargar();
 
     private final SaludBaseDatosDao baseOk = () -> new SaludBaseDatosDao.InfoBaseDatos("16.4", "3.4.2");
-    private final PropiedadDao jpaOk = () -> 28L;
+    private final LongSupplier jpaOk = () -> 28L;
 
     @Test
     void conBaseEHibernateFuncionandoElEstadoEsOk() {
@@ -50,7 +50,7 @@ class SaludServiceTest {
 
     @Test
     void siHibernateFallaElEstadoEsDegradado() {
-        PropiedadDao jpaRoto = () -> {
+        LongSupplier jpaRoto = () -> {
             throw new IllegalStateException("Schema-validation: missing column");
         };
 

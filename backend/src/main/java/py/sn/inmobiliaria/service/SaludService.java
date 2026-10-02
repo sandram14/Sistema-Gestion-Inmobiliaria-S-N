@@ -6,10 +6,10 @@ import py.sn.inmobiliaria.config.AppConfig;
 import py.sn.inmobiliaria.dto.response.HealthResponse;
 import py.sn.inmobiliaria.dto.response.HealthResponse.EstadoBaseDatos;
 import py.sn.inmobiliaria.dto.response.HealthResponse.EstadoJpa;
-import py.sn.inmobiliaria.repository.PropiedadDao;
 import py.sn.inmobiliaria.repository.SaludBaseDatosDao;
 
 import java.time.OffsetDateTime;
+import java.util.function.LongSupplier;
 
 /**
  * Arma el estado de salud del backend: la aplicación, la base de datos y Hibernate.
@@ -20,19 +20,19 @@ public class SaludService {
 
     private final AppConfig config;
     private final SaludBaseDatosDao saludDao;   // null si la base no está configurada
-    private final PropiedadDao propiedadDao;    // null si la base no está configurada
+    private final LongSupplier propiedadesDisponibles; // consulta con Hibernate; null si la base no está configurada
 
-    public SaludService(AppConfig config, SaludBaseDatosDao saludDao, PropiedadDao propiedadDao) {
+    public SaludService(AppConfig config, SaludBaseDatosDao saludDao, LongSupplier propiedadesDisponibles) {
         this.config = config;
         this.saludDao = saludDao;
-        this.propiedadDao = propiedadDao;
+        this.propiedadesDisponibles = propiedadesDisponibles;
     }
 
     public HealthResponse verificar() {
         EstadoBaseDatos bd = estadoBaseDatos();
         // Si la base no responde, no tiene sentido consultar con Hibernate.
         EstadoJpa jpa = EstadoBaseDatos.OK.equals(bd.estado()) ? estadoJpa()
-                : (propiedadDao == null ? EstadoJpa.noConfigurada() : EstadoJpa.error());
+                : (propiedadesDisponibles == null ? EstadoJpa.noConfigurada() : EstadoJpa.error());
 
         boolean todoOk = EstadoBaseDatos.OK.equals(bd.estado()) && EstadoBaseDatos.OK.equals(jpa.estado());
         return new HealthResponse(
@@ -61,11 +61,11 @@ public class SaludService {
     }
 
     private EstadoJpa estadoJpa() {
-        if (propiedadDao == null) {
+        if (propiedadesDisponibles == null) {
             return EstadoJpa.noConfigurada();
         }
         try {
-            return EstadoJpa.ok(propiedadDao.contarDisponibles());
+            return EstadoJpa.ok(propiedadesDisponibles.getAsLong());
         } catch (Exception e) {
             log.error("Hibernate no pudo leer las entidades", e);
             return EstadoJpa.error();

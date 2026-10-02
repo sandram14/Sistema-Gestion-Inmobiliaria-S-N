@@ -6,7 +6,7 @@
 
     <groupId>py.sn</groupId>
     <artifactId>sn-inmobiliaria-backend</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
     <packaging>war</packaging>
 
     <name>S&amp;N Inmobiliaria - Backend</name>
@@ -144,6 +144,15 @@
                     <compilerArgs>
                         <arg>-Xlint:all</arg>
                     </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <!-- Codificación de app.properties al filtrarlo (elimina el aviso de Maven) -->
+                    <propertiesEncoding>UTF-8</propertiesEncoding>
                 </configuration>
             </plugin>
             <plugin>

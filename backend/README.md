@@ -19,11 +19,16 @@ Genera `backend/target/sn-inmobiliaria.war`.
 
 Las pruebas unitarias no necesitan base de datos.
 
-### Prueba de integración con Hibernate (necesita la base de Docker)
+### Pruebas de integración (necesitan la base de Docker)
 
-`ModeloJpaIntegracionTest` solo se ejecuta si `DB_URL` está definida. Levanta Hibernate
-contra la base real, valida el esquema, lee las propiedades con sus relaciones y prueba
-escrituras que siempre se deshacen (la base queda igual).
+Solo se ejecutan si `DB_URL` está definida; sin ella, Maven las marca como omitidas.
+Las escrituras que hacen se deshacen siempre (la base queda igual).
+
+| Clase | Qué prueba |
+|---|---|
+| `ModeloJpaIntegracionTest` | Hibernate valida el esquema; entidades y relaciones; escrituras en cascada |
+| `PropiedadDaoIntegracionTest` | Búsqueda pública con filtros, catálogos, imágenes, usuarios |
+| `UbicacionDaoIntegracionTest` | Consultas PostGIS: ciudades, polígonos GeoJSON, punto dentro de barrio |
 
 ```powershell
 $env:DB_URL = "jdbc:postgresql://localhost:5433/sn_inmobiliaria"
