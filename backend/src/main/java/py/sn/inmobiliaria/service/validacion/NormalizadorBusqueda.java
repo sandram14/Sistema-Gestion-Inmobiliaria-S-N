@@ -25,6 +25,9 @@ public final class NormalizadorBusqueda {
         }
         Errores errores = new Errores();
 
+        if (req.departamentoId() != null && req.departamentoId() <= 0) {
+            errores.agregar("departamentoId", "Debe ser un número positivo");
+        }
         if (req.ciudadId() != null && req.ciudadId() <= 0) {
             errores.agregar("ciudadId", "Debe ser un número positivo");
         }
@@ -69,7 +72,8 @@ public final class NormalizadorBusqueda {
         }
 
         errores.lanzarSiHay();
-        return new FiltroPropiedades(req.ciudadId(), req.barrioId(), tipo, operacion, presupuesto, moneda);
+        return new FiltroPropiedades(req.ciudadId(), req.barrioId(), tipo, operacion, presupuesto, moneda,
+                req.departamentoId());
     }
 
     private static boolean vacio(String s) {

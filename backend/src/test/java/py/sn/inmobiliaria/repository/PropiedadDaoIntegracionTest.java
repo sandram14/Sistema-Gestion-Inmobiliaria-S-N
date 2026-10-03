@@ -116,6 +116,18 @@ class PropiedadDaoIntegracionTest {
     }
 
     @Test
+    void filtraPorDepartamento() {
+        Integer altoParana = tx.soloLectura(em -> em.createQuery(
+                        "select d.id from Departamento d where d.codigo = '10'", Integer.class).getSingleResult());
+
+        assertEquals(28, buscar(new FiltroPropiedades(null, null, null, null, null, null, altoParana)).size());
+        assertEquals(0, buscar(new FiltroPropiedades(null, null, null, null, null, null, 999999)).size());
+        // Departamento + ciudad: se combinan
+        assertEquals(12, buscar(new FiltroPropiedades(idCiudad("CIUDAD DEL ESTE"), null, null, null, null, null,
+                altoParana)).size());
+    }
+
+    @Test
     void filtraPorOperacion() {
         List<Propiedad> alquileres = buscar(new FiltroPropiedades(null, null, null, Operacion.ALQUILER, null, null));
 

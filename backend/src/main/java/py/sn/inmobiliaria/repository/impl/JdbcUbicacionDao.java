@@ -21,13 +21,14 @@ import java.util.Optional;
 public class JdbcUbicacionDao implements UbicacionDao {
 
     private static final String SQL_CIUDADES = """
-            SELECT c.id_ciudad, c.nombre, c.codigo_distrito, d.nombre AS departamento,
+            SELECT c.id_ciudad, c.nombre, c.codigo_distrito, d.id_departamento, d.nombre AS departamento,
                    ST_X(c.centro) AS longitud, ST_Y(c.centro) AS latitud,
                    COUNT(b.id_barrio) AS total_barrios
               FROM ciudad c
               JOIN departamento d ON d.id_departamento = c.id_departamento
               LEFT JOIN barrio b  ON b.id_ciudad = c.id_ciudad
-             GROUP BY c.id_ciudad, c.nombre, c.codigo_distrito, d.nombre, c.centro
+             WHERE (CAST(? AS integer) IS NULL OR d.id_departamento = CAST(? AS integer))
+             GROUP BY c.id_ciudad, c.nombre, c.codigo_distrito, d.id_departamento, d.nombre, c.centro
              ORDER BY c.nombre
             """;
 
@@ -60,22 +61,27 @@ public class JdbcUbicacionDao implements UbicacionDao {
     }
 
     @Override
-    public List<CiudadGeo> listarCiudades() throws SQLException {
+    public List<CiudadGeo> listarCiudades(Integer departamentoId) throws SQLException {
         try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(SQL_CIUDADES);
-             ResultSet rs = ps.executeQuery()) {
-            List<CiudadGeo> ciudades = new ArrayList<>();
-            while (rs.next()) {
-                ciudades.add(new CiudadGeo(
-                        rs.getInt("id_ciudad"),
-                        rs.getString("nombre"),
-                        rs.getString("codigo_distrito"),
-                        rs.getString("departamento"),
-                        rs.getDouble("longitud"),
-                        rs.getDouble("latitud"),
-                        rs.getInt("total_barrios")));
+             PreparedStatement ps = con.prepareStatement(SQL_CIUDADES)) {
+            // El mismo parámetro dos veces: "sin filtro" (NULL) o "solo este departamento"
+            ps.setObject(1, departamentoId, java.sql.Types.INTEGER);
+            ps.setObject(2, departamentoId, java.sql.Types.INTEGER);
+            try (ResultSet rs = ps.executeQuery()) {
+                List<CiudadGeo> ciudades = new ArrayList<>();
+                while (rs.next()) {
+                    ciudades.add(new CiudadGeo(
+                            rs.getInt("id_ciudad"),
+                            rs.getString("nombre"),
+                            rs.getString("codigo_distrito"),
+                            rs.getInt("id_departamento"),
+                            rs.getString("departamento"),
+                            rs.getDouble("longitud"),
+                            rs.getDouble("latitud"),
+                            rs.getInt("total_barrios")));
+                }
+                return ciudades;
             }
-            return ciudades;
         }
     }
 

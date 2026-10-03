@@ -35,7 +35,7 @@ public final class GeoJsonMapper {
         return FeatureCollection.de(ciudades.stream()
                 .map(c -> Feature.de(Punto.de(c.longitud(), c.latitud()),
                         new CiudadProps(String.valueOf(c.id()), c.nombre(), c.departamento(), c.totalBarrios(),
-                                Formato.color(c.id()))))
+                                Formato.color(c.id()), c.idDepartamento())))
                 .toList());
     }
 

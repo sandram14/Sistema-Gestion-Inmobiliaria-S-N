@@ -3,6 +3,7 @@ package py.sn.inmobiliaria.controller;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import py.sn.inmobiliaria.exception.ValidacionException;
 import py.sn.inmobiliaria.mapper.GeoJsonMapper;
 import py.sn.inmobiliaria.service.UbicacionService;
 import py.sn.inmobiliaria.service.validacion.Errores;
@@ -13,7 +14,7 @@ import java.io.IOException;
 /**
  * Datos geográficos del mapa, en GeoJSON:
  * <ul>
- *   <li>{@code GET /api/ciudades} → ciudades como puntos.</li>
+ *   <li>{@code GET /api/ciudades} y {@code GET /api/ciudades?departamentoId=1} → ciudades como puntos.</li>
  *   <li>{@code GET /api/barrios} y {@code GET /api/barrios?ciudadId=1} → polígonos de los barrios.</li>
  * </ul>
  * Estos datos casi no cambian, por eso el navegador puede guardarlos una hora.
@@ -28,7 +29,13 @@ public class UbicacionServlet extends ApiServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         UbicacionService ubicaciones = servicio(UbicacionService.class);
         if ("/api/ciudades".equals(req.getServletPath())) {
-            var ciudades = GeoJsonMapper.ciudades(ubicaciones.listarCiudades());
+            Errores errores = new Errores();
+            Integer departamentoId = Parametros.entero(req, "departamentoId", errores);
+            errores.lanzarSiHay();
+            if (departamentoId != null && departamentoId <= 0) {
+                throw ValidacionException.deCampo("departamentoId", "Debe ser un número positivo");
+            }
+            var ciudades = GeoJsonMapper.ciudades(ubicaciones.listarCiudades(departamentoId));
             permitirCache(resp, UNA_HORA);
             escribirJson(resp, HttpServletResponse.SC_OK, ciudades);
             return;

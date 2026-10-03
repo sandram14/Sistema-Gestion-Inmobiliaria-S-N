@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  *
  * <ul>
  *   <li>{@code GET /api/propiedades} → FeatureCollection. Filtros opcionales:
- *       ciudadId, barrioId, categoria (Casa | Vivienda | Terreno), operacion (o tipoOperacion),
+ *       departamentoId, ciudadId, barrioId, categoria (Casa | Vivienda | Terreno), operacion (o tipoOperacion),
  *       presupuestoMax, moneda (USD por defecto si hay presupuesto).</li>
  *   <li>{@code GET /api/propiedades/{codigo}} → Feature de una propiedad (por ejemplo prop-001).</li>
  * </ul>
@@ -54,6 +54,7 @@ public class PropiedadServlet extends ApiServlet {
 
     private void listar(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Errores errores = new Errores();
+        Integer departamentoId = Parametros.entero(req, "departamentoId", errores);
         Integer ciudadId = Parametros.entero(req, "ciudadId", errores);
         Integer barrioId = Parametros.entero(req, "barrioId", errores);
         var presupuesto = Parametros.decimal(req, "presupuestoMax", errores);
@@ -61,7 +62,8 @@ public class PropiedadServlet extends ApiServlet {
 
         String operacion = Parametros.texto(req, "operacion", "tipoOperacion");
         BusquedaRequest criterios = new BusquedaRequest(ciudadId, barrioId,
-                Parametros.texto(req, "categoria"), operacion, presupuesto, Parametros.texto(req, "moneda"));
+                Parametros.texto(req, "categoria"), operacion, presupuesto, Parametros.texto(req, "moneda"),
+                departamentoId);
 
         // Si se filtra por Alquiler, cada propiedad muestra su precio de alquiler
         String operacionPreferida = ReglasNegocio.normalizarOperacion(operacion).orElse(null);

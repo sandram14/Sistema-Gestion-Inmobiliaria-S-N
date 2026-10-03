@@ -98,19 +98,19 @@ también como variable de entorno.
 | Método | Ruta | Respuesta |
 |--------|------|-----------|
 | GET | `/api/health` | Estado del backend, la base y Hibernate (200 ok / 503 degradado) |
-| GET | `/api/ciudades` | FeatureCollection de puntos (caché 1 h) |
+| GET | `/api/ciudades?departamentoId=` | FeatureCollection de puntos; `departamentoId` opcional (caché 1 h) |
 | GET | `/api/barrios?ciudadId=` | FeatureCollection de polígonos; `ciudadId` opcional (caché 1 h) |
 | GET | `/api/propiedades` | FeatureCollection de propiedades Disponibles |
 | GET | `/api/propiedades/{codigo}` | Feature de una propiedad (`prop-001`) |
 | GET | `/api/catalogos` | Tipos, estados, operaciones, monedas, reglas y árbol de ubicaciones |
 | * | `/api/*` | Cualquier otra ruta → 404 JSON |
 
-Filtros de `/api/propiedades` (todos opcionales): `ciudadId`, `barrioId`,
+Filtros de `/api/propiedades` (todos opcionales): `departamentoId`, `ciudadId`, `barrioId`,
 `categoria` (`Casa`, `Vivienda` o `Terreno`), `operacion` o `tipoOperacion` (`Venta`, `Alquiler`),
 `presupuestoMax` y `moneda` (`USD` por defecto, o `PYG`). Ejemplo:
 
 ```
-GET /api/propiedades?ciudadId=1&categoria=Vivienda&operacion=Alquiler&presupuestoMax=500&moneda=USD
+GET /api/propiedades?departamentoId=1&ciudadId=1&categoria=Vivienda&operacion=Alquiler&presupuestoMax=500&moneda=USD
 ```
 
 ### Autenticación administrativa

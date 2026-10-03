@@ -57,9 +57,19 @@ class UbicacionDaoIntegracionTest {
         CiudadGeo cde = ciudad("CIUDAD DEL ESTE");
         assertEquals("01", cde.codigoDistrito());
         assertEquals("ALTO PARANÁ", cde.departamento());
+        assertTrue(cde.idDepartamento() > 0);
         assertEquals(4, cde.totalBarrios());
         assertEquals(-54.641961, cde.longitud(), 0.000001);
         assertEquals(-25.505118, cde.latitud(), 0.000001);
+    }
+
+    @Test
+    void filtraCiudadesPorDepartamento() throws Exception {
+        int altoParana = ciudad("CIUDAD DEL ESTE").idDepartamento();
+
+        assertEquals(4, dao.listarCiudades(altoParana).size());
+        assertEquals(0, dao.listarCiudades(999999).size());
+        assertEquals(4, dao.listarCiudades(null).size());
     }
 
     @Test

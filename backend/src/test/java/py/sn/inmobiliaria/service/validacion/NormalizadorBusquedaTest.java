@@ -61,6 +61,24 @@ class NormalizadorBusquedaTest {
     }
 
     @Test
+    void pasaElDepartamentoAlFiltro() {
+        FiltroPropiedades f = NormalizadorBusqueda.normalizar(
+                new BusquedaRequest(1, null, null, null, null, null, 1));
+
+        assertEquals(1, f.departamentoId());
+        assertEquals(1, f.ciudadId());
+        assertNull(NormalizadorBusqueda.normalizar(BusquedaRequest.vacia()).departamentoId());
+    }
+
+    @Test
+    void rechazaDepartamentoNoPositivo() {
+        ValidacionException e = assertThrows(ValidacionException.class,
+                () -> NormalizadorBusqueda.normalizar(new BusquedaRequest(null, null, null, null, null, null, 0)));
+
+        assertTrue(e.campos().containsKey("departamentoId"));
+    }
+
+    @Test
     void rechazaIdsNoPositivos() {
         ValidacionException e = assertThrows(ValidacionException.class,
                 () -> NormalizadorBusqueda.normalizar(new BusquedaRequest(0, -5, null, null, null, null)));

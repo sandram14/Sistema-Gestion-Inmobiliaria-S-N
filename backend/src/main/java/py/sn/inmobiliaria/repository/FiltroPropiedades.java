@@ -13,6 +13,7 @@ import java.math.BigDecimal;
  * @param operacion      nombre de la operación: "Venta" o "Alquiler"
  * @param presupuestoMax precio máximo (se compara solo contra precios en {@code moneda})
  * @param moneda         moneda del presupuesto; obligatoria si hay presupuestoMax
+ * @param departamentoId id del departamento (por ejemplo, Alto Paraná)
  */
 public record FiltroPropiedades(
         Integer ciudadId,
@@ -20,11 +21,18 @@ public record FiltroPropiedades(
         String tipo,
         String operacion,
         BigDecimal presupuestoMax,
-        Moneda moneda) {
+        Moneda moneda,
+        Integer departamentoId) {
+
+    /** Sin filtro de departamento (constructor anterior a la Fase 12). */
+    public FiltroPropiedades(Integer ciudadId, Integer barrioId, String tipo, String operacion,
+                             BigDecimal presupuestoMax, Moneda moneda) {
+        this(ciudadId, barrioId, tipo, operacion, presupuestoMax, moneda, null);
+    }
 
     /** Filtro vacío: todas las propiedades disponibles. */
     public static FiltroPropiedades sinFiltros() {
-        return new FiltroPropiedades(null, null, null, null, null, null);
+        return new FiltroPropiedades(null, null, null, null, null, null, null);
     }
 
     public boolean tienePresupuesto() {

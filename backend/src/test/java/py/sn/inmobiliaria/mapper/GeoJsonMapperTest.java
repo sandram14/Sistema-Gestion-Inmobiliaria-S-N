@@ -103,11 +103,14 @@ class GeoJsonMapperTest {
     @Test
     void ciudadesComoPuntosConIdDeTexto() throws Exception {
         JsonNode fc = json(GeoJsonMapper.ciudades(List.of(
-                new CiudadGeo(1, "CIUDAD DEL ESTE", "01", "ALTO PARANÁ", -54.641961, -25.505118, 4))));
+                new CiudadGeo(1, "CIUDAD DEL ESTE", "01", 1, "ALTO PARANÁ", -54.641961, -25.505118, 4))));
 
         assertEquals("FeatureCollection", fc.get("type").asText());
         JsonNode f = fc.get("features").get(0);
-        assertEquals(Set.of("id", "ciudad", "departamento", "totalBarrios", "color"), campos(f.get("properties")));
+        // Los campos de types.ts más departamentoId (nuevo, el frontend actual lo ignora)
+        assertEquals(Set.of("id", "ciudad", "departamento", "totalBarrios", "color", "departamentoId"),
+                campos(f.get("properties")));
+        assertEquals(1, f.get("properties").get("departamentoId").asInt());
         assertEquals("1", f.get("properties").get("id").asText());
         assertTrue(f.get("properties").get("id").isTextual());
         assertEquals(4, f.get("properties").get("totalBarrios").asInt());

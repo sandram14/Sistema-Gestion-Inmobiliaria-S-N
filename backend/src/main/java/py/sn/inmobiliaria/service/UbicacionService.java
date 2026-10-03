@@ -19,9 +19,12 @@ public class UbicacionService {
         this.ubicacionDao = ubicacionDao;
     }
 
-    public List<CiudadGeo> listarCiudades() {
+    /**
+     * @param departamentoId null para todas las ciudades
+     */
+    public List<CiudadGeo> listarCiudades(Integer departamentoId) {
         try {
-            return ubicacionDao.listarCiudades();
+            return ubicacionDao.listarCiudades(departamentoId);
         } catch (SQLException e) {
             throw sinBase(e);
         }

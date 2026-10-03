@@ -11,8 +11,17 @@ import java.util.Optional;
  */
 public interface UbicacionDao {
 
-    /** Ciudades con su punto central y cantidad de barrios, ordenadas por nombre. */
-    List<CiudadGeo> listarCiudades() throws SQLException;
+    /**
+     * Ciudades con su punto central y cantidad de barrios, ordenadas por nombre.
+     *
+     * @param departamentoId departamento a filtrar; null devuelve todas
+     */
+    List<CiudadGeo> listarCiudades(Integer departamentoId) throws SQLException;
+
+    /** Todas las ciudades. */
+    default List<CiudadGeo> listarCiudades() throws SQLException {
+        return listarCiudades(null);
+    }
 
     /**
      * Barrios con su polígono en GeoJSON.
@@ -32,7 +41,7 @@ public interface UbicacionDao {
     List<FilaUbicacion> listarJerarquia() throws SQLException;
 
     /** Ciudad con su punto central (longitud/latitud en WGS84). */
-    record CiudadGeo(int id, String nombre, String codigoDistrito, String departamento,
+    record CiudadGeo(int id, String nombre, String codigoDistrito, int idDepartamento, String departamento,
                      double longitud, double latitud, int totalBarrios) {
     }
 

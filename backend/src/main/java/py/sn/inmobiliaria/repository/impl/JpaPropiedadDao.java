@@ -44,6 +44,10 @@ public class JpaPropiedadDao implements PropiedadDao {
         Map<String, Object> parametros = new HashMap<>();
         parametros.put("disponible", EstadoPropiedad.DISPONIBLE);
 
+        if (filtro.departamentoId() != null) {
+            jpql.append(" and p.barrio.ciudad.departamento.id = :departamentoId");
+            parametros.put("departamentoId", filtro.departamentoId());
+        }
         if (filtro.ciudadId() != null) {
             jpql.append(" and p.barrio.ciudad.id = :ciudadId");
             parametros.put("ciudadId", filtro.ciudadId());

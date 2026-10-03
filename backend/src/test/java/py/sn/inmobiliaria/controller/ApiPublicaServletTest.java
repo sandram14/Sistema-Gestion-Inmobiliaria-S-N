@@ -56,8 +56,11 @@ class ApiPublicaServletTest {
     /** DAO geográfico de prueba con una ciudad y un barrio. */
     static final UbicacionDao UBICACION_FALSA = new UbicacionDao() {
         @Override
-        public List<CiudadGeo> listarCiudades() {
-            return List.of(new CiudadGeo(1, "CIUDAD DEL ESTE", "01", "ALTO PARANÁ", -54.641961, -25.505118, 1));
+        public List<CiudadGeo> listarCiudades(Integer departamentoId) {
+            if (departamentoId != null && departamentoId != 1) {
+                return List.of();
+            }
+            return List.of(new CiudadGeo(1, "CIUDAD DEL ESTE", "01", 1, "ALTO PARANÁ", -54.641961, -25.505118, 1));
         }
 
         @Override
@@ -140,6 +143,16 @@ class ApiPublicaServletTest {
     }
 
     @Test
+    void filtroPorDepartamento() throws Exception {
+        var r = get(propiedades, "/api/propiedades", null, Map.of("departamentoId", "1", "ciudadId", "1"));
+
+        assertEquals(200, r.estado);
+        assertEquals(1, consulta.ultimosCriterios.departamentoId());
+        assertEquals(400, get(propiedades, "/api/propiedades", null, Map.of("departamentoId", "x")).estado);
+        assertEquals(400, get(propiedades, "/api/propiedades", null, Map.of("departamentoId", "0")).estado);
+    }
+
+    @Test
     void parametrosConFormatoInvalidoDan400ConElDetallePorCampo() throws Exception {
         var r = get(propiedades, "/api/propiedades", null, Map.of("ciudadId", "abc", "presupuestoMax", "mil"));
 
@@ -203,6 +216,14 @@ class ApiPublicaServletTest {
         assertEquals(200, r.estado);
         assertEquals("public, max-age=3600", r.cabecera("Cache-Control"));
         assertEquals("1", r.json().get("features").get(0).get("properties").get("id").asText());
+    }
+
+    @Test
+    void ciudadesPorDepartamento() throws Exception {
+        assertEquals(1, get(ubicacion, "/api/ciudades", null, Map.of("departamentoId", "1")).json().get("features").size());
+        assertEquals(0, get(ubicacion, "/api/ciudades", null, Map.of("departamentoId", "2")).json().get("features").size());
+        assertEquals(400, get(ubicacion, "/api/ciudades", null, Map.of("departamentoId", "abc")).estado);
+        assertEquals(400, get(ubicacion, "/api/ciudades", null, Map.of("departamentoId", "-1")).estado);
     }
 
     @Test
