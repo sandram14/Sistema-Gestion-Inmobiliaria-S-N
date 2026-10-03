@@ -233,13 +233,18 @@ public class PropiedadAdminService extends ServicioBase {
         });
     }
 
-    /** Elimina una imagen; si era la principal, la siguiente en orden pasa a serlo. */
-    public void eliminarImagen(long idPropiedad, long idImagen) {
-        escribir(em -> {
+    /**
+     * Elimina una imagen; si era la principal, la siguiente en orden pasa a serlo.
+     *
+     * @return la URL de la imagen eliminada (para borrar también el archivo, si corresponde)
+     */
+    public String eliminarImagen(long idPropiedad, long idImagen) {
+        return escribir(em -> {
             Imagen imagen = imagenDao.buscar(em, idPropiedad, idImagen)
                     .orElseThrow(() -> new NoEncontradoException("La imagen no existe en esta propiedad"));
             Propiedad p = imagen.getPropiedad();
             boolean eraPrincipal = imagen.isEsPrincipal();
+            String url = imagen.getUrl();
             p.quitarImagen(imagen);
             em.flush();
             if (eraPrincipal) {
@@ -247,7 +252,7 @@ public class PropiedadAdminService extends ServicioBase {
                         .min(Comparator.comparing(Imagen::getOrden))
                         .ifPresent(siguiente -> siguiente.setEsPrincipal(true));
             }
-            return null;
+            return url;
         });
     }
 

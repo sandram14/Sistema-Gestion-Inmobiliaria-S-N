@@ -163,6 +163,16 @@ class AutenticacionTest {
     }
 
     @Test
+    void deleteYPatchSinCuerpoPasanConSesion() throws Exception {
+        ServletFalso.ejecutar(servlet, login(LOGIN_OK));
+
+        assertTrue(ServletFalso.filtrar(filtro,
+                Peticion.de("DELETE", "/api/admin/propiedades", "/1").navegador(navegador)).continuo());
+        assertTrue(ServletFalso.filtrar(filtro,
+                Peticion.de("PATCH", "/api/admin/propiedades", "/1/imagenes/5/principal").navegador(navegador)).continuo());
+    }
+
+    @Test
     void rechazaFormulariosHtmlComoCuerpo() throws Exception {
         var formulario = ServletFalso.filtrar(filtro, Peticion.de("POST", "/api/admin/auth", "/login")
                 .cuerpo("email=a&password=b", "application/x-www-form-urlencoded").navegador(navegador));

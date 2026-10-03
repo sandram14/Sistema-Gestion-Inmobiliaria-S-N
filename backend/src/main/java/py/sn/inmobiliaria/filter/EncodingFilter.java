@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
@@ -25,7 +26,11 @@ public class EncodingFilter implements Filter {
         if (request.getCharacterEncoding() == null) {
             request.setCharacterEncoding(UTF8);
         }
-        response.setCharacterEncoding(UTF8);
+        boolean esImagen = request instanceof HttpServletRequest http
+                && http.getRequestURI().startsWith(http.getContextPath() + "/uploads/");
+        if (!esImagen) {
+            response.setCharacterEncoding(UTF8); // las imágenes son binarias: no llevan charset
+        }
         if (response instanceof HttpServletResponse http) {
             // Impide que el navegador "adivine" un tipo de contenido distinto al declarado
             http.setHeader("X-Content-Type-Options", "nosniff");

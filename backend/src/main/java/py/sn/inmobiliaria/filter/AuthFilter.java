@@ -26,10 +26,12 @@ import java.util.Set;
  *
  * <ol>
  *   <li><b>Protección CSRF</b> (que otro sitio web use la sesión del administrador sin que
- *       lo sepa): en POST/PUT/PATCH/DELETE exige un Content-Type que un formulario HTML de
- *       otro sitio no puede enviar sin permiso (application/json o multipart/form-data) y, si
- *       el navegador envía la cabecera Origin, que coincida con este mismo sitio. A esto se
- *       suma la cookie SameSite=Lax (META-INF/context.xml).</li>
+ *       lo sepa): en POST/PUT/PATCH/DELETE, si el navegador envía la cabecera Origin, debe
+ *       coincidir con este mismo sitio; y si la petición trae cuerpo, su Content-Type debe ser
+ *       uno que un formulario HTML de otro sitio no puede enviar sin permiso
+ *       (application/json o multipart/form-data). Las peticiones sin cuerpo (por ejemplo,
+ *       DELETE o PATCH .../principal) no pueden transportar un formulario. A esto se suma la
+ *       cookie SameSite=Lax (META-INF/context.xml).</li>
  *   <li><b>Autenticación</b>: salvo login y logout, exige una sesión con un administrador.</li>
  * </ol>
  */
@@ -62,8 +64,7 @@ public class AuthFilter implements Filter {
                 rechazar(resp, 403, "ACCESO_DENEGADO", "Origen de la petición no permitido");
                 return;
             }
-            boolean logoutSinCuerpo = ruta.equals("/api/admin/auth/logout") && req.getContentLengthLong() <= 0;
-            if (!logoutSinCuerpo && !contentTypeSeguro(req.getContentType())) {
+            if (tieneCuerpo(req) && !contentTypeSeguro(req.getContentType())) {
                 rechazar(resp, 415, "TIPO_NO_SOPORTADO", "El cuerpo debe enviarse como application/json");
                 return;
             }
@@ -104,6 +105,10 @@ public class AuthFilter implements Filter {
         } catch (IllegalArgumentException e) {
             return false;
         }
+    }
+
+    private static boolean tieneCuerpo(HttpServletRequest req) {
+        return req.getContentLengthLong() > 0 || req.getHeader("Transfer-Encoding") != null;
     }
 
     private static boolean contentTypeSeguro(String contentType) {

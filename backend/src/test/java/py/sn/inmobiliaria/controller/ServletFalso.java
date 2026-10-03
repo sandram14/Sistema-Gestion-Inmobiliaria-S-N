@@ -91,6 +91,7 @@ public final class ServletFalso {
         byte[] cuerpo;
         String ip = "127.0.0.1";
         Navegador navegador = new Navegador();
+        final Map<String, byte[]> partes = new HashMap<>();
 
         public static Peticion de(String metodo, String servletPath, String pathInfo) {
             Peticion p = new Peticion();
@@ -120,6 +121,13 @@ public final class ServletFalso {
             if (contentType != null) {
                 cabecera("Content-Type", contentType);
             }
+            return this;
+        }
+
+        /** Agrega un archivo a una petición multipart/form-data. */
+        public Peticion parte(String nombre, byte[] contenido) {
+            partes.put(nombre, contenido);
+            cabeceras.putIfAbsent("content-type", "multipart/form-data; boundary=prueba");
             return this;
         }
 
@@ -237,6 +245,21 @@ public final class ServletFalso {
                 });
     }
 
+    private static jakarta.servlet.http.Part parte(Map<String, byte[]> partes, String nombre) {
+        byte[] contenido = partes.get(nombre);
+        if (contenido == null) {
+            return null;
+        }
+        return (jakarta.servlet.http.Part) Proxy.newProxyInstance(ServletFalso.class.getClassLoader(),
+                new Class<?>[]{jakarta.servlet.http.Part.class}, (p, m, args) -> switch (m.getName()) {
+                    case "getInputStream" -> new ByteArrayInputStream(contenido);
+                    case "getSize" -> (long) contenido.length;
+                    case "getName" -> nombre;
+                    case "getSubmittedFileName" -> "foto.jpg";
+                    default -> null;
+                });
+    }
+
     private static HttpServletRequest peticion(Peticion pet) {
         String uri = pet.servletPath + (pet.pathInfo == null ? "" : pet.pathInfo);
         ServletInputStream entrada = new ServletInputStream() {
@@ -280,6 +303,7 @@ public final class ServletFalso {
                     case "getContentLength" -> pet.cuerpo == null ? -1 : pet.cuerpo.length;
                     case "getInputStream" -> entrada;
                     case "getRemoteAddr" -> pet.ip;
+                    case "getPart" -> parte(pet.partes, (String) args[0]);
                     case "getProtocol" -> "HTTP/1.1";
                     case "getDateHeader" -> -1L;
                     case "getSession" -> {

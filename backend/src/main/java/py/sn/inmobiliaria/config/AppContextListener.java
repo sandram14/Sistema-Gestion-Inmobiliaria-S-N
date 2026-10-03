@@ -22,6 +22,7 @@ import py.sn.inmobiliaria.repository.impl.JpaPropiedadDao;
 import py.sn.inmobiliaria.repository.impl.JpaUsuarioDao;
 import py.sn.inmobiliaria.seguridad.ContrasenaHasher;
 import py.sn.inmobiliaria.seguridad.LimitadorIntentos;
+import py.sn.inmobiliaria.service.AlmacenImagenes;
 import py.sn.inmobiliaria.service.AuthService;
 import py.sn.inmobiliaria.service.CatalogoService;
 import py.sn.inmobiliaria.service.PropiedadAdminService;
@@ -58,6 +59,11 @@ public class AppContextListener implements ServletContextListener {
         contexto.setAttribute(AppConfig.ATRIBUTO_CONTEXTO, config);
 
         log.info("Iniciando {} v{} (entorno: {})", config.nombre(), config.version(), config.entorno());
+
+        // El almacén de imágenes no depende de la base: siempre se registra
+        AlmacenImagenes almacen = new AlmacenImagenes(config.directorioUploads());
+        registrar(contexto, AlmacenImagenes.class, almacen);
+        log.info("Imágenes subidas en {}", almacen.base());
 
         if (config.esProduccion()) {
             // En producción el sitio va por HTTPS: la cookie de sesión solo viaja cifrada

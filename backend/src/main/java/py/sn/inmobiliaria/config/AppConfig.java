@@ -2,6 +2,7 @@ package py.sn.inmobiliaria.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
  *   <li>{@code APP_ENV}: desarrollo | produccion (por defecto: desarrollo)</li>
  *   <li>{@code DB_URL}, {@code DB_USER}, {@code DB_PASSWORD}: conexión a PostgreSQL.
  *       Si falta alguna, la aplicación arranca igual y /api/health lo informa.</li>
+ *   <li>{@code UPLOAD_DIR}: carpeta donde se guardan las imágenes subidas desde el panel
+ *       (en Docker, un volumen montado en /data/uploads). Por defecto, una carpeta temporal.</li>
  *   <li>{@code APP_ORIGENES_PERMITIDOS}: orígenes extra (separados por coma) desde los que se
  *       aceptan peticiones que modifican datos, por ejemplo {@code http://localhost:5174}.
  *       El propio sitio siempre está permitido.</li>
@@ -37,14 +40,16 @@ public final class AppConfig {
     private final String entorno;
     private final BaseDatosConfig baseDatos; // null si no está configurada
     private final Set<String> origenesPermitidos;
+    private final Path directorioUploads;
 
     private AppConfig(String nombre, String version, String entorno, BaseDatosConfig baseDatos,
-                      Set<String> origenesPermitidos) {
+                      Set<String> origenesPermitidos, Path directorioUploads) {
         this.nombre = nombre;
         this.version = version;
         this.entorno = entorno;
         this.baseDatos = baseDatos;
         this.origenesPermitidos = origenesPermitidos;
+        this.directorioUploads = directorioUploads;
     }
 
     /** Crea la configuración real: variables de entorno del sistema + app.properties. */
@@ -62,7 +67,9 @@ public final class AppConfig {
         String nombre = propiedades.getProperty("app.nombre", "sn-inmobiliaria-backend");
         String version = propiedades.getProperty("app.version", "desconocida");
         String appEnv = valorOPorDefecto(entorno.get("APP_ENV"), "desarrollo");
-        return new AppConfig(nombre, version, appEnv, leerBaseDatos(entorno), leerOrigenes(entorno.get("APP_ORIGENES_PERMITIDOS")));
+        return new AppConfig(nombre, version, appEnv, leerBaseDatos(entorno), leerOrigenes(entorno.get("APP_ORIGENES_PERMITIDOS")),
+                Path.of(valorOPorDefecto(entorno.get("UPLOAD_DIR"),
+                        Path.of(System.getProperty("java.io.tmpdir"), "sn-inmobiliaria-uploads").toString())));
     }
 
     private static BaseDatosConfig leerBaseDatos(Map<String, String> entorno) {
@@ -121,6 +128,11 @@ public final class AppConfig {
 
     public boolean esProduccion() {
         return "produccion".equalsIgnoreCase(entorno);
+    }
+
+    /** Carpeta de imágenes subidas (UPLOAD_DIR). */
+    public Path directorioUploads() {
+        return directorioUploads;
     }
 
     /** Orígenes adicionales permitidos (en minúsculas), según APP_ORIGENES_PERMITIDOS. */
