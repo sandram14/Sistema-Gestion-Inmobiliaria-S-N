@@ -75,6 +75,11 @@ class ApiPublicaServletTest {
         }
 
         @Override
+        public Optional<FilaUbicacion> barrioQueContiene(BigDecimal latitud, BigDecimal longitud) {
+            return Optional.empty();
+        }
+
+        @Override
         public List<FilaUbicacion> listarJerarquia() {
             return List.of(new FilaUbicacion(1, "ALTO PARANÁ", 1, "CIUDAD DEL ESTE", 10011013, "AREA 1"));
         }

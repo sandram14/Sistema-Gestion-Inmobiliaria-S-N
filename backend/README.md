@@ -22,16 +22,21 @@ Las pruebas unitarias no necesitan base de datos.
 ### Pruebas de integración (necesitan la base de Docker)
 
 Solo se ejecutan si `DB_URL` está definida; sin ella, Maven las marca como omitidas.
-Las escrituras que hacen se deshacen siempre (la base queda igual).
+Las escrituras que hacen se deshacen o se limpian al terminar (la base queda igual).
+
+No dependen de las propiedades de demostración: cada prueba crea sus propias propiedades
+sobre los barrios registrados y compara contra el estado de la base, así funcionan aunque se
+hayan creado o editado propiedades desde el panel. La comparación campo por campo con el
+GeoJSON original del frontend es opcional: se activa con `VERIFICAR_DATOS_DEMO=true`.
 
 | Clase | Qué prueba |
 |---|---|
 | `ModeloJpaIntegracionTest` | Hibernate valida el esquema; entidades y relaciones; escrituras en cascada |
 | `PropiedadDaoIntegracionTest` | Búsqueda pública con filtros, catálogos, imágenes, usuarios |
-| `UbicacionDaoIntegracionTest` | Consultas PostGIS: ciudades, polígonos GeoJSON, punto dentro de barrio |
+| `UbicacionDaoIntegracionTest` | Consultas PostGIS: ciudades, polígonos GeoJSON, punto dentro de barrio y detección del barrio de un punto |
 | `ServiciosIntegracionTest` | Crear/editar/eliminar propiedades, cambio de tipo, imágenes, búsqueda. Borra al final lo que crea |
 | `AuthIntegracionTest` | Login con el administrador real (requiere además `ADMIN_EMAIL` y `ADMIN_PASSWORD`) |
-| `CompatibilidadFrontendIntegracionTest` | El GeoJSON de la API coincide campo por campo con `frontend/public/data/propiedades.geojson` |
+| `CompatibilidadFrontendIntegracionTest` | Cada propiedad de la API tiene los campos y tipos de `PropiedadProps` (types.ts); con `VERIFICAR_DATOS_DEMO=true`, además coincide con `frontend/public/data/propiedades.geojson` |
 
 ```powershell
 $env:DB_URL = "jdbc:postgresql://localhost:5433/sn_inmobiliaria"
@@ -144,6 +149,15 @@ El filtro `AuthFilter` protege todo `/api/admin/*`:
 | DELETE | `/api/admin/propiedades/{id}/imagenes/{idImagen}` | Eliminar imagen (y su archivo) → 200 + detalle |
 | PATCH | `/api/admin/propiedades/{id}/imagenes/{idImagen}/principal` | Marcar como principal → 200 + detalle |
 
+Detección de ubicación (para el selector en mapa del panel):
+
+| Método | Ruta | Respuesta |
+|--------|------|-----------|
+| GET | `/api/admin/ubicacion?latitud=&longitud=` | 200 con `departamento`, `ciudad` y `barrio` (id y nombre) del punto, y las coordenadas redondeadas a 6 decimales; 404 `FUERA_DE_ZONA` si el punto no está en ningún barrio registrado; 400 si faltan o son inválidas |
+
+La detección usa la misma regla que valida la base al guardar (`ST_Covers`, borde incluido), así
+el barrio detectado siempre es aceptado. Al guardar, la propiedad se vuelve a validar igual que antes.
+
 Imágenes: JPEG, PNG o WebP de hasta 5 MB, reconocidas por su contenido. Se guardan en
 `UPLOAD_DIR/{codigo}/{uuid}.{ext}` y se sirven en `GET /uploads/{codigo}/{uuid}.{ext}`
 (caché de un año: el nombre nunca se reutiliza). Las imágenes originales del frontend (`/images/...`)
@@ -161,6 +175,7 @@ Siempre en el mismo formato, sin detalles internos:
 |------|--------|--------|
 | 400 | `VALIDACION` | Parámetros o datos inválidos (incluye Terreno + Alquiler) |
 | 404 | `NO_ENCONTRADO` | Recurso o ruta inexistente |
+| 404 | `FUERA_DE_ZONA` | El punto marcado no está dentro de ningún barrio registrado |
 | 401 | `NO_AUTENTICADO` | Sin sesión, sesión expirada o credenciales incorrectas |
 | 403 | `ACCESO_DENEGADO` | Origen no permitido o usuario sin permisos |
 | 405 | `METODO_NO_PERMITIDO` | Método HTTP no admitido |

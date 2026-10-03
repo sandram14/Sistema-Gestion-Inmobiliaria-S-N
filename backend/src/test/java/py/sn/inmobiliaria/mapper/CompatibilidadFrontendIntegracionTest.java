@@ -13,6 +13,9 @@ import py.sn.inmobiliaria.config.TxRunner;
 import py.sn.inmobiliaria.dto.request.BusquedaRequest;
 import py.sn.inmobiliaria.dto.response.CatalogosDto;
 import py.sn.inmobiliaria.dto.response.admin.PropiedadDetalleDto;
+import py.sn.inmobiliaria.dto.response.admin.PropiedadResumenDto;
+import py.sn.inmobiliaria.dto.response.geojson.FeatureCollection;
+import py.sn.inmobiliaria.prueba.DatosPrueba;
 import py.sn.inmobiliaria.repository.impl.JdbcUbicacionDao;
 import py.sn.inmobiliaria.repository.impl.JpaCatalogoDao;
 import py.sn.inmobiliaria.repository.impl.JpaImagenDao;
@@ -26,27 +29,35 @@ import py.sn.inmobiliaria.util.JsonUtil;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * La prueba más importante de la integración: compara el GeoJSON que generará la API
- * con el archivo original del frontend (frontend/public/data/propiedades.geojson),
- * propiedad por propiedad y campo por campo.
+ * Compatibilidad del GeoJSON de la API con lo que espera el frontend.
  *
- * <p>Única diferencia esperada (decisión de la Fase 2): las 7 propiedades de categoría
- * "Departamento" ahora son "Casa".</p>
- *
- * <p>Solo se ejecuta si DB_URL está definida. Maven ejecuta las pruebas desde la carpeta
- * backend/, por eso el archivo original se busca en ../frontend.</p>
+ * <ul>
+ *   <li><b>Siempre</b> (con DB_URL): cada propiedad que devuelve la API tiene los campos y tipos
+ *       de {@code PropiedadProps} (types.ts), sin importar qué propiedades haya en la base.</li>
+ *   <li><b>Opcional</b> (además VERIFICAR_DATOS_DEMO=true): compara campo por campo con el
+ *       archivo original frontend/public/data/propiedades.geojson. Sirve para confirmar la
+ *       migración de los datos de demostración; deja de tener sentido cuando se editan desde
+ *       el panel, por eso no se ejecuta por defecto.</li>
+ * </ul>
  */
 @EnabledIfEnvironmentVariable(named = "DB_URL", matches = ".+")
 class CompatibilidadFrontendIntegracionTest {
 
     private static final File ORIGINAL = new File("../frontend/public/data/propiedades.geojson");
+
+    /** Campos de PropiedadProps en frontend/src/components/PropertyMap/types.ts. */
+    private static final Set<String> CAMPOS_FRONTEND = Set.of("id", "titulo", "categoria", "tipoOperacion", "ciudad",
+            "barrio", "barrioId", "precio", "moneda", "dormitorios", "banos", "m2", "direccion", "fotos");
 
     private static HikariDataSource dataSource;
     private static JpaProvider jpa;
@@ -76,27 +87,63 @@ class CompatibilidadFrontendIntegracionTest {
         }
     }
 
-    private static JsonNode json(Object o) throws Exception {
-        return JsonUtil.mapper().readTree(JsonUtil.mapper().writeValueAsString(o));
+    private static JsonNode propiedadesDeLaApi() throws Exception {
+        return JsonUtil.mapper().readTree(JsonUtil.mapper().writeValueAsString(FeatureCollection.de(
+                consulta.buscar(BusquedaRequest.vacia(), GeoJsonMapper.propiedad(null)))));
+    }
+
+    private static Set<String> campos(JsonNode n) {
+        Set<String> s = new HashSet<>();
+        for (Iterator<String> it = n.fieldNames(); it.hasNext(); ) {
+            s.add(it.next());
+        }
+        return s;
     }
 
     @Test
-    void lasPropiedadesDeLaApiCoincidenConElGeoJsonOriginalDelFrontend() throws Exception {
+    void cadaPropiedadTieneLaFormaQueEsperaElFrontend() throws Exception {
+        JsonNode api = propiedadesDeLaApi();
+
+        assertEquals("FeatureCollection", api.get("type").asText());
+        for (JsonNode f : api.get("features")) {
+            JsonNode p = f.get("properties");
+            String id = p.get("id").asText();
+            assertTrue(campos(p).containsAll(CAMPOS_FRONTEND), id + ": faltan campos de PropiedadProps");
+
+            assertEquals("Point", f.get("geometry").get("type").asText(), id);
+            assertEquals(2, f.get("geometry").get("coordinates").size(), id);
+            assertTrue(p.get("id").isTextual() && p.get("titulo").isTextual() && p.get("direccion").isTextual(), id);
+            assertTrue(Set.of("Casa", "Terreno").contains(p.get("categoria").asText()), id);
+            assertTrue(Set.of("Venta", "Alquiler").contains(p.get("tipoOperacion").asText()), id);
+            assertTrue(Set.of("USD", "PYG").contains(p.get("moneda").asText()), id);
+            assertTrue(p.get("precio").isNumber() && p.get("m2").isNumber(), id);
+            assertTrue(p.get("barrioId").isInt() && p.get("dormitorios").isInt() && p.get("banos").isInt(), id);
+            assertTrue(p.get("fotos").isArray(), id);
+            p.get("fotos").forEach(foto -> assertTrue(foto.isTextual(), id));
+            if ("Terreno".equals(p.get("categoria").asText())) {
+                assertEquals(0, p.get("dormitorios").asInt(), id);
+            }
+        }
+    }
+
+    @Test
+    @EnabledIfEnvironmentVariable(named = "VERIFICAR_DATOS_DEMO", matches = "(?i)true")
+    void losDatosDeDemostracionCoincidenConElGeoJsonOriginal() throws Exception {
         assertTrue(ORIGINAL.exists(), "No se encontró " + ORIGINAL.getAbsolutePath());
         Map<String, JsonNode> originales = new HashMap<>();
         JsonUtil.mapper().readTree(ORIGINAL).get("features")
                 .forEach(f -> originales.put(f.get("properties").get("id").asText(), f));
 
-        JsonNode api = json(py.sn.inmobiliaria.dto.response.geojson.FeatureCollection.de(
-                consulta.buscar(BusquedaRequest.vacia(), GeoJsonMapper.propiedad(null))));
-
-        assertEquals(originales.size(), api.get("features").size());
-        int departamentosConvertidos = 0;
-        for (JsonNode f : api.get("features")) {
+        int comparadas = 0;
+        for (JsonNode f : propiedadesDeLaApi().get("features")) {
             JsonNode p = f.get("properties");
             String id = p.get("id").asText();
-            JsonNode o = originales.get(id).get("properties");
-
+            JsonNode original = originales.get(id);
+            if (original == null) {
+                continue; // propiedad creada desde el panel: no existe en el archivo original
+            }
+            JsonNode o = original.get("properties");
+            comparadas++;
             for (String campo : List.of("titulo", "tipoOperacion", "ciudad", "barrio", "moneda", "direccion")) {
                 assertEquals(o.get(campo).asText(), p.get(campo).asText(), id + "." + campo);
             }
@@ -108,41 +155,43 @@ class CompatibilidadFrontendIntegracionTest {
                         id + "." + campo);
             }
             assertEquals(o.get("fotos"), p.get("fotos"), id + ".fotos");
-            assertEquals(originales.get(id).get("geometry").get("coordinates").get(0).asDouble(),
-                    f.get("geometry").get("coordinates").get(0).asDouble(), 1e-6, id + ".longitud");
-            assertEquals(originales.get(id).get("geometry").get("coordinates").get(1).asDouble(),
-                    f.get("geometry").get("coordinates").get(1).asDouble(), 1e-6, id + ".latitud");
-
-            String categoriaOriginal = o.get("categoria").asText();
-            if ("Departamento".equals(categoriaOriginal)) {
-                assertEquals("Casa", p.get("categoria").asText(), id + ".categoria");
-                departamentosConvertidos++;
-            } else {
-                assertEquals(categoriaOriginal, p.get("categoria").asText(), id + ".categoria");
+            for (int i = 0; i < 2; i++) {
+                assertEquals(original.get("geometry").get("coordinates").get(i).asDouble(),
+                        f.get("geometry").get("coordinates").get(i).asDouble(), 1e-6, id + ".coordenada" + i);
             }
+            // Decisión de la Fase 2: las propiedades "Departamento" ahora son "Casa"
+            String esperada = "Departamento".equals(o.get("categoria").asText()) ? "Casa" : o.get("categoria").asText();
+            assertEquals(esperada, p.get("categoria").asText(), id + ".categoria");
         }
-        assertEquals(7, departamentosConvertidos);
+        assertTrue(comparadas > 0, "Ninguna propiedad de la API coincide con el archivo original");
     }
 
     @Test
     void elDetalleAdministrativoTraeTodoLoNecesarioParaEditar() {
-        long id = consulta.obtenerPorCodigo("prop-001", p -> p.getId());
+        List<PropiedadResumenDto> listado = admin.listar(PropiedadAdminMapper::resumen);
+        if (listado.isEmpty()) {
+            return; // base sin propiedades: no hay nada que detallar
+        }
+        PropiedadResumenDto resumen = listado.get(0);
 
-        PropiedadDetalleDto d = admin.obtener(id, PropiedadAdminMapper::detalle);
+        PropiedadDetalleDto d = admin.obtener(resumen.id(), PropiedadAdminMapper::detalle);
 
-        assertEquals("prop-001", d.codigo());
-        assertEquals("CIUDAD DEL ESTE", d.ubicacion().ciudad());
-        assertEquals(5, d.imagenes().size());
-        assertTrue(d.imagenes().get(0).esPrincipal());
-        assertEquals(1, d.operaciones().size());
+        assertEquals(resumen.codigo(), d.codigo());
+        assertEquals(resumen.ciudad(), d.ubicacion().ciudad());
+        assertTrue((d.casa() == null) != (d.terreno() == null), "debe tener exactamente un subtipo");
+        assertEquals(resumen.operaciones().size(), d.operaciones().size());
+        assertTrue(d.imagenes().stream().filter(PropiedadDetalleDto.ImagenDto::esPrincipal).count() <= 1);
     }
 
     @Test
     void losCatalogosSeEntreganComoArbol() {
         CatalogosDto c = CatalogoMapper.dto(catalogos.obtener());
 
-        assertEquals(1, c.departamentos().size());
-        assertEquals(4, c.departamentos().get(0).ciudades().size());
-        assertEquals(12, c.departamentos().get(0).ciudades().stream().mapToInt(ci -> ci.barrios().size()).sum());
+        assertEquals(DatosPrueba.numero(dataSource, "SELECT count(*) FROM departamento WHERE EXISTS "
+                + "(SELECT 1 FROM ciudad c JOIN barrio b ON b.id_ciudad = c.id_ciudad "
+                + "WHERE c.id_departamento = departamento.id_departamento)"), c.departamentos().size());
+        long barrios = c.departamentos().stream()
+                .flatMap(d -> d.ciudades().stream()).mapToLong(ci -> ci.barrios().size()).sum();
+        assertEquals(DatosPrueba.numero(dataSource, "SELECT count(*) FROM barrio"), barrios);
     }
 }

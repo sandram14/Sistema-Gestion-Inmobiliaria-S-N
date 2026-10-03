@@ -9,15 +9,17 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import py.sn.inmobiliaria.config.BaseDatosConfig;
 import py.sn.inmobiliaria.config.DataSourceFactory;
 import py.sn.inmobiliaria.config.JpaProvider;
-import py.sn.inmobiliaria.config.TxRunner;
 import py.sn.inmobiliaria.model.EstadoPropiedad;
 import py.sn.inmobiliaria.model.Imagen;
 import py.sn.inmobiliaria.model.Moneda;
 import py.sn.inmobiliaria.model.Operacion;
+import py.sn.inmobiliaria.model.OperacionPropiedad;
 import py.sn.inmobiliaria.model.Propiedad;
 import py.sn.inmobiliaria.model.Rol;
 import py.sn.inmobiliaria.model.TipoPropiedad;
 import py.sn.inmobiliaria.model.Usuario;
+import py.sn.inmobiliaria.prueba.DatosPrueba;
+import py.sn.inmobiliaria.prueba.DatosPrueba.Zona;
 import py.sn.inmobiliaria.repository.impl.JpaCatalogoDao;
 import py.sn.inmobiliaria.repository.impl.JpaImagenDao;
 import py.sn.inmobiliaria.repository.impl.JpaPropiedadDao;
@@ -26,23 +28,26 @@ import py.sn.inmobiliaria.repository.impl.JpaUsuarioDao;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Prueba de integración de los DAOs JPA contra la base real.
- * Solo se ejecuta si está definida la variable DB_URL. Las escrituras se deshacen siempre.
+ * Prueba de integración de los DAOs JPA contra la base real (solo si DB_URL está definida).
  *
- * <p>Los valores esperados corresponden a los datos de database/seed/03_propiedades_demo.sql.</p>
+ * <p>Independiente de los datos de demostración: cada prueba crea sus propias propiedades
+ * dentro de una transacción que se deshace al final, y verifica que (1) aparezcan donde deben,
+ * (2) no aparezcan donde no deben y (3) TODO resultado cumpla el filtro, sin importar cuántas
+ * otras propiedades haya en la base.</p>
  */
 @EnabledIfEnvironmentVariable(named = "DB_URL", matches = ".+")
 class PropiedadDaoIntegracionTest {
 
     private static HikariDataSource dataSource;
     private static JpaProvider jpa;
-    private static TxRunner tx;
+    private static Zona zona;
 
     private final PropiedadDao propiedadDao = new JpaPropiedadDao();
     private final CatalogoDao catalogoDao = new JpaCatalogoDao();
@@ -54,7 +59,7 @@ class PropiedadDaoIntegracionTest {
         dataSource = DataSourceFactory.crear(new BaseDatosConfig(
                 System.getenv("DB_URL"), System.getenv("DB_USER"), System.getenv("DB_PASSWORD")));
         jpa = new JpaProvider(dataSource);
-        tx = new TxRunner(jpa);
+        zona = DatosPrueba.zona(dataSource);
     }
 
     @AfterAll
@@ -80,104 +85,206 @@ class PropiedadDaoIntegracionTest {
         }
     }
 
-    private List<Propiedad> buscar(FiltroPropiedades filtro) {
-        return tx.soloLectura(em -> propiedadDao.buscarDisponibles(em, filtro));
+    /** Casa de prueba con Venta 50.000 USD y Alquiler 4.000.000 PYG. */
+    private static Propiedad casaConDosOperaciones(EntityManager em, String codigo) {
+        Propiedad p = DatosPrueba.casa(em, codigo, zona);
+        p.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "50000", Moneda.USD));
+        p.agregarOperacion(DatosPrueba.operacion(em, Operacion.ALQUILER, "4000000", Moneda.PYG));
+        em.persist(p);
+        return p;
     }
 
-    private static Integer idCiudad(String nombre) {
-        return tx.soloLectura(em -> em.createQuery(
-                        "select c.id from Ciudad c where c.nombre = :n", Integer.class)
-                .setParameter("n", nombre).getSingleResult());
+    /** Terreno de prueba con Venta 30.000 USD. */
+    private static Propiedad terrenoEnVenta(EntityManager em, String codigo) {
+        Propiedad p = DatosPrueba.terreno(em, codigo, zona);
+        p.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "30000", Moneda.USD));
+        em.persist(p);
+        return p;
+    }
+
+    private static List<String> codigos(List<Propiedad> propiedades) {
+        return propiedades.stream().map(Propiedad::getCodigo).toList();
+    }
+
+    private static boolean tieneOperacion(Propiedad p, Predicate<OperacionPropiedad> condicion) {
+        return p.getOperaciones().stream().anyMatch(condicion);
     }
 
     // ---- Búsqueda pública ----
 
     @Test
-    void sinFiltrosDevuelveLas28DisponiblesOrdenadas() {
-        List<Propiedad> todas = buscar(FiltroPropiedades.sinFiltros());
+    void sinFiltrosIncluyeLaNuevaYDevuelveOrdenadoPorCodigo() {
+        enTransaccionDescartada(em -> {
+            long antes = propiedadDao.contarDisponibles(em);
+            casaConDosOperaciones(em, "test-911");
+            em.flush();
 
-        assertEquals(28, todas.size());
-        assertEquals("prop-001", todas.get(0).getCodigo());
+            List<Propiedad> todas = propiedadDao.buscarDisponibles(em, FiltroPropiedades.sinFiltros());
+
+            assertEquals(antes + 1, todas.size());
+            assertEquals(antes + 1, propiedadDao.contarDisponibles(em));
+            assertTrue(codigos(todas).contains("test-911"));
+            List<String> ordenados = codigos(todas).stream().sorted().toList();
+            assertEquals(ordenados, codigos(todas));
+        });
     }
 
     @Test
     void filtraPorTipo() {
-        List<Propiedad> terrenos = buscar(new FiltroPropiedades(null, null, TipoPropiedad.TERRENO, null, null, null));
+        enTransaccionDescartada(em -> {
+            casaConDosOperaciones(em, "test-912");
+            terrenoEnVenta(em, "test-913");
+            em.flush();
 
-        assertEquals(12, terrenos.size());
-        assertTrue(terrenos.stream().allMatch(p -> p.getTipo().getNombre().equals(TipoPropiedad.TERRENO)));
+            List<Propiedad> terrenos = propiedadDao.buscarDisponibles(em,
+                    new FiltroPropiedades(null, null, TipoPropiedad.TERRENO, null, null, null));
+
+            assertTrue(codigos(terrenos).contains("test-913"));
+            assertFalse(codigos(terrenos).contains("test-912"));
+            assertTrue(terrenos.stream().allMatch(p -> p.getTipo().getNombre().equals(TipoPropiedad.TERRENO)));
+        });
     }
 
     @Test
-    void filtraPorCiudadYBarrio() {
-        assertEquals(12, buscar(new FiltroPropiedades(idCiudad("CIUDAD DEL ESTE"), null, null, null, null, null)).size());
-        assertEquals(4, buscar(new FiltroPropiedades(idCiudad("HERNANDARIAS"), null, null, null, null, null)).size());
-        assertEquals(3, buscar(new FiltroPropiedades(null, 10011013, null, null, null, null)).size());
+    void filtraPorDepartamentoCiudadYBarrio() {
+        enTransaccionDescartada(em -> {
+            casaConDosOperaciones(em, "test-914");
+            em.flush();
+
+            List<Propiedad> enDepartamento = propiedadDao.buscarDisponibles(em,
+                    new FiltroPropiedades(null, null, null, null, null, null, zona.idDepartamento()));
+            List<Propiedad> enCiudad = propiedadDao.buscarDisponibles(em,
+                    new FiltroPropiedades(zona.idCiudad(), null, null, null, null, null, zona.idDepartamento()));
+            List<Propiedad> enBarrio = propiedadDao.buscarDisponibles(em,
+                    new FiltroPropiedades(null, zona.idBarrio(), null, null, null, null));
+
+            assertTrue(codigos(enDepartamento).contains("test-914"));
+            assertTrue(codigos(enCiudad).contains("test-914"));
+            assertTrue(codigos(enBarrio).contains("test-914"));
+            assertTrue(enDepartamento.stream().allMatch(p ->
+                    p.getBarrio().getCiudad().getDepartamento().getId() == zona.idDepartamento()));
+            assertTrue(enCiudad.stream().allMatch(p -> p.getBarrio().getCiudad().getId() == zona.idCiudad()));
+            assertTrue(enBarrio.stream().allMatch(p -> p.getBarrio().getId() == zona.idBarrio()));
+            assertEquals(0, propiedadDao.buscarDisponibles(em,
+                    new FiltroPropiedades(null, null, null, null, null, null, -1)).size());
+        });
     }
 
     @Test
-    void filtraPorDepartamento() {
-        Integer altoParana = tx.soloLectura(em -> em.createQuery(
-                        "select d.id from Departamento d where d.codigo = '10'", Integer.class).getSingleResult());
+    void filtrarPorOtraCiudadExcluyeLaPropiedad() {
+        var otra = DatosPrueba.zonaDeOtraCiudad(dataSource, zona.idCiudad());
+        if (otra.isEmpty()) {
+            return; // con una sola ciudad registrada no hay con qué comparar
+        }
+        enTransaccionDescartada(em -> {
+            casaConDosOperaciones(em, "test-915");
+            em.flush();
 
-        assertEquals(28, buscar(new FiltroPropiedades(null, null, null, null, null, null, altoParana)).size());
-        assertEquals(0, buscar(new FiltroPropiedades(null, null, null, null, null, null, 999999)).size());
-        // Departamento + ciudad: se combinan
-        assertEquals(12, buscar(new FiltroPropiedades(idCiudad("CIUDAD DEL ESTE"), null, null, null, null, null,
-                altoParana)).size());
+            List<Propiedad> enOtraCiudad = propiedadDao.buscarDisponibles(em,
+                    new FiltroPropiedades(otra.get().idCiudad(), null, null, null, null, null));
+
+            assertFalse(codigos(enOtraCiudad).contains("test-915"));
+        });
     }
 
     @Test
     void filtraPorOperacion() {
-        List<Propiedad> alquileres = buscar(new FiltroPropiedades(null, null, null, Operacion.ALQUILER, null, null));
+        enTransaccionDescartada(em -> {
+            casaConDosOperaciones(em, "test-916");
+            terrenoEnVenta(em, "test-917");
+            em.flush();
 
-        assertEquals(5, alquileres.size());
-        assertTrue(alquileres.stream().allMatch(p -> p.getTipo().getNombre().equals(TipoPropiedad.CASA)));
+            List<Propiedad> alquileres = propiedadDao.buscarDisponibles(em,
+                    new FiltroPropiedades(null, null, null, Operacion.ALQUILER, null, null));
+
+            assertTrue(codigos(alquileres).contains("test-916"));
+            assertFalse(codigos(alquileres).contains("test-917"));
+            assertTrue(alquileres.stream().allMatch(p ->
+                    tieneOperacion(p, op -> op.getOperacion().getNombre().equals(Operacion.ALQUILER))));
+        });
     }
 
     @Test
-    void terrenoEnAlquilerNoDevuelveResultados() {
-        // El service rechazará esta combinación antes de llegar aquí; el DAO simplemente no encuentra nada
-        assertEquals(0, buscar(new FiltroPropiedades(null, null, TipoPropiedad.TERRENO, Operacion.ALQUILER, null, null)).size());
+    void terrenoEnAlquilerNuncaDevuelveResultados() {
+        enTransaccionDescartada(em -> {
+            terrenoEnVenta(em, "test-918");
+            em.flush();
+
+            // El service rechaza esta combinación antes; el DAO, por la regla de negocio, no encuentra nada
+            assertEquals(0, propiedadDao.buscarDisponibles(em,
+                    new FiltroPropiedades(null, null, TipoPropiedad.TERRENO, Operacion.ALQUILER, null, null)).size());
+        });
     }
 
     @Test
-    void filtraPorPresupuestoSoloEnLaMonedaElegida() {
-        assertEquals(10, buscar(new FiltroPropiedades(null, null, null, Operacion.VENTA,
-                new BigDecimal("50000"), Moneda.USD)).size());
-        // Todos los precios cargados están en USD y no se convierte entre monedas
-        assertEquals(0, buscar(new FiltroPropiedades(null, null, null, Operacion.VENTA,
-                new BigDecimal("999999999"), Moneda.PYG)).size());
+    void elPresupuestoSeComparaSoloEnLaMismaMonedaYOperacion() {
+        enTransaccionDescartada(em -> {
+            casaConDosOperaciones(em, "test-919"); // Venta 50.000 USD, Alquiler 4.000.000 PYG
+            em.flush();
+
+            assertTrue(codigos(propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null,
+                    Operacion.VENTA, new BigDecimal("60000"), Moneda.USD))).contains("test-919"));
+            assertFalse(codigos(propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null,
+                    Operacion.VENTA, new BigDecimal("40000"), Moneda.USD))).contains("test-919"));
+            assertTrue(codigos(propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null,
+                    Operacion.ALQUILER, new BigDecimal("5000000"), Moneda.PYG))).contains("test-919"));
+            // La venta está en USD: con presupuesto en PYG no se compara (no hay conversión)
+            assertFalse(codigos(propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null,
+                    Operacion.VENTA, new BigDecimal("999999999"), Moneda.PYG))).contains("test-919"));
+
+            List<Propiedad> hasta60milUsd = propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null,
+                    Operacion.VENTA, new BigDecimal("60000"), Moneda.USD));
+            assertTrue(hasta60milUsd.stream().allMatch(p -> tieneOperacion(p, op ->
+                    op.getOperacion().getNombre().equals(Operacion.VENTA) && op.getMoneda() == Moneda.USD
+                            && op.getPrecio().compareTo(new BigDecimal("60000")) <= 0)));
+        });
     }
 
     @Test
     void combinaVariosFiltros() {
-        assertEquals(3, buscar(new FiltroPropiedades(idCiudad("CIUDAD DEL ESTE"), null, TipoPropiedad.CASA,
-                Operacion.VENTA, new BigDecimal("100000"), Moneda.USD)).size());
+        enTransaccionDescartada(em -> {
+            casaConDosOperaciones(em, "test-920");
+            em.flush();
+
+            List<Propiedad> r = propiedadDao.buscarDisponibles(em, new FiltroPropiedades(zona.idCiudad(), null,
+                    TipoPropiedad.CASA, Operacion.VENTA, new BigDecimal("100000"), Moneda.USD, zona.idDepartamento()));
+
+            assertTrue(codigos(r).contains("test-920"));
+            assertTrue(r.stream().allMatch(p -> p.getTipo().getNombre().equals(TipoPropiedad.CASA)
+                    && p.getBarrio().getCiudad().getId() == zona.idCiudad()));
+        });
     }
 
     @Test
     void leeLasRelacionesDentroDeLaTransaccion() {
-        tx.soloLectura(em -> {
-            Propiedad p = propiedadDao.buscarDisponiblePorCodigo(em, "prop-001").orElseThrow();
-            assertEquals("CIUDAD DEL ESTE", p.getBarrio().getCiudad().getNombre());
-            assertEquals(5, p.getImagenes().size());
-            assertEquals(1, p.getOperaciones().size());
-            return null;
+        enTransaccionDescartada(em -> {
+            Propiedad nueva = casaConDosOperaciones(em, "test-921");
+            nueva.agregarImagen(new Imagen("/uploads/test-921/a.jpg", true, (short) 0));
+            em.flush();
+            em.clear();
+
+            Propiedad p = propiedadDao.buscarDisponiblePorCodigo(em, "test-921").orElseThrow();
+            assertEquals(zona.ciudad(), p.getBarrio().getCiudad().getNombre());
+            assertEquals(1, p.getImagenes().size());
+            assertEquals(2, p.getOperaciones().size());
         });
     }
 
     @Test
     void unaPropiedadInactivaNoApareceEnLaPartePublica() {
         enTransaccionDescartada(em -> {
-            Propiedad p = propiedadDao.buscarDisponiblePorCodigo(em, "prop-003").orElseThrow();
+            Propiedad p = casaConDosOperaciones(em, "test-922");
+            em.flush();
+            long disponibles = propiedadDao.contarDisponibles(em);
+            long todas = propiedadDao.listarTodas(em).size();
+
             p.setEstado(catalogoDao.estadoPorNombre(em, EstadoPropiedad.INACTIVO).orElseThrow());
             em.flush();
 
-            assertEquals(27, propiedadDao.buscarDisponibles(em, FiltroPropiedades.sinFiltros()).size());
-            assertTrue(propiedadDao.buscarDisponiblePorCodigo(em, "prop-003").isEmpty());
-            assertTrue(propiedadDao.buscarPorId(em, p.getId()).isPresent());   // el panel sí la ve
-            assertEquals(28, propiedadDao.listarTodas(em).size());
+            assertEquals(disponibles - 1, propiedadDao.contarDisponibles(em));
+            assertTrue(propiedadDao.buscarDisponiblePorCodigo(em, "test-922").isEmpty());
+            assertTrue(propiedadDao.buscarPorId(em, p.getId()).isPresent()); // el panel sí la ve
+            assertEquals(todas, propiedadDao.listarTodas(em).size());
         });
     }
 
@@ -185,42 +292,47 @@ class PropiedadDaoIntegracionTest {
 
     @Test
     void codigosExistentesYSiguienteNumero() {
-        tx.soloLectura(em -> {
-            assertTrue(propiedadDao.existeCodigo(em, "prop-001"));
-            assertFalse(propiedadDao.existeCodigo(em, "prop-999"));
-            assertEquals(16, propiedadDao.ultimoNumeroDeCodigo(em, "prop"));
-            assertEquals(12, propiedadDao.ultimoNumeroDeCodigo(em, "terr"));
-            assertEquals(0, propiedadDao.ultimoNumeroDeCodigo(em, "xyz"));
-            return null;
+        enTransaccionDescartada(em -> {
+            int antes = propiedadDao.ultimoNumeroDeCodigo(em, "test");
+            casaConDosOperaciones(em, "test-9950");
+            em.flush();
+
+            assertTrue(propiedadDao.existeCodigo(em, "test-9950"));
+            assertFalse(propiedadDao.existeCodigo(em, "test-9951"));
+            assertEquals(Math.max(antes, 9950), propiedadDao.ultimoNumeroDeCodigo(em, "test"));
+            assertEquals(0, propiedadDao.ultimoNumeroDeCodigo(em, "prefijoinexistente"));
         });
     }
 
     @Test
     void cambiaLaImagenPrincipalSinViolarElIndiceUnico() {
         enTransaccionDescartada(em -> {
-            Propiedad p = propiedadDao.buscarDisponiblePorCodigo(em, "prop-001").orElseThrow();
+            Propiedad p = casaConDosOperaciones(em, "test-923");
+            p.agregarImagen(new Imagen("/uploads/test-923/a.jpg", true, (short) 0));
+            p.agregarImagen(new Imagen("/uploads/test-923/b.jpg", false, (short) 1));
+            em.flush();
             Imagen segunda = p.getImagenes().get(1);
 
             assertEquals(1, imagenDao.desmarcarPrincipal(em, p.getId()));
             segunda.setEsPrincipal(true);
-            em.flush();   // si hubiera dos principales, aquí fallaría el índice uq_imagen_principal
+            em.flush(); // si hubiera dos principales, aquí fallaría el índice uq_imagen_principal
 
-            Imagen principal = imagenDao.buscar(em, p.getId(), segunda.getId()).orElseThrow();
-            assertTrue(principal.isEsPrincipal());
+            assertTrue(imagenDao.buscar(em, p.getId(), segunda.getId()).orElseThrow().isEsPrincipal());
         });
     }
 
     @Test
     void catalogosYBarrios() {
-        tx.soloLectura(em -> {
-            assertEquals(2, catalogoDao.listarTipos(em).size());
+        enTransaccionDescartada(em -> {
+            // Valores definidos por las reglas del negocio (no son datos de demostración)
+            assertEquals(List.of(TipoPropiedad.CASA, TipoPropiedad.TERRENO),
+                    catalogoDao.listarTipos(em).stream().map(TipoPropiedad::getNombre).toList());
             assertEquals(5, catalogoDao.listarEstados(em).size());
             assertEquals(2, catalogoDao.listarOperaciones(em).size());
             assertTrue(catalogoDao.operacionPorNombre(em, Operacion.VENTA).isPresent());
             assertTrue(catalogoDao.tipoPorNombre(em, "Departamento").isEmpty());
-            assertEquals("AREA 1", catalogoDao.barrioPorId(em, 10011013).orElseThrow().getNombre());
-            assertTrue(catalogoDao.barrioPorId(em, 1).isEmpty());
-            return null;
+            assertEquals(zona.barrio(), catalogoDao.barrioPorId(em, zona.idBarrio()).orElseThrow().getNombre());
+            assertTrue(catalogoDao.barrioPorId(em, -1).isEmpty());
         });
     }
 
@@ -228,13 +340,12 @@ class PropiedadDaoIntegracionTest {
     void buscaUsuarioActivoSinDistinguirMayusculas() {
         enTransaccionDescartada(em -> {
             Rol admin = catalogoDao.rolPorNombre(em, "ADMIN").orElseThrow();
-            // Hash BCrypt de ejemplo (60 caracteres); en esta prueba no se verifica la contraseña
-            String hash = "$2a$12$" + "a".repeat(53);
+            String hash = "$2a$12$" + "a".repeat(53); // formato BCrypt; aquí no se verifica la contraseña
             em.persist(new Usuario("Prueba", "Dao", "prueba.dao@test.com", hash, admin));
             em.flush();
 
             assertTrue(usuarioDao.buscarActivoPorEmail(em, "PRUEBA.DAO@test.com").isPresent());
-            assertTrue(usuarioDao.buscarActivoPorEmail(em, "otro@test.com").isEmpty());
+            assertTrue(usuarioDao.buscarActivoPorEmail(em, "otro.inexistente@test.com").isEmpty());
         });
     }
 }

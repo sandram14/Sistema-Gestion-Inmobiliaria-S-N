@@ -183,6 +183,18 @@ public final class ValidadorPropiedad {
         return resultado;
     }
 
+    // ---- Coordenadas: reutilizadas por la detección de ubicación (UbicacionService) ----
+
+    /** Valida y redondea la latitud a 6 decimales (precisión de la base). Null si es inválida. */
+    public static BigDecimal latitud(BigDecimal valor, Errores e) {
+        return coordenada(valor, LAT_MAX, "latitud", e);
+    }
+
+    /** Valida y redondea la longitud a 6 decimales (precisión de la base). Null si es inválida. */
+    public static BigDecimal longitud(BigDecimal valor, Errores e) {
+        return coordenada(valor, LNG_MAX, "longitud", e);
+    }
+
     // ---- Utilidades ----
 
     /** Recorta espacios; devuelve null si queda vacío. */

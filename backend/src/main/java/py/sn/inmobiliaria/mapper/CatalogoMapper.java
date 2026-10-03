@@ -4,15 +4,21 @@ import py.sn.inmobiliaria.dto.response.CatalogosDto;
 import py.sn.inmobiliaria.dto.response.CatalogosDto.BarrioDto;
 import py.sn.inmobiliaria.dto.response.CatalogosDto.CiudadDto;
 import py.sn.inmobiliaria.dto.response.CatalogosDto.DepartamentoDto;
+import py.sn.inmobiliaria.dto.response.admin.UbicacionDetectadaDto;
+import py.sn.inmobiliaria.dto.response.admin.UbicacionDetectadaDto.Elemento;
 import py.sn.inmobiliaria.repository.UbicacionDao.FilaUbicacion;
 import py.sn.inmobiliaria.service.CatalogoService.Catalogos;
+import py.sn.inmobiliaria.service.UbicacionService.UbicacionDetectada;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Convierte los catálogos en el formato de GET /api/catalogos (con la jerarquía como árbol). */
+/**
+ * Convierte los datos de catálogo y ubicación: GET /api/catalogos (jerarquía como árbol)
+ * y GET /api/admin/ubicacion (la jerarquía de un punto).
+ */
 public final class CatalogoMapper {
 
     private CatalogoMapper() {
@@ -21,6 +27,15 @@ public final class CatalogoMapper {
     public static CatalogosDto dto(Catalogos c) {
         return new CatalogosDto(c.tipos(), c.estados(), c.operaciones(), c.monedas(), c.operacionesPorTipo(),
                 arbol(c.ubicaciones()));
+    }
+
+    /** Misma forma de departamento/ciudad/barrio que el árbol de catálogos (id + nombre). */
+    public static UbicacionDetectadaDto ubicacion(UbicacionDetectada u) {
+        FilaUbicacion f = u.ubicacion();
+        return new UbicacionDetectadaDto(u.latitud(), u.longitud(),
+                new Elemento(f.idDepartamento(), f.departamento()),
+                new Elemento(f.idCiudad(), f.ciudad()),
+                new Elemento(f.idBarrio(), f.barrio()));
     }
 
     /**

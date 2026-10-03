@@ -40,19 +40,28 @@ public class JdbcUbicacionDao implements UbicacionDao {
               JOIN departamento d ON d.id_departamento = c.id_departamento
             """;
 
+    /** Punto en WGS84 a partir de (longitud, latitud): el mismo que usa el trigger de la base. */
+    private static final String PUNTO = "ST_SetSRID(ST_MakePoint(?, ?), 4326)";
+
     private static final String SQL_PUNTO_EN_BARRIO = """
-            SELECT ST_Covers(geom, ST_SetSRID(ST_MakePoint(?, ?), 4326))
+            SELECT ST_Covers(geom, %s)
               FROM barrio
              WHERE id_barrio = ?
-            """;
+            """.formatted(PUNTO);
 
-    private static final String SQL_JERARQUIA = """
+    /** Departamento, ciudad y barrio de cada barrio; compartido por la jerarquía y la detección por punto. */
+    private static final String SELECT_FILA_UBICACION = """
             SELECT d.id_departamento, d.nombre, c.id_ciudad, c.nombre, b.id_barrio, b.nombre
               FROM departamento d
               JOIN ciudad c ON c.id_departamento = d.id_departamento
               JOIN barrio b ON b.id_ciudad = c.id_ciudad
-             ORDER BY d.nombre, c.nombre, b.nombre
             """;
+
+    private static final String SQL_JERARQUIA = SELECT_FILA_UBICACION + " ORDER BY d.nombre, c.nombre, b.nombre";
+
+    // ST_Covers usa el índice espacial ix_barrio_geom: no recorre todos los polígonos
+    private static final String SQL_BARRIO_POR_PUNTO = SELECT_FILA_UBICACION
+            + " WHERE ST_Covers(b.geom, " + PUNTO + ") ORDER BY b.id_barrio LIMIT 1";
 
     private final DataSource dataSource;
 
@@ -126,16 +135,31 @@ public class JdbcUbicacionDao implements UbicacionDao {
     }
 
     @Override
+    public Optional<FilaUbicacion> barrioQueContiene(BigDecimal latitud, BigDecimal longitud) throws SQLException {
+        try (Connection con = dataSource.getConnection();
+             PreparedStatement ps = con.prepareStatement(SQL_BARRIO_POR_PUNTO)) {
+            ps.setDouble(1, longitud.doubleValue()); // ST_MakePoint(x = longitud, y = latitud)
+            ps.setDouble(2, latitud.doubleValue());
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? Optional.of(fila(rs)) : Optional.empty();
+            }
+        }
+    }
+
+    @Override
     public List<FilaUbicacion> listarJerarquia() throws SQLException {
         try (Connection con = dataSource.getConnection();
              PreparedStatement ps = con.prepareStatement(SQL_JERARQUIA);
              ResultSet rs = ps.executeQuery()) {
             List<FilaUbicacion> filas = new ArrayList<>();
             while (rs.next()) {
-                filas.add(new FilaUbicacion(
-                        rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4), rs.getInt(5), rs.getString(6)));
+                filas.add(fila(rs));
             }
             return filas;
         }
+    }
+
+    private static FilaUbicacion fila(ResultSet rs) throws SQLException {
+        return new FilaUbicacion(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4), rs.getInt(5), rs.getString(6));
     }
 }

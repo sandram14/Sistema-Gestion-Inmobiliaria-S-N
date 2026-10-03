@@ -121,6 +121,18 @@ class AutenticacionTest {
     }
 
     @Test
+    void laDeteccionDeUbicacionRequiereSesion() throws Exception {
+        var sinSesion = ServletFalso.filtrar(filtro, Peticion.de("GET", "/api/admin/ubicacion", null)
+                .parametros(Map.of("latitud", "-25.5", "longitud", "-54.6")).navegador(navegador));
+        assertFalse(sinSesion.continuo());
+        assertEquals(401, sinSesion.respuesta().estado);
+
+        ServletFalso.ejecutar(servlet, login(LOGIN_OK));
+        assertTrue(ServletFalso.filtrar(filtro, Peticion.de("GET", "/api/admin/ubicacion", null)
+                .navegador(navegador)).continuo());
+    }
+
+    @Test
     void conSesionDeAdministradorDejaPasar() throws Exception {
         ServletFalso.ejecutar(servlet, login(LOGIN_OK));
 

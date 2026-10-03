@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import py.sn.inmobiliaria.config.BaseDatosConfig;
@@ -16,48 +17,53 @@ import py.sn.inmobiliaria.dto.request.PropiedadRequest;
 import py.sn.inmobiliaria.dto.request.PropiedadRequest.CasaRequest;
 import py.sn.inmobiliaria.dto.request.PropiedadRequest.OperacionRequest;
 import py.sn.inmobiliaria.dto.request.PropiedadRequest.TerrenoRequest;
+import py.sn.inmobiliaria.exception.FueraDeZonaException;
 import py.sn.inmobiliaria.exception.NoEncontradoException;
 import py.sn.inmobiliaria.exception.ValidacionException;
 import py.sn.inmobiliaria.model.Imagen;
 import py.sn.inmobiliaria.model.Propiedad;
+import py.sn.inmobiliaria.prueba.DatosPrueba;
+import py.sn.inmobiliaria.prueba.DatosPrueba.Zona;
 import py.sn.inmobiliaria.repository.impl.JdbcUbicacionDao;
 import py.sn.inmobiliaria.repository.impl.JpaCatalogoDao;
 import py.sn.inmobiliaria.repository.impl.JpaImagenDao;
 import py.sn.inmobiliaria.repository.impl.JpaPropiedadDao;
 import py.sn.inmobiliaria.service.PropiedadAdminService.PropiedadGuardada;
+import py.sn.inmobiliaria.service.UbicacionService.UbicacionDetectada;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Prueba de integración de los services contra la base real (solo si DB_URL está definida).
  *
- * <p>Los services confirman sus transacciones, así que esta prueba LIMPIA lo que crea:
- * al terminar cada prueba borra las propiedades con id mayor al último de la carga
- * inicial. Las 28 propiedades originales no se modifican.</p>
+ * <p>Los services confirman sus transacciones, así que la prueba LIMPIA lo que crea: al terminar
+ * cada prueba borra las propiedades con id mayor al último que existía antes de empezar.
+ * No espera cantidades ni códigos fijos: los calcula a partir del estado de la base, así funciona
+ * aunque se hayan creado o editado propiedades desde el panel.</p>
  */
 @EnabledIfEnvironmentVariable(named = "DB_URL", matches = ".+")
 class ServiciosIntegracionTest {
 
     private static HikariDataSource dataSource;
     private static JpaProvider jpa;
-    private static long ultimoIdOriginal;
+    private static Zona zona;
 
     private static PropiedadAdminService admin;
     private static PropiedadConsultaService consulta;
     private static CatalogoService catalogos;
+    private static UbicacionService ubicacion;
+
+    private long ultimoIdAntes;
+    private long totalAntes;
 
     @BeforeAll
-    static void iniciar() throws Exception {
+    static void iniciar() {
         dataSource = DataSourceFactory.crear(new BaseDatosConfig(
                 System.getenv("DB_URL"), System.getenv("DB_USER"), System.getenv("DB_PASSWORD")));
         jpa = new JpaProvider(dataSource);
@@ -66,19 +72,26 @@ class ServiciosIntegracionTest {
         JpaPropiedadDao propiedadDao = new JpaPropiedadDao();
         JpaCatalogoDao catalogoDao = new JpaCatalogoDao();
 
+        ubicacion = new UbicacionService(ubicacionDao);
         admin = new PropiedadAdminService(tx, propiedadDao, catalogoDao, new JpaImagenDao(), ubicacionDao);
         consulta = new PropiedadConsultaService(tx, propiedadDao);
-        catalogos = new CatalogoService(tx, catalogoDao, new UbicacionService(ubicacionDao));
-        ultimoIdOriginal = unNumero("SELECT COALESCE(MAX(id_propiedad), 0) FROM propiedad");
+        catalogos = new CatalogoService(tx, catalogoDao, ubicacion);
+        zona = DatosPrueba.zona(dataSource);
+    }
+
+    @BeforeEach
+    void recordarEstado() {
+        ultimoIdAntes = DatosPrueba.numero(dataSource, "SELECT COALESCE(MAX(id_propiedad), 0) FROM propiedad");
+        totalAntes = DatosPrueba.numero(dataSource, "SELECT count(*) FROM propiedad");
     }
 
     @AfterEach
-    void limpiar() throws Exception {
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement("DELETE FROM propiedad WHERE id_propiedad > ?")) {
-            ps.setLong(1, ultimoIdOriginal); // casa, terreno, imágenes y operaciones se borran en cascada
-            ps.executeUpdate();
-        }
+    void limpiarYVerificar() {
+        DatosPrueba.numero(dataSource,
+                "WITH borradas AS (DELETE FROM propiedad WHERE id_propiedad > ? RETURNING 1) SELECT count(*) FROM borradas",
+                ultimoIdAntes); // casa, terreno, imágenes y operaciones se borran en cascada
+        assertEquals(totalAntes, DatosPrueba.numero(dataSource, "SELECT count(*) FROM propiedad"),
+                "La prueba no debe dejar propiedades en la base");
     }
 
     @AfterAll
@@ -91,11 +104,11 @@ class ServiciosIntegracionTest {
         }
     }
 
-    // ---- Datos de prueba: un punto real dentro de AREA 1 (el de prop-001) ----
+    // ---- Datos de prueba ----
 
-    private static PropiedadRequest casa(List<OperacionRequest> ops) throws Exception {
+    private static PropiedadRequest casa(List<OperacionRequest> ops) {
         return new PropiedadRequest("Casa de prueba", "Descripción", "Calle 1",
-                coordenada("latitud"), coordenada("longitud"), 10011013, "Casa", null,
+                zona.latitud(), zona.longitud(), zona.idBarrio(), "Casa", null,
                 new CasaRequest(2, 1, true, true, true, new BigDecimal("95.5"), null), null, ops);
     }
 
@@ -109,53 +122,49 @@ class ServiciosIntegracionTest {
         return new OperacionRequest(operacion, new BigDecimal(precio), moneda);
     }
 
-    private static BigDecimal coordenada(String columna) throws Exception {
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT " + columna + " FROM propiedad WHERE codigo = 'prop-001'");
-             ResultSet rs = ps.executeQuery()) {
-            rs.next();
-            return rs.getBigDecimal(1);
-        }
+    /** El código que debería recibir la próxima propiedad con ese prefijo. */
+    private static String siguienteCodigo(String prefijo) {
+        long ultimo = DatosPrueba.numero(dataSource,
+                "SELECT COALESCE(MAX(CAST(substring(codigo FROM '[0-9]+$') AS integer)), 0) FROM propiedad WHERE codigo LIKE ?",
+                prefijo + "-%");
+        return ReglasNegocio.formatearCodigo(prefijo, (int) ultimo + 1);
     }
 
-    private static long unNumero(String sql) throws Exception {
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            rs.next();
-            return rs.getLong(1);
-        }
+    private static long idPrincipal(long idPropiedad) {
+        return admin.obtener(idPropiedad, p -> p.getImagenes().stream()
+                .filter(Imagen::isEsPrincipal).map(Imagen::getId).findFirst().orElse(-1L));
     }
 
-    // ---- Pruebas ----
+    // ---- Propiedades ----
 
     @Test
-    void creaUnaCasaConVentaYAlquilerYApareceEnLaBusqueda() throws Exception {
+    void creaUnaCasaConVentaYAlquilerYApareceEnLaBusqueda() {
+        String esperado = siguienteCodigo("prop");
+
         PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "120000", "USD"), op("Alquiler", "4000000", "PYG"))));
 
-        assertEquals("prop-017", g.codigo()); // siguiente a prop-016
-
+        assertEquals(esperado, g.codigo());
         List<String> alquileresEnPyg = consulta.buscar(
-                new BusquedaRequest(null, null, "Vivienda", "Alquiler", new BigDecimal("5000000"), "PYG"),
+                new BusquedaRequest(zona.idCiudad(), null, "Vivienda", "Alquiler", new BigDecimal("5000000"), "PYG"),
                 Propiedad::getCodigo);
-        assertEquals(List.of("prop-017"), alquileresEnPyg);
-
-        int operaciones = consulta.obtenerPorCodigo("prop-017", p -> p.getOperaciones().size());
-        assertEquals(2, operaciones);
+        assertTrue(alquileresEnPyg.contains(g.codigo()));
+        assertEquals(2, (int) consulta.obtenerPorCodigo(g.codigo(), p -> p.getOperaciones().size()));
     }
 
     @Test
-    void elCodigoDeTerrenoUsaSuPropioPrefijo() throws Exception {
+    void elCodigoDeTerrenoUsaSuPropioPrefijo() {
+        String esperado = siguienteCodigo("terr");
+
         PropiedadGuardada g = admin.crear(comoTerreno(casa(null), List.of(op("Venta", "30000", "USD"))));
 
-        assertEquals("terr-013", g.codigo());
+        assertEquals(esperado, g.codigo());
     }
 
     @Test
-    void rechazaUnaUbicacionFueraDelBarrio() throws Exception {
+    void rechazaUnaUbicacionFueraDelBarrio() {
         PropiedadRequest base = casa(List.of(op("Venta", "1", "USD")));
         PropiedadRequest lejos = new PropiedadRequest(base.titulo(), null, null,
-                new BigDecimal("-25.300000"), new BigDecimal("-54.500000"), base.idBarrio(), "Casa", null,
+                DatosPrueba.LATITUD_FUERA, DatosPrueba.LONGITUD_FUERA, base.idBarrio(), "Casa", null,
                 base.casa(), null, base.operaciones());
 
         ValidacionException e = assertThrows(ValidacionException.class, () -> admin.crear(lejos));
@@ -164,7 +173,7 @@ class ServiciosIntegracionTest {
     }
 
     @Test
-    void cambiaDeCasaConAlquilerATerreno() throws Exception {
+    void cambiaDeCasaConAlquilerATerrenoSinCambiarElCodigo() {
         PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "120000", "USD"), op("Alquiler", "4000000", "PYG"))));
 
         admin.actualizar(g.id(), comoTerreno(casa(null), List.of(op("Venta", "90000", "USD"))));
@@ -172,42 +181,49 @@ class ServiciosIntegracionTest {
         String resumen = admin.obtener(g.id(), p -> p.getTipo().getNombre() + "|" + (p.getCasa() == null)
                 + "|" + p.getTerreno().getSuperficie().intValue() + "|" + p.getOperaciones().size()
                 + "|" + p.getOperaciones().get(0).getPrecio().intValue() + "|" + p.getCodigo());
-        assertEquals("Terreno|true|360|1|90000|prop-017", resumen); // el código no cambia
+        assertEquals("Terreno|true|360|1|90000|" + g.codigo(), resumen);
     }
 
     @Test
-    void elBorradoEsLogico() throws Exception {
+    void elBorradoEsLogico() {
+        long disponiblesAntes = consulta.buscar(BusquedaRequest.vacia(), Propiedad::getCodigo).size();
         PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "1000", "USD"))));
+        assertEquals(disponiblesAntes + 1, consulta.buscar(BusquedaRequest.vacia(), Propiedad::getCodigo).size());
 
         admin.eliminar(g.id());
 
         assertThrows(NoEncontradoException.class, () -> consulta.obtenerPorCodigo(g.codigo(), Propiedad::getCodigo));
         assertEquals("Inactivo", admin.obtener(g.id(), p -> p.getEstado().getNombre())); // sigue en la base
-        assertEquals(28, consulta.buscar(BusquedaRequest.vacia(), Propiedad::getCodigo).size());
+        assertEquals(disponiblesAntes, consulta.buscar(BusquedaRequest.vacia(), Propiedad::getCodigo).size());
     }
 
+    // ---- Imágenes ----
+
     @Test
-    void gestionaImagenesYSuPrincipal() throws Exception {
+    void gestionaImagenesYSuPrincipal() {
         PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "1000", "USD"))));
 
-        long primera = admin.agregarImagen(g.id(), new ImagenRequest("/uploads/prop-017/a.jpg", "Frente"));
-        long segunda = admin.agregarImagen(g.id(), new ImagenRequest("/uploads/prop-017/b.jpg", null));
+        long primera = admin.agregarImagen(g.id(), new ImagenRequest("/uploads/" + g.codigo() + "/a.jpg", "Frente"));
+        long segunda = admin.agregarImagen(g.id(), new ImagenRequest("/uploads/" + g.codigo() + "/b.jpg", null));
         assertEquals(primera, idPrincipal(g.id()));       // la primera queda como principal
 
         admin.marcarPrincipal(g.id(), segunda);
         assertEquals(segunda, idPrincipal(g.id()));
 
-        admin.eliminarImagen(g.id(), segunda);             // se borra la principal...
+        String url = admin.eliminarImagen(g.id(), segunda); // se borra la principal...
+        assertEquals("/uploads/" + g.codigo() + "/b.jpg", url);
         assertEquals(primera, idPrincipal(g.id()));       // ...y la otra pasa a serlo
     }
 
     @Test
-    void validaQueLaImagenPertenezcaALaPropiedad() throws Exception {
+    void validaQueLaImagenPertenezcaALaPropiedad() {
         PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "1000", "USD"))));
 
-        assertThrows(NoEncontradoException.class, () -> admin.marcarPrincipal(g.id(), 999999L));
+        assertThrows(NoEncontradoException.class, () -> admin.marcarPrincipal(g.id(), Long.MAX_VALUE));
         assertThrows(ValidacionException.class, () -> admin.agregarImagen(g.id(), new ImagenRequest("ftp://x", null)));
     }
+
+    // ---- Búsqueda, catálogos y ubicación ----
 
     @Test
     void laBusquedaRechazaTerrenoEnAlquiler() {
@@ -223,23 +239,34 @@ class ServiciosIntegracionTest {
         assertEquals(5, c.estados().size());
         assertEquals(List.of("PYG", "USD"), c.monedas());
         assertEquals(List.of("Venta"), c.operacionesPorTipo().get("Terreno"));
-        assertEquals(12, c.ubicaciones().size());
+        assertEquals(DatosPrueba.numero(dataSource, "SELECT count(*) FROM barrio"), c.ubicaciones().size());
     }
 
     @Test
     void propiedadInexistente() {
-        assertThrows(NoEncontradoException.class, () -> admin.obtener(999999L, Propiedad::getCodigo));
-        assertThrows(NoEncontradoException.class, () -> admin.eliminar(999999L));
-    }
-
-    private static long idPrincipal(long idPropiedad) {
-        return admin.obtener(idPropiedad, p -> p.getImagenes().stream()
-                .filter(Imagen::isEsPrincipal).map(Imagen::getId).findFirst().orElse(-1L));
+        assertThrows(NoEncontradoException.class, () -> admin.obtener(Long.MAX_VALUE, Propiedad::getCodigo));
+        assertThrows(NoEncontradoException.class, () -> admin.eliminar(Long.MAX_VALUE));
     }
 
     @Test
-    void sinCambiosEnLasPropiedadesOriginales() throws Exception {
-        assertNull(null);
-        assertFalse(unNumero("SELECT count(*) FROM propiedad WHERE id_propiedad <= " + ultimoIdOriginal) != 28);
+    void laUbicacionDetectadaPermiteGuardarLaPropiedad() {
+        // Flujo del panel: clic en el mapa → detección → guardar con el barrio detectado
+        UbicacionDetectada u = ubicacion.localizar(zona.latitud(), zona.longitud());
+        assertEquals(zona.idBarrio(), u.ubicacion().idBarrio());
+
+        PropiedadRequest base = casa(List.of(op("Venta", "1000", "USD")));
+        PropiedadRequest conDetectada = new PropiedadRequest(base.titulo(), null, null, u.latitud(), u.longitud(),
+                u.ubicacion().idBarrio(), "Casa", null, base.casa(), null, base.operaciones());
+
+        assertTrue(admin.crear(conDetectada).id() > 0);
+    }
+
+    @Test
+    void unPuntoFueraDeZonaSeInformaConClaridad() {
+        FueraDeZonaException e = assertThrows(FueraDeZonaException.class,
+                () -> ubicacion.localizar(DatosPrueba.LATITUD_FUERA, DatosPrueba.LONGITUD_FUERA));
+
+        assertEquals("FUERA_DE_ZONA", e.codigo());
+        assertFalse(e.getMessage().isBlank());
     }
 }

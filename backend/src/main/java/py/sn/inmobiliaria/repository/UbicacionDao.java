@@ -37,6 +37,15 @@ public interface UbicacionDao {
      */
     Optional<Boolean> puntoDentroDeBarrio(int idBarrio, BigDecimal latitud, BigDecimal longitud) throws SQLException;
 
+    /**
+     * Barrio que contiene el punto (ST_Covers: incluye el borde), con su ciudad y departamento.
+     * Es la misma regla que aplica el trigger de la base al guardar una propiedad.
+     * Si el punto cae justo en el límite entre dos barrios, devuelve el de menor id.
+     *
+     * @return vacío si el punto está fuera de todos los barrios registrados
+     */
+    Optional<FilaUbicacion> barrioQueContiene(BigDecimal latitud, BigDecimal longitud) throws SQLException;
+
     /** Jerarquía completa Departamento → Ciudad → Barrio, sin geometrías (para formularios). */
     List<FilaUbicacion> listarJerarquia() throws SQLException;
 
