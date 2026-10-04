@@ -1,9 +1,36 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './AssistantWidget.module.css'
+import { ApiError, apiPost } from '../../services/api'
 
 // Número del agente que recibe las consultas generadas por el asistente
 // (mismo formato/agente que ya se usa en la página de Contacto).
+// PENDIENTE: reemplazar por el número real de la inmobiliaria (formato internacional sin "+").
 const AGENTE_WHATSAPP = '595981123456'
+
+/** Máximo de caracteres por pregunta (el backend rechaza más de 500). */
+const MAX_PREGUNTA = 500
+
+// ─── Abrir el asistente desde otra parte de la web ──────────────────────────
+// El detalle de una propiedad (SearchFilter.tsx) emite este evento con su código, y el
+// asistente se abre listo para responder sobre esa propiedad. Así no hace falta modificar
+// App.tsx ni compartir estado entre componentes.
+const EVENTO_CONSULTAR = 'sn:consultar-propiedad'
+
+interface PropiedadEnConsulta {
+  codigo: string
+  titulo: string
+}
+
+export function abrirAsistenteConPropiedad(propiedad: PropiedadEnConsulta) {
+  window.dispatchEvent(new CustomEvent<PropiedadEnConsulta>(EVENTO_CONSULTAR, { detail: propiedad }))
+}
+
+/** Respuesta de POST /api/asistente/consultas */
+interface RespuestaAsistente {
+  respuesta: string
+  sugerirWhatsApp: boolean
+  propiedadesRelacionadas: string[]
+}
 
 const CIUDADES = ['Ciudad del Este', 'Hernandarias', 'Minga Guazú', 'Presidente Franco', 'No estoy seguro/a']
 
@@ -11,7 +38,8 @@ const PRESUPUESTOS = ['Hasta USD 40.000', 'Hasta USD 70.000', 'Hasta USD 100.000
 
 type Step = 'inicio' | 'tipoVivienda' | 'zona' | 'presupuesto' | 'contacto' | 'resumen'
 
-type ChatMessage = { from: 'bot' | 'user'; text: string }
+// whatsapp: mensaje para el enlace de WhatsApp cuando el asistente sugiere hablar con un asesor
+type ChatMessage = { from: 'bot' | 'user'; text: string; whatsapp?: string }
 
 interface Respuestas {
   operacion?: string
@@ -36,6 +64,22 @@ export default function AssistantWidget() {
   const [respuestas, setRespuestas] = useState<Respuestas>({})
   const [nombreInput, setNombreInput] = useState('')
   const [telefonoInput, setTelefonoInput] = useState('')
+  const [pregunta, setPregunta] = useState('')
+  const [esperando, setEsperando] = useState(false)
+  const [propiedadEnConsulta, setPropiedadEnConsulta] = useState<PropiedadEnConsulta | null>(null)
+
+  // "Consultar sobre esta propiedad" desde el detalle
+  useEffect(() => {
+    function alConsultar(e: Event) {
+      const propiedad = (e as CustomEvent<PropiedadEnConsulta>).detail
+      setPropiedadEnConsulta(propiedad)
+      setOpen(true)
+      setMinimized(false)
+      decir(`Escribí tu consulta sobre "${propiedad.titulo}" (${propiedad.codigo}) y te respondo con los datos que tenemos.`)
+    }
+    window.addEventListener(EVENTO_CONSULTAR, alConsultar)
+    return () => window.removeEventListener(EVENTO_CONSULTAR, alConsultar)
+  }, [])
 
   const bodyRef = useRef<HTMLDivElement>(null)
 
@@ -118,6 +162,48 @@ export default function AssistantWidget() {
     setNombreInput('')
     setTelefonoInput('')
     setStep('inicio')
+    setPregunta('')
+    setPropiedadEnConsulta(null)
+  }
+
+  // ─── Pregunta libre al asistente de IA (Gemini, a través del backend) ─────
+  async function enviarPregunta() {
+    const texto = pregunta.trim()
+    if (!texto || esperando) return
+    responder(texto)
+    setPregunta('')
+    setEsperando(true)
+    try {
+      const r = await apiPost<RespuestaAsistente>('/api/asistente/consultas', {
+        pregunta: texto,
+        codigoPropiedad: propiedadEnConsulta?.codigo ?? null,
+      })
+      const contexto = propiedadEnConsulta ? ` sobre la propiedad ${propiedadEnConsulta.codigo}` : ''
+      setMessages((m) => [
+        ...m,
+        {
+          from: 'bot',
+          text: r.respuesta,
+          whatsapp: r.sugerirWhatsApp
+            ? encodeURIComponent(`Hola, quisiera hacer una consulta${contexto} desde la web de S&N Inmobiliaria: ${texto}`)
+            : undefined,
+        },
+      ])
+    } catch (e) {
+      // 429 (muchas consultas), 503 (asistente no disponible) y otros: el backend envía un mensaje claro
+      const mensaje =
+        e instanceof ApiError ? e.mensajeParaVisitante() : 'No pude responder en este momento. Intentá de nuevo en unos minutos.'
+      setMessages((m) => [
+        ...m,
+        {
+          from: 'bot',
+          text: mensaje,
+          whatsapp: encodeURIComponent('Hola, quisiera hacer una consulta desde la web de S&N Inmobiliaria.'),
+        },
+      ])
+    } finally {
+      setEsperando(false)
+    }
   }
 
   return (
@@ -169,10 +255,25 @@ export default function AssistantWidget() {
             <>
               <div className={styles.body} ref={bodyRef}>
                 {messages.map((m, i) => (
-                  <div key={i} className={m.from === 'bot' ? styles.bubbleBot : styles.bubbleUser}>
-                    {m.text}
+                  <div key={i}>
+                    {/* pre-line: respeta los saltos de línea de las listas del asistente */}
+                    <div className={m.from === 'bot' ? styles.bubbleBot : styles.bubbleUser} style={{ whiteSpace: 'pre-line' }}>
+                      {m.text}
+                    </div>
+                    {m.whatsapp && (
+                      <a
+                        className={styles.whatsappBtn}
+                        href={`https://wa.me/${AGENTE_WHATSAPP}?text=${m.whatsapp}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Hablar con un asesor por WhatsApp →
+                      </a>
+                    )}
                   </div>
                 ))}
+
+                {esperando && <div className={styles.bubbleBot}>Escribiendo…</div>}
 
                 {step === 'resumen' && (
                   <div className={styles.summaryCard}>
@@ -264,6 +365,36 @@ export default function AssistantWidget() {
                     <button type="submit" className={styles.sendBtn}>
                       Continuar
                     </button>
+                  </form>
+                )}
+
+                {step !== 'contacto' && (
+                  <form
+                    className={styles.form}
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      void enviarPregunta()
+                    }}
+                  >
+                    <input
+                      className={styles.input}
+                      placeholder={
+                        propiedadEnConsulta ? `Preguntá sobre ${propiedadEnConsulta.codigo}…` : 'Escribí tu pregunta…'
+                      }
+                      value={pregunta}
+                      maxLength={MAX_PREGUNTA}
+                      disabled={esperando}
+                      onChange={(e) => setPregunta(e.target.value)}
+                      aria-label="Pregunta para el asistente"
+                    />
+                    <button type="submit" className={styles.sendBtn} disabled={esperando || !pregunta.trim()}>
+                      Enviar
+                    </button>
+                    {propiedadEnConsulta && (
+                      <button type="button" className={styles.restartBtn} onClick={() => setPropiedadEnConsulta(null)}>
+                        Preguntar en general
+                      </button>
+                    )}
                   </form>
                 )}
 

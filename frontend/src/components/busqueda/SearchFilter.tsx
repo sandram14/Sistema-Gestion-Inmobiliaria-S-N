@@ -4,6 +4,8 @@ import { useSearchParams } from 'react-router-dom'
 import styles from './SearchFilter.module.css'
 import MapCanvas from '../PropertyMap/MapCanvas'
 import { useGeoData } from '../PropertyMap/useGeoData'
+import { apiGet, esCancelacion } from '../../services/api'
+import { abrirAsistenteConPropiedad } from '../chat/AssistantWidget'
 import {
   boundsForBarrio,
   boundsForCiudad,
@@ -12,11 +14,17 @@ import {
 } from '../PropertyMap/mapUtils'
 import {
   FILTROS_VACIOS,
-  grupoDeCategoria,
+  operacionesDe,
+  tieneOperacion,
   type Filtros,
+  type GeoFeatureCollection,
+  type OperacionPrecio,
   type PropiedadFeature,
 } from '../PropertyMap/types'
 
+// Los presupuestos están en dólares: el backend compara solo contra precios en USD
+// (no convierte monedas), por eso la búsqueda envía moneda=USD junto con el tope.
+const MONEDA_PRESUPUESTO = 'USD'
 const PRESUPUESTOS = [
   { label: 'Hasta USD 40.000', value: 40000 },
   { label: 'Hasta USD 70.000', value: 70000 },
@@ -38,6 +46,59 @@ export function iconoCategoria(categoria: PropiedadFeature['properties']['catego
 // (ver public/images/propiedades/LEEME.txt) — el resto del código no cambia.
 export function fotosPara(props: PropiedadFeature['properties']): string[] {
   return props.fotos ?? []
+}
+
+/** "USD 45.000" o "PYG 4.000.000 / mes" (alquiler). */
+function textoPrecio(op: OperacionPrecio): string {
+  return `${op.moneda} ${op.precio.toLocaleString()}${op.operacion === 'Alquiler' ? ' / mes' : ''}`
+}
+
+/** Búsqueda con filtros contra la API: el backend aplica y valida las reglas. */
+function usePropiedadesFiltradas(filtros: Filtros, habilitado: boolean) {
+  const [estado, setEstado] = useState<{ datos: PropiedadFeature[]; cargando: boolean; error: string | null }>({
+    datos: [],
+    cargando: true,
+    error: null,
+  })
+
+  useEffect(() => {
+    if (!habilitado) return
+    const control = new AbortController()
+    setEstado((e) => ({ ...e, cargando: true, error: null }))
+    apiGet<GeoFeatureCollection<PropiedadFeature>>(
+      '/api/propiedades',
+      {
+        departamentoId: filtros.departamentoId,
+        ciudadId: filtros.ciudadId,
+        barrioId: filtros.barrioId,
+        categoria: filtros.categoria === 'Todos' ? null : filtros.categoria,
+        operacion: filtros.tipoOperacion === 'Todos' ? null : filtros.tipoOperacion,
+        presupuestoMax: filtros.presupuestoMax,
+        moneda: filtros.presupuestoMax ? MONEDA_PRESUPUESTO : null,
+      },
+      control.signal
+    )
+      .then((fc) => setEstado({ datos: fc.features, cargando: false, error: null }))
+      .catch((e: unknown) => {
+        if (esCancelacion(e)) return
+        setEstado((s) => ({
+          ...s,
+          cargando: false,
+          error: e instanceof Error ? e.message : 'No se pudieron cargar las propiedades.',
+        }))
+      })
+    return () => control.abort() // si cambian los filtros, se descarta la búsqueda anterior
+  }, [
+    habilitado,
+    filtros.departamentoId,
+    filtros.ciudadId,
+    filtros.barrioId,
+    filtros.categoria,
+    filtros.tipoOperacion,
+    filtros.presupuestoMax,
+  ])
+
+  return estado
 }
 
 // ─── Galería de fotos deslizable ─────────────────────────────────────────
@@ -163,6 +224,23 @@ export default function SearchFilter() {
     setPropiedadId(null)
   }
 
+  // Departamentos disponibles, a partir de las ciudades que entrega la API
+  const departamentos = useMemo(() => {
+    const vistos = new Map<number, string>()
+    ciudades.forEach((c) => {
+      if (c.properties.departamentoId != null) vistos.set(c.properties.departamentoId, c.properties.departamento)
+    })
+    return [...vistos.entries()].map(([id, nombre]) => ({ id, nombre }))
+  }, [ciudades])
+
+  const ciudadesVisibles = useMemo(
+    () =>
+      filtros.departamentoId == null
+        ? ciudades
+        : ciudades.filter((c) => c.properties.departamentoId === filtros.departamentoId),
+    [ciudades, filtros.departamentoId]
+  )
+
   const barriosDeLaCiudad = useMemo(
     () => barrios.filter((b) => b.properties.distritoCod === filtros.ciudadId),
     [barrios, filtros.ciudadId]
@@ -172,25 +250,12 @@ export default function SearchFilter() {
   const barrioSeleccionado = barriosDeLaCiudad.find((b) => b.properties.id === filtros.barrioId)
   const nivel = filtros.barrioId ? 'barrio' : filtros.ciudadId ? 'ciudad' : 'departamento'
 
-  const propiedadesFiltradas = useMemo(() => {
-    return propiedades.filter((p) => {
-      const props = p.properties
-      if (ciudadSeleccionada && props.ciudad !== ciudadSeleccionada.properties.ciudad) return false
-      if (filtros.categoria !== 'Todos' && grupoDeCategoria(props.categoria) !== filtros.categoria)
-        return false
-      if (filtros.tipoOperacion !== 'Todos' && props.tipoOperacion !== filtros.tipoOperacion)
-        return false
-      if (filtros.presupuestoMax && props.precio > filtros.presupuestoMax) return false
-      return true
-    })
-  }, [propiedades, ciudadSeleccionada, filtros.categoria, filtros.tipoOperacion, filtros.presupuestoMax])
-
-  const propiedadesDelBarrio = useMemo(
-    () => propiedadesFiltradas.filter((p) => p.properties.barrioId === filtros.barrioId),
-    [propiedadesFiltradas, filtros.barrioId]
-  )
-
-  const resultados = filtros.barrioId ? propiedadesDelBarrio : propiedadesFiltradas
+  // Los filtros los aplica el backend (/api/propiedades?...): ciudad, barrio, tipo, operación,
+  // presupuesto en USD y departamento. Aquí solo se muestran los resultados.
+  const busqueda = usePropiedadesFiltradas(filtros, !loading && !error)
+  const propiedadesFiltradas = busqueda.datos
+  const propiedadesDelBarrio = propiedadesFiltradas
+  const resultados = propiedadesFiltradas
 
   const propiedadSeleccionada = useMemo(
     () => propiedades.find((p) => p.properties.id === propiedadId) ?? null,
@@ -267,8 +332,19 @@ export default function SearchFilter() {
       <div className={styles.filterBar}>
         <div className={styles.filterGroup}>
           <label className={styles.filterLabel}>Departamento</label>
-          <select className={styles.filterSelect} value="ALTO PARANÁ" disabled>
-            <option>ALTO PARANÁ</option>
+          <select
+            className={styles.filterSelect}
+            value={filtros.departamentoId ?? ''}
+            onChange={(e) =>
+              patch({ departamentoId: e.target.value ? Number(e.target.value) : null, ciudadId: null, barrioId: null })
+            }
+          >
+            <option value="">Todos</option>
+            {departamentos.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.nombre}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -280,7 +356,7 @@ export default function SearchFilter() {
             onChange={(e) => patch({ ciudadId: e.target.value || null, barrioId: null })}
           >
             <option value="">Todas</option>
-            {ciudades.map((c) => (
+            {ciudadesVisibles.map((c) => (
               <option key={c.properties.id} value={c.properties.id}>
                 {c.properties.ciudad}
               </option>
@@ -353,6 +429,12 @@ export default function SearchFilter() {
         </button>
       </div>
 
+      {busqueda.error && (
+        <p className={styles.emptyText} role="alert">
+          {busqueda.error}
+        </p>
+      )}
+
       {/* ── Escenario principal: mapa a pantalla completa ───────────────── */}
       <div className={styles.stage}>
         {propiedadSeleccionada ? (
@@ -377,7 +459,7 @@ export default function SearchFilter() {
           />
         ) : (
           <MapaGeneralView
-            ciudades={ciudades}
+            ciudades={ciudadesVisibles}
             barriosVisibles={barriosDeLaCiudad}
             propiedades={resultados}
             nivel={filtros.ciudadId ? 'ciudad' : 'departamento'}
@@ -490,8 +572,9 @@ function BarrioView({
   onSelectBarrio: (id: number) => void
   onSelectPropiedad: (p: PropiedadFeature) => void
 }) {
-  const enVenta = propiedades.filter((p) => p.properties.tipoOperacion === 'Venta').length
-  const enAlquiler = propiedades.filter((p) => p.properties.tipoOperacion === 'Alquiler').length
+  // Una casa con Venta y Alquiler cuenta en ambos
+  const enVenta = propiedades.filter((p) => tieneOperacion(p.properties, 'Venta')).length
+  const enAlquiler = propiedades.filter((p) => tieneOperacion(p.properties, 'Alquiler')).length
 
   return (
     <>
@@ -600,10 +683,12 @@ function PropiedadCard({ p, onClick }: { p: PropiedadFeature; onClick: () => voi
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick()}
       >
         <div className={styles.propTitle}>{props.titulo}</div>
-        <div className={styles.propPrice}>
-          {props.moneda} {props.precio.toLocaleString()}
-          {props.tipoOperacion === 'Alquiler' ? ' / mes' : ''}
-        </div>
+        {operacionesDe(props).map((op) => (
+          <div key={op.operacion} className={styles.propPrice}>
+            {operacionesDe(props).length > 1 ? `${op.operacion}: ` : ''}
+            {textoPrecio(op)}
+          </div>
+        ))}
         <div className={styles.propSpecs}>
           {props.categoria !== 'Terreno' && (
             <>
@@ -634,6 +719,7 @@ function DetalleView({
   const props = propiedad.properties
   const esTerreno = props.categoria === 'Terreno'
   const fotos = fotosPara(props)
+  const operaciones = operacionesDe(props)
 
   return (
     <div className={styles.splitStage}>
@@ -671,17 +757,21 @@ function DetalleView({
           <button className={styles.detailCloseBtn} onClick={onVolver} aria-label="Volver al barrio">
             ✕
           </button>
-          <span className={styles.detailPhotosTag}>{props.tipoOperacion.toUpperCase()}</span>
+          <span className={styles.detailPhotosTag}>
+            {operaciones.map((o) => o.operacion.toUpperCase()).join(' · ')}
+          </span>
         </div>
 
         <div className={styles.sidePanelScroll}>
           <span className={styles.sidePanelScrollLabel}>Especificaciones de la propiedad</span>
 
           <h3 className={styles.detailTitle}>{props.titulo}</h3>
-          <div className={styles.detailPrice}>
-            {props.moneda} {props.precio.toLocaleString()}
-            {props.tipoOperacion === 'Alquiler' ? ' / mes' : ''}
-          </div>
+          {operaciones.map((op) => (
+            <div key={op.operacion} className={styles.detailPrice}>
+              {operaciones.length > 1 ? `${op.operacion}: ` : ''}
+              {textoPrecio(op)}
+            </div>
+          ))}
 
           <div className={styles.specGrid}>
             {!esTerreno && (
@@ -691,12 +781,21 @@ function DetalleView({
               </>
             )}
             <SpecTile label="Superficie" value={`${props.m2} m²`} />
-            <SpecTile label="Operación" value={props.tipoOperacion} />
+            <SpecTile label="Operación" value={operaciones.map((o) => o.operacion).join(' y ')} />
             <SpecTile label="Barrio" value={props.barrio} />
             <SpecTile label="Ciudad" value={props.ciudad} />
           </div>
 
+          {props.descripcion && <p className={styles.detailAddress}>{props.descripcion}</p>}
+
           <p className={styles.detailAddress}>📍 {props.direccion}</p>
+
+          <button
+            className={styles.searchBtn}
+            onClick={() => abrirAsistenteConPropiedad({ codigo: props.id, titulo: props.titulo })}
+          >
+            💬 Consultar sobre esta propiedad
+          </button>
         </div>
       </div>
     </div>

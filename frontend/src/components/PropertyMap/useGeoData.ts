@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiGet } from "../../services/api";
 import type {
   CiudadFeature,
   BarrioFeature,
@@ -15,11 +16,14 @@ interface GeoDataState {
 }
 
 /**
- * Carga ciudades.geojson / barrios.geojson / propiedades.geojson desde
- * `public/data/`. Cuando tengas un backend real de listados, reemplazá
- * el fetch de `propiedades` por tu endpoint (mismo shape de FeatureCollection).
+ * Carga ciudades, barrios y propiedades desde la API Java:
+ * /api/ciudades, /api/barrios y /api/propiedades (mismo formato FeatureCollection
+ * que tenían los archivos estáticos de public/data/, que ya no se usan).
+ *
+ * "propiedades" trae todas las disponibles (para Ofertas y para abrir el detalle
+ * desde un enlace); la búsqueda con filtros la hace el buscador contra la API.
  */
-export function useGeoData(dataBaseUrl: string = "/data"): GeoDataState {
+export function useGeoData(apiBaseUrl: string = "/api"): GeoDataState {
   const [state, setState] = useState<GeoDataState>({
     ciudades: [],
     barrios: [],
@@ -31,18 +35,12 @@ export function useGeoData(dataBaseUrl: string = "/data"): GeoDataState {
   useEffect(() => {
     let cancelled = false;
 
-    async function fetchJson<T>(path: string): Promise<T> {
-      const res = await fetch(path);
-      if (!res.ok) throw new Error(`No se pudo cargar ${path} (HTTP ${res.status})`);
-      return res.json() as Promise<T>;
-    }
-
     async function load() {
       try {
         const [ciudadesFC, barriosFC, propiedadesFC] = await Promise.all([
-          fetchJson<GeoFeatureCollection<CiudadFeature>>(`${dataBaseUrl}/ciudades.geojson`),
-          fetchJson<GeoFeatureCollection<BarrioFeature>>(`${dataBaseUrl}/barrios.geojson`),
-          fetchJson<GeoFeatureCollection<PropiedadFeature>>(`${dataBaseUrl}/propiedades.geojson`),
+          apiGet<GeoFeatureCollection<CiudadFeature>>(`${apiBaseUrl}/ciudades`),
+          apiGet<GeoFeatureCollection<BarrioFeature>>(`${apiBaseUrl}/barrios`),
+          apiGet<GeoFeatureCollection<PropiedadFeature>>(`${apiBaseUrl}/propiedades`),
         ]);
         if (!cancelled) {
           setState({
@@ -68,7 +66,7 @@ export function useGeoData(dataBaseUrl: string = "/data"): GeoDataState {
     return () => {
       cancelled = true;
     };
-  }, [dataBaseUrl]);
+  }, [apiBaseUrl]);
 
   return state;
 }
