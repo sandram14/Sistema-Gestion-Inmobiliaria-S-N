@@ -44,6 +44,7 @@ public final class ServletFalso {
         public int estado = 200;
         public final Map<String, String> cabeceras = new HashMap<>();
         public final ByteArrayOutputStream cuerpo = new ByteArrayOutputStream();
+        public final java.util.List<jakarta.servlet.http.Cookie> cookies = new java.util.ArrayList<>();
 
         public JsonNode json() throws Exception {
             return JsonUtil.mapper().readTree(cuerpo.toString(StandardCharsets.UTF_8));
@@ -92,6 +93,7 @@ public final class ServletFalso {
         String ip = "127.0.0.1";
         Navegador navegador = new Navegador();
         final Map<String, byte[]> partes = new HashMap<>();
+        final java.util.List<jakarta.servlet.http.Cookie> cookies = new java.util.ArrayList<>();
 
         public static Peticion de(String metodo, String servletPath, String pathInfo) {
             Peticion p = new Peticion();
@@ -121,6 +123,11 @@ public final class ServletFalso {
             if (contentType != null) {
                 cabecera("Content-Type", contentType);
             }
+            return this;
+        }
+
+        public Peticion cookie(String nombre, String valor) {
+            cookies.add(new jakarta.servlet.http.Cookie(nombre, valor));
             return this;
         }
 
@@ -304,6 +311,8 @@ public final class ServletFalso {
                     case "getInputStream" -> entrada;
                     case "getRemoteAddr" -> pet.ip;
                     case "getPart" -> parte(pet.partes, (String) args[0]);
+                    case "getCookies" -> pet.cookies.isEmpty() ? null
+                            : pet.cookies.toArray(new jakarta.servlet.http.Cookie[0]);
                     case "getProtocol" -> "HTTP/1.1";
                     case "getDateHeader" -> -1L;
                     case "getSession" -> {
@@ -351,6 +360,7 @@ public final class ServletFalso {
                             return r.cabeceras.get(((String) args[0]).toLowerCase(Locale.ROOT));
                         }
                         case "setContentType" -> r.cabeceras.put("content-type", (String) args[0]);
+                        case "addCookie" -> r.cookies.add((jakarta.servlet.http.Cookie) args[0]);
                         case "getOutputStream" -> {
                             return salida;
                         }

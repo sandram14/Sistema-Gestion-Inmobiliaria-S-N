@@ -35,6 +35,7 @@ GeoJSON original del frontend es opcional: se activa con `VERIFICAR_DATOS_DEMO=t
 | `PropiedadDaoIntegracionTest` | Búsqueda pública con filtros, catálogos, imágenes, usuarios |
 | `UbicacionDaoIntegracionTest` | Consultas PostGIS: ciudades, polígonos GeoJSON, punto dentro de barrio y detección del barrio de un punto |
 | `ServiciosIntegracionTest` | Crear/editar/eliminar propiedades, cambio de tipo, imágenes, búsqueda. Borra al final lo que crea |
+| `AsistenteIntegracionTest` | Contexto desde la base y registro en `consulta` con IA simulada; con `PROBAR_GEMINI_REAL=true`, una consulta real a Gemini |
 | `AuthIntegracionTest` | Login con el administrador real (requiere además `ADMIN_EMAIL` y `ADMIN_PASSWORD`) |
 | `CompatibilidadFrontendIntegracionTest` | Cada propiedad de la API tiene los campos y tipos de `PropiedadProps` (types.ts); con `VERIFICAR_DATOS_DEMO=true`, además coincide con `frontend/public/data/propiedades.geojson` |
 
@@ -74,6 +75,10 @@ Probar: `curl.exe -i http://localhost:8080/api/health`
 | `DB_PASSWORD` | Contraseña de la base                        | —            |
 | `APP_ORIGENES_PERMITIDOS` | Orígenes extra que pueden modificar datos (coma) | — |
 | `UPLOAD_DIR` | Carpeta de imágenes subidas (en Docker: un volumen en `/data/uploads`) | carpeta temporal |
+| `GEMINI_API_KEY` | Clave de Gemini (solo en `docker/.env`) | — (asistente 503) |
+| `GEMINI_MODEL` | Modelo de Gemini | `gemini-3.1-flash-lite` |
+| `GEMINI_THINKING_LEVEL` | Razonamiento interno en Gemini 3 (`minimal`, `low`…; `ninguno` = no enviar) | `minimal` |
+| `ASISTENTE_LIMITE_*` | Límites por minuto/día, por visitante y global | 10, 30, 8, 200 |
 
 Si falta alguna variable `DB_*`, el backend arranca igual y `/api/health` responde 503
 con `"baseDatos": {"estado": "no_configurada"}`. La API key de Gemini se agregará en su fase,
@@ -92,7 +97,7 @@ también como variable de entorno.
 | `model`        | Entidades JPA (una por tabla; Hibernate valida el esquema al arrancar) |
 | `dto`          | Entrada (`request`) y salida (`response`, `response.geojson`, `response.admin`) |
 | `mapper`       | Conversión entidad → DTO: GeoJSON del mapa (`GeoJsonMapper`), panel (`PropiedadAdminMapper`), catálogos (`CatalogoMapper`) |
-| `integration`  | Servicios externos (Gemini)                                   |
+| `integration`  | Cliente de Gemini (`GeminiClient`) detrás de la interfaz `ClienteIa` |
 | `exception`    | Errores de la API → JSON `{ "error": { ... } }` (400 validación, 404, 409 conflicto, 422 regla de negocio, 503) |
 | `util`         | Utilidades (JSON)                                             |
 
@@ -117,6 +122,24 @@ Filtros de `/api/propiedades` (todos opcionales): `departamentoId`, `ciudadId`, 
 ```
 GET /api/propiedades?departamentoId=1&ciudadId=1&categoria=Vivienda&operacion=Alquiler&presupuestoMax=500&moneda=USD
 ```
+
+### Asistente de IA (público)
+
+| Método | Ruta | Respuesta |
+|--------|------|-----------|
+| POST | `/api/asistente/consultas` | Cuerpo `{"pregunta", "codigoPropiedad"}` (código opcional) → 200 `{"respuesta", "sugerirWhatsApp", "propiedadesRelacionadas"}` |
+
+- Gemini no accede a la base: el backend lee solo datos públicos de propiedades Disponibles
+  (una ficha, o un resumen de hasta `ASISTENTE_MAX_PROPIEDADES_CONTEXTO`) y los envía como contexto.
+- El visitante se identifica con la cookie anónima `sn_sesion` (UUID, HttpOnly). No se guarda la IP.
+- Respuestas en texto plano (sin Markdown; listas con guiones). `sugerirWhatsApp` es true solo si falta
+  un dato en los registros o el visitante muestra interés concreto en una propiedad.
+- Cada consulta se registra en la tabla `consulta` (también si Gemini falla, con una respuesta de respaldo).
+- Límites (cuota gratuita): por visitante 10/min y 30/día; en total 8/min y 200/día → 429 `DEMASIADAS_CONSULTAS`
+  o 503 `ASISTENTE_NO_DISPONIBLE`. Sin `GEMINI_API_KEY` responde 503.
+- La clave viaja solo en la cabecera `x-goog-api-key`; nunca en URLs, logs ni respuestas.
+- Ante un error temporal de Google (HTTP 500/502/503/504, "alta demanda") se reintenta una vez tras 2 s;
+  ante 429 (cuota) o tiempo agotado no se reintenta.
 
 ### Autenticación administrativa
 
@@ -181,6 +204,8 @@ Siempre en el mismo formato, sin detalles internos:
 | 405 | `METODO_NO_PERMITIDO` | Método HTTP no admitido |
 | 415 | `TIPO_NO_SOPORTADO` | El cuerpo no es JSON |
 | 429 | `DEMASIADOS_INTENTOS` | Demasiados logins fallidos |
+| 429 | `DEMASIADAS_CONSULTAS` | Límite de consultas al asistente por visitante |
+| 503 | `ASISTENTE_NO_DISPONIBLE` | Asistente sin clave, Gemini no responde o límite global alcanzado |
 | 413 | `ARCHIVO_DEMASIADO_GRANDE` | Imagen de más de 5 MB |
 | 409 | `CONFLICTO` | Dato repetido (código, imagen principal, email) |
 | 422 | `REGLA_*` / `RESTRICCION` | Regla de negocio rechazada por la base |

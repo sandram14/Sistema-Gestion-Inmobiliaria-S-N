@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
  *   <li>{@code APP_ENV}: desarrollo | produccion (por defecto: desarrollo)</li>
  *   <li>{@code DB_URL}, {@code DB_USER}, {@code DB_PASSWORD}: conexión a PostgreSQL.
  *       Si falta alguna, la aplicación arranca igual y /api/health lo informa.</li>
+ *   <li>{@code GEMINI_API_KEY}, {@code GEMINI_MODEL} y {@code ASISTENTE_*}: asistente de IA
+ *       (ver {@link AsistenteConfig}). Sin clave, el asistente responde 503.</li>
  *   <li>{@code UPLOAD_DIR}: carpeta donde se guardan las imágenes subidas desde el panel
  *       (en Docker, un volumen montado en /data/uploads). Por defecto, una carpeta temporal.</li>
  *   <li>{@code APP_ORIGENES_PERMITIDOS}: orígenes extra (separados por coma) desde los que se
@@ -41,15 +43,17 @@ public final class AppConfig {
     private final BaseDatosConfig baseDatos; // null si no está configurada
     private final Set<String> origenesPermitidos;
     private final Path directorioUploads;
+    private final AsistenteConfig asistente;
 
     private AppConfig(String nombre, String version, String entorno, BaseDatosConfig baseDatos,
-                      Set<String> origenesPermitidos, Path directorioUploads) {
+                      Set<String> origenesPermitidos, Path directorioUploads, AsistenteConfig asistente) {
         this.nombre = nombre;
         this.version = version;
         this.entorno = entorno;
         this.baseDatos = baseDatos;
         this.origenesPermitidos = origenesPermitidos;
         this.directorioUploads = directorioUploads;
+        this.asistente = asistente;
     }
 
     /** Crea la configuración real: variables de entorno del sistema + app.properties. */
@@ -69,7 +73,8 @@ public final class AppConfig {
         String appEnv = valorOPorDefecto(entorno.get("APP_ENV"), "desarrollo");
         return new AppConfig(nombre, version, appEnv, leerBaseDatos(entorno), leerOrigenes(entorno.get("APP_ORIGENES_PERMITIDOS")),
                 Path.of(valorOPorDefecto(entorno.get("UPLOAD_DIR"),
-                        Path.of(System.getProperty("java.io.tmpdir"), "sn-inmobiliaria-uploads").toString())));
+                        Path.of(System.getProperty("java.io.tmpdir"), "sn-inmobiliaria-uploads").toString())),
+                AsistenteConfig.desde(entorno));
     }
 
     private static BaseDatosConfig leerBaseDatos(Map<String, String> entorno) {
@@ -128,6 +133,11 @@ public final class AppConfig {
 
     public boolean esProduccion() {
         return "produccion".equalsIgnoreCase(entorno);
+    }
+
+    /** Configuración del asistente de IA (GEMINI_API_KEY, GEMINI_MODEL, límites). */
+    public AsistenteConfig asistente() {
+        return asistente;
     }
 
     /** Carpeta de imágenes subidas (UPLOAD_DIR). */

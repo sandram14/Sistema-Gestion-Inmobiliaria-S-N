@@ -8,7 +8,6 @@ import jakarta.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import py.sn.inmobiliaria.repository.CatalogoDao;
-import py.sn.inmobiliaria.repository.ConsultaDao;
 import py.sn.inmobiliaria.repository.ImagenDao;
 import py.sn.inmobiliaria.repository.PropiedadDao;
 import py.sn.inmobiliaria.repository.SaludBaseDatosDao;
@@ -22,7 +21,11 @@ import py.sn.inmobiliaria.repository.impl.JpaPropiedadDao;
 import py.sn.inmobiliaria.repository.impl.JpaUsuarioDao;
 import py.sn.inmobiliaria.seguridad.ContrasenaHasher;
 import py.sn.inmobiliaria.seguridad.LimitadorIntentos;
+import py.sn.inmobiliaria.integration.ClienteIa;
+import py.sn.inmobiliaria.integration.GeminiClient;
 import py.sn.inmobiliaria.service.AlmacenImagenes;
+import py.sn.inmobiliaria.service.asistente.AsistenteService;
+import py.sn.inmobiliaria.service.asistente.LimitadorAsistente;
 import py.sn.inmobiliaria.service.AuthService;
 import py.sn.inmobiliaria.service.CatalogoService;
 import py.sn.inmobiliaria.service.PropiedadAdminService;
@@ -33,6 +36,8 @@ import py.sn.inmobiliaria.service.UbicacionService;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.Clock;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.function.LongSupplier;
 
@@ -90,7 +95,7 @@ public class AppContextListener implements ServletContextListener {
             UbicacionDao ubicacionDao = new JdbcUbicacionDao(dataSource);
             registrar(contexto, AuthService.class,
                     new AuthService(tx, new JpaUsuarioDao(), new ContrasenaHasher(), new LimitadorIntentos()));
-            registrar(contexto, ConsultaDao.class, new JpaConsultaDao()); // asistente (Fase 14)
+            registrar(contexto, AsistenteService.class, crearAsistente(config, tx, propiedadDao));
 
             // Services: los Servlets de la Fase 9 los obtienen del ServletContext.
             UbicacionService ubicacionService = new UbicacionService(ubicacionDao);
@@ -108,6 +113,21 @@ public class AppContextListener implements ServletContextListener {
         }
 
         contexto.setAttribute(SaludService.class.getName(), new SaludService(config, saludDao, propiedadesDisponibles));
+    }
+
+    /** Asistente de IA: sin GEMINI_API_KEY se crea igual, pero responde 503 sin llamar a Gemini. */
+    private static AsistenteService crearAsistente(AppConfig config, TxRunner tx, PropiedadDao propiedadDao) {
+        var a = config.asistente();
+        ClienteIa cliente = a.configurado()
+                ? new GeminiClient(a.apiKey(), a.modelo(), a.nivelRazonamiento(), Duration.ofSeconds(a.timeoutSegundos()))
+                : null;
+        log.info("Asistente de IA: {}", a); // toString oculta la clave
+        if (!a.configurado()) {
+            log.warn("GEMINI_API_KEY no configurada: el asistente responderá 503");
+        }
+        LimitadorAsistente limitador = new LimitadorAsistente(a.limiteMinutoSesion(), a.limiteDiaSesion(),
+                a.limiteMinutoGlobal(), a.limiteDiaGlobal(), Clock.systemUTC());
+        return new AsistenteService(tx, propiedadDao, new JpaConsultaDao(), cliente, limitador, a);
     }
 
     /** Guarda un objeto compartido en el ServletContext, usando el nombre de su tipo como clave. */

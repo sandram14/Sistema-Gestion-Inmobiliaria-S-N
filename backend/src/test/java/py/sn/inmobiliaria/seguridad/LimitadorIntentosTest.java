@@ -9,11 +9,11 @@ import java.time.ZoneId;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class LimitadorIntentosTest {
+public class LimitadorIntentosTest {
 
-    /** Reloj que se puede adelantar manualmente. */
-    static final class RelojManual extends Clock {
-        Instant ahora = Instant.parse("2026-10-02T12:00:00Z");
+    /** Reloj que se puede adelantar manualmente (también lo usan otras pruebas). */
+    public static final class RelojManual extends Clock {
+        public Instant ahora = Instant.parse("2026-10-02T12:00:00Z");
 
         @Override
         public ZoneId getZone() {
