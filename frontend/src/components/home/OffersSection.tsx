@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { iconoCategoria, fotosPara } from '../busqueda/SearchFilter'
 import { useGeoData } from '../PropertyMap/useGeoData'
 import type { PropiedadFeature } from '../PropertyMap/types'
-import SuccessStories from '../SuccessStories'
 import styles from './OffersSection.module.css'
 
 // Toma propiedades y terrenos reales (los mismos de /buscar), elegidos al
@@ -73,8 +72,6 @@ export default function OffersSection() {
           <button className={styles.nosotrosBtn} onClick={() => navigate('/nosotros')}>
             Conocé más sobre nosotros →
           </button>
-
-          <SuccessStories />
         </div>
       </div>
     </section>
