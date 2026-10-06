@@ -68,7 +68,7 @@ export interface PropiedadProps {
   banos: number;
   m2: number;
   direccion: string;
-  /** Rutas a las fotos reales (mínimo 3), ej: "/images/propiedades/prop-001/1.png". */
+  /** Rutas a las fotos (la principal primero), servidas desde el almacenamiento compartido: "/uploads/<codigo>/<archivo>". */
   fotos?: string[];
   /** Campo de la API: todas las operaciones con su precio (una casa puede tener Venta y Alquiler). */
   operaciones?: OperacionPrecio[];

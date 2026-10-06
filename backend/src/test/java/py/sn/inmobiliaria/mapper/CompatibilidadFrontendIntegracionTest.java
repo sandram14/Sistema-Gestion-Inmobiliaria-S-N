@@ -54,6 +54,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CompatibilidadFrontendIntegracionTest {
 
     private static final File ORIGINAL = new File("../frontend/public/data/propiedades.geojson");
+    /** Migración 001: las fotos del GeoJSON original (/images/...) ahora están en /uploads/... */
+    private static final File MAPEO_IMAGENES = new File("../database/seed/imagenes/MAPEO.csv");
 
     /** Campos de PropiedadProps en frontend/src/components/PropertyMap/types.ts. */
     private static final Set<String> CAMPOS_FRONTEND = Set.of("id", "titulo", "categoria", "tipoOperacion", "ciudad",
@@ -134,6 +136,15 @@ class CompatibilidadFrontendIntegracionTest {
         JsonUtil.mapper().readTree(ORIGINAL).get("features")
                 .forEach(f -> originales.put(f.get("properties").get("id").asText(), f));
 
+        Map<String, String> mapeo = new HashMap<>();
+        if (MAPEO_IMAGENES.exists()) {
+            List<String> lineas = java.nio.file.Files.readAllLines(MAPEO_IMAGENES.toPath());
+            for (String linea : lineas.subList(1, lineas.size())) {
+                String[] c = linea.split(";");
+                mapeo.put(c[3], c[4]); // url_anterior -> url_nueva
+            }
+        }
+
         int comparadas = 0;
         for (JsonNode f : propiedadesDeLaApi().get("features")) {
             JsonNode p = f.get("properties");
@@ -154,7 +165,12 @@ class CompatibilidadFrontendIntegracionTest {
                 assertEquals(0, new BigDecimal(o.get(campo).asText()).compareTo(new BigDecimal(p.get(campo).asText())),
                         id + "." + campo);
             }
-            assertEquals(o.get("fotos"), p.get("fotos"), id + ".fotos");
+            // Las fotos se comparan traducidas con el mapeo de la migración 001
+            List<String> fotosOriginales = new java.util.ArrayList<>();
+            o.get("fotos").forEach(foto -> fotosOriginales.add(mapeo.getOrDefault(foto.asText(), foto.asText())));
+            List<String> fotosApi = new java.util.ArrayList<>();
+            p.get("fotos").forEach(foto -> fotosApi.add(foto.asText()));
+            assertEquals(fotosOriginales, fotosApi, id + ".fotos");
             for (int i = 0; i < 2; i++) {
                 assertEquals(original.get("geometry").get("coordinates").get(i).asDouble(),
                         f.get("geometry").get("coordinates").get(i).asDouble(), 1e-6, id + ".coordenada" + i);

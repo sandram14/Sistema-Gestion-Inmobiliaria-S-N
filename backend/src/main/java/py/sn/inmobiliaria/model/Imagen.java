@@ -27,7 +27,7 @@ public class Imagen {
     @JoinColumn(name = "id_propiedad", nullable = false)
     private Propiedad propiedad;
 
-    /** Ruta relativa (/images/..., /uploads/...) o URL https. */
+    /** Ruta del almacenamiento compartido (/uploads/...) o URL https. */
     @Column(name = "url", nullable = false, length = 500)
     private String url;
 

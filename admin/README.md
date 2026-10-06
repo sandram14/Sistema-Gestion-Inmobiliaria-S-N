@@ -7,7 +7,6 @@ rutas protegidas; no hay enlaces a ella desde la web pública.
 
 - Node.js 20 o superior
 - El backend (Tomcat) en `http://localhost:8080`
-- Para ver en el panel las fotos originales (`/images/...`), el sitio público en `http://localhost:5173`
 
 ## Desarrollo
 
@@ -17,8 +16,9 @@ npm install      # solo la primera vez
 npm run dev
 ```
 
-Abrir `http://localhost:5174/admin/`. Vite reenvía `/api` y `/uploads` al backend, y `/images`
-al sitio público (ver `vite.config.ts`; se pueden cambiar con `VITE_BACKEND_URL` y `VITE_FRONTEND_URL`).
+Abrir `http://localhost:5174/admin/`. Vite reenvía `/api` y `/uploads` al backend
+(`VITE_BACKEND_URL` para cambiarlo). Todas las fotos de propiedades están en el almacenamiento
+compartido del backend (`/uploads/...`), el mismo que usa el sitio público.
 
 ## Compilar
 

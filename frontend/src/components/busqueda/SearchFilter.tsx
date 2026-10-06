@@ -39,11 +39,9 @@ export function iconoCategoria(categoria: PropiedadFeature['properties']['catego
 }
 
 // ─── Fotos de las propiedades ────────────────────────────────────────────
-// Cada propiedad trae su propio campo `fotos` (ver public/data/propiedades.geojson).
-// Hoy son ilustraciones de referencia (public/images/stock/) porque son datos
-// de prueba; el día que subas fotos reales a public/images/propiedades/<id>/,
-// sólo hay que actualizar el arreglo "fotos" de esa propiedad en el geojson
-// (ver public/images/propiedades/LEEME.txt) — el resto del código no cambia.
+// Cada propiedad trae su campo `fotos` desde la API (la principal primero). Los
+// archivos están en el almacenamiento compartido del backend (/uploads/...) y se
+// cargan o cambian desde el panel administrativo.
 export function fotosPara(props: PropiedadFeature['properties']): string[] {
   return props.fotos ?? []
 }
