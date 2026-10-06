@@ -1,0 +1,92 @@
+/* Estilos compartidos del panel (herramienta interna: sobrio y legible) */
+
+.cargando { padding: 2rem; color: var(--gris); text-align: center; }
+
+/* ── Encabezado ─────────────────────────────────────────── */
+.barra {
+  display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+  padding: 0.75rem 1.5rem; background: var(--verde); color: #fff;
+}
+.marca { font-weight: 700; letter-spacing: 0.02em; margin-right: auto; }
+.marca small { font-weight: 400; opacity: 0.8; margin-left: 0.4rem; }
+.navLink { color: #fff; text-decoration: none; opacity: 0.85; }
+.navLink:hover, .navLinkActivo { opacity: 1; text-decoration: underline; }
+.usuario { font-size: 0.9rem; opacity: 0.9; }
+
+.contenido { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+.tituloPagina { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.tituloPagina h1 { margin: 0; font-size: 1.5rem; }
+
+/* ── Botones ────────────────────────────────────────────── */
+.boton, .botonSecundario, .botonPeligro, .botonLink {
+  display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer;
+  border-radius: 6px; padding: 0.5rem 0.9rem; border: 1px solid transparent; text-decoration: none; font-size: 0.95rem;
+}
+.boton { background: var(--verde); color: #fff; }
+.boton:hover { background: var(--verde-medio); }
+.botonSecundario { background: #fff; color: var(--verde); border-color: var(--borde); }
+.botonPeligro { background: #fff; color: var(--rojo); border-color: #f1c4bf; }
+.botonLink { background: none; color: #fff; border-color: rgba(255,255,255,0.5); }
+.boton:disabled, .botonSecundario:disabled, .botonPeligro:disabled { opacity: 0.55; cursor: not-allowed; }
+.botonChico { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
+
+/* ── Avisos ─────────────────────────────────────────────── */
+.aviso, .avisoError, .avisoExito {
+  padding: 0.7rem 0.9rem; border-radius: 6px; margin-bottom: 1rem; border: 1px solid;
+}
+.aviso { background: var(--ambar-claro); border-color: #f3d48b; }
+.avisoError { background: var(--rojo-claro); border-color: #f1c4bf; color: var(--rojo); }
+.avisoExito { background: var(--verde-claro); border-color: #b9d3be; color: var(--verde); }
+.avisoError ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+
+/* ── Tarjetas y formularios ─────────────────────────────── */
+.tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.25rem; }
+.tarjeta h2 { margin: 0 0 1rem; font-size: 1.1rem; }
+.grilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.campo { display: flex; flex-direction: column; gap: 0.3rem; }
+.campoAncho { grid-column: 1 / -1; }
+.etiqueta { font-size: 0.85rem; font-weight: 600; color: #374151; }
+.input { padding: 0.5rem 0.6rem; border: 1px solid var(--borde); border-radius: 6px; background: #fff; }
+.input:focus { outline: 2px solid var(--verde-medio); outline-offset: 0; }
+.inputConError { border-color: var(--rojo); }
+.errorCampo { color: var(--rojo); font-size: 0.82rem; }
+.ayuda { color: var(--gris); font-size: 0.82rem; }
+.checks { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: center; }
+.acciones { display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap; }
+
+/* ── Login ──────────────────────────────────────────────── */
+.loginFondo { min-height: 100vh; display: grid; place-items: center; padding: 1rem; background: var(--verde-claro); }
+.loginCaja { width: 100%; max-width: 380px; background: #fff; border-radius: 10px; padding: 2rem; border: 1px solid var(--borde); }
+.loginCaja h1 { margin: 0 0 0.25rem; font-size: 1.4rem; color: var(--verde); }
+.loginCaja p { margin: 0 0 1.25rem; color: var(--gris); }
+.loginCaja form { display: flex; flex-direction: column; gap: 0.9rem; }
+
+/* ── Listado ────────────────────────────────────────────── */
+.filtros { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.filtros .input { min-width: 180px; }
+.tablaContenedor { overflow-x: auto; background: #fff; border: 1px solid var(--borde); border-radius: 8px; }
+.tabla { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.tabla th, .tabla td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--borde); text-align: left; vertical-align: middle; }
+.tabla th { background: var(--verde-claro); font-weight: 600; white-space: nowrap; }
+.tabla tr:last-child td { border-bottom: none; }
+.miniatura { width: 64px; height: 44px; object-fit: cover; border-radius: 4px; background: var(--verde-claro); display: block; }
+.estado { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.8rem; background: var(--verde-claro); color: var(--verde); }
+.estadoInactivo { background: #eee; color: var(--gris); }
+.codigo { font-family: ui-monospace, Consolas, monospace; font-size: 0.85rem; }
+
+/* ── Operaciones ────────────────────────────────────────── */
+.filaOperacion { display: grid; grid-template-columns: 1fr 1fr 110px auto; gap: 0.6rem; align-items: start; margin-bottom: 0.6rem; }
+
+/* ── Mapa ───────────────────────────────────────────────── */
+.mapa { height: 380px; border-radius: 8px; overflow: hidden; border: 1px solid var(--borde); }
+.ubicacionDetectada { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
+.ubicacionDato { background: var(--fondo); border: 1px solid var(--borde); border-radius: 6px; padding: 0.5rem 0.7rem; }
+.ubicacionDato span { display: block; font-size: 0.75rem; color: var(--gris); }
+
+/* ── Galería ────────────────────────────────────────────── */
+.galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 0.9rem; margin-bottom: 1rem; }
+.foto { border: 1px solid var(--borde); border-radius: 8px; overflow: hidden; background: #fff; display: flex; flex-direction: column; }
+.foto img { width: 100%; height: 120px; object-fit: cover; display: block; background: var(--verde-claro); }
+.fotoPrincipal { outline: 3px solid var(--verde); }
+.fotoAcciones { display: flex; gap: 0.4rem; padding: 0.5rem; flex-wrap: wrap; align-items: center; }
+.subida { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: end; }
