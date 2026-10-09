@@ -1,0 +1,18 @@
+# Contexto de construcción de las imágenes Docker (raíz del repositorio).
+# Nada sensible ni pesado debe entrar en las imágenes.
+
+# Secretos: las claves solo se leen en tiempo de ejecución desde docker/.env
+**/.env
+**/.env.*
+!docker/.env.example
+
+# Dependencias y resultados de compilación (se generan dentro de la imagen)
+**/node_modules
+**/dist
+**/target
+
+# No los usa ninguna imagen (las fotos iniciales llegan al volumen con imagenes-init)
+.git
+database
+**/verificacion-*
+**/*.log
