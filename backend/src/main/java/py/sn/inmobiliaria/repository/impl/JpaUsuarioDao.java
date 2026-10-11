@@ -19,4 +19,12 @@ public class JpaUsuarioDao implements UsuarioDao {
                 .getResultStream()
                 .findFirst();
     }
+
+    @Override
+    public Optional<Usuario> buscarActivoPorId(EntityManager em, int id) {
+        return em.createQuery("select u from Usuario u join fetch u.rol where u.id = :id and u.activo = true", Usuario.class)
+                .setParameter("id", id)
+                .getResultStream()
+                .findFirst();
+    }
 }

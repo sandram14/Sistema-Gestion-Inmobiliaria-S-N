@@ -5,12 +5,21 @@ export type TipoPropiedad = 'Casa' | 'Terreno'
 export type Operacion = 'Venta' | 'Alquiler'
 export type Moneda = 'PYG' | 'USD'
 
+/** Permisos que asigna el backend según el rol (ver seguridad/Permiso.java). */
+export type Permiso =
+  | 'PROPIEDADES_VER' | 'PROPIEDADES_EDITAR' | 'PROPIEDADES_EDITAR_TODAS' | 'PROPIEDADES_BAJA'
+  | 'OFERTAS_GESTIONAR' | 'CONTENIDO_EDITAR' | 'CONFIGURACION_VER' | 'CONFIGURACION_EDITAR'
+  | 'CONSULTAS_VER' | 'CONSULTAS_VER_TODAS' | 'ESTADISTICAS_VER' | 'USUARIOS_VER' | 'USUARIOS_GESTIONAR'
+  | 'CUENTA_PROPIA'
+
 export interface UsuarioSesion {
   id: number
   nombre: string
   apellido: string
   email: string
   rol: string
+  permisos: Permiso[]
+  debeCambiarPassword: boolean
 }
 
 export interface OperacionPrecio {

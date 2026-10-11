@@ -48,6 +48,10 @@ public class Usuario {
     @Column(name = "activo", nullable = false)
     private boolean activo = true;
 
+    /** true si tiene una contraseña temporal que debe cambiar al ingresar (migración 002). */
+    @Column(name = "debe_cambiar_password", nullable = false)
+    private boolean debeCambiarPassword;
+
     /** Lo completa PostgreSQL (DEFAULT now()). */
     @Column(name = "creado_en", nullable = false, insertable = false, updatable = false,
             columnDefinition = "timestamptz")
@@ -62,6 +66,14 @@ public class Usuario {
         this.email = email;
         this.passwordHash = passwordHash;
         this.rol = rol;
+    }
+
+    public boolean isDebeCambiarPassword() {
+        return debeCambiarPassword;
+    }
+
+    public void setDebeCambiarPassword(boolean debeCambiarPassword) {
+        this.debeCambiarPassword = debeCambiarPassword;
     }
 
     public Integer getId() {

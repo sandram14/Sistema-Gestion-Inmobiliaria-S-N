@@ -18,6 +18,7 @@ CREATE INDEX ix_barrio_ciudad          ON barrio (id_ciudad);
 CREATE INDEX ix_propiedad_barrio       ON propiedad (id_barrio);
 CREATE INDEX ix_propiedad_estado       ON propiedad (id_estado);
 CREATE INDEX ix_propiedad_tipo         ON propiedad (id_tipo_propiedad);
+CREATE INDEX ix_propiedad_responsable  ON propiedad (id_responsable);
 CREATE INDEX ix_imagen_propiedad_orden ON imagen (id_propiedad, orden);
 CREATE INDEX ix_operacion_prop_oper    ON operacion_propiedad (id_operacion);
 CREATE INDEX ix_consulta_sesion        ON consulta (id_sesion);

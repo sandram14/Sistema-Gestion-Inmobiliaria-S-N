@@ -45,3 +45,18 @@ la transacción lo verifica.
 | Después de retirar las fotos del frontend | Recuperarlas desde Git (siguen en el historial) o desde `database/seed/imagenes` con `MAPEO.csv`, y luego revertir |
 
 El procedimiento completo, paso a paso, está en la entrega de la Fase 15C.
+
+## 002 — Roles GERENTE y VENDEDOR, contraseña temporal y responsable (panel, etapa 2A)
+
+Agrega, sin modificar ni borrar datos: los roles `GERENTE` y `VENDEDOR`, la columna
+`usuario.debe_cambiar_password` (false para las cuentas existentes) y la columna opcional
+`propiedad.id_responsable` (las propiedades existentes quedan sin responsable).
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `002_verificar_roles.sql` | Estructura real de `rol`, roles, columnas nuevas, usuarios y cantidad de propiedades | No |
+| `002_roles_y_responsable.sql` | La migración, en una transacción que comprueba la estructura antes y los datos después | Sí, todo o nada |
+| `002_revertir_roles.sql` | Quita lo agregado; se detiene si algún usuario tiene rol GERENTE o VENDEDOR | Sí, todo o nada |
+
+**Orden obligatorio:** aplicar la migración **antes** de desplegar el backend 0.13.0, porque
+Hibernate valida al arrancar que exista la columna `debe_cambiar_password`.

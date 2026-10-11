@@ -27,6 +27,7 @@ CREATE TABLE usuario (
     password_hash  varchar(60)  NOT NULL,          -- BCrypt: siempre 60 caracteres
     id_rol         integer      NOT NULL REFERENCES rol (id_rol),
     activo         boolean      NOT NULL DEFAULT true,
+    debe_cambiar_password boolean NOT NULL DEFAULT false,  -- contraseña temporal (migración 002)
     creado_en      timestamptz  NOT NULL DEFAULT now(),
     CONSTRAINT ck_usuario_email         CHECK (email ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
     CONSTRAINT ck_usuario_password_hash CHECK (password_hash ~ '^\$2[aby]\$[0-9]{2}\$.{53}$')
@@ -98,6 +99,7 @@ CREATE TABLE propiedad (
     id_tipo_propiedad  integer NOT NULL REFERENCES tipo_propiedad (id_tipo_propiedad),
     id_estado          integer NOT NULL REFERENCES estado_propiedad (id_estado),
     id_barrio          integer NOT NULL REFERENCES barrio (id_barrio),
+    id_responsable     integer REFERENCES usuario (id_usuario) ON DELETE SET NULL,  -- migración 002
     creado_en          timestamptz NOT NULL DEFAULT now(),
     actualizado_en     timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT ck_propiedad_codigo   CHECK (codigo ~ '^[a-z]+-[0-9]{3,}$'),

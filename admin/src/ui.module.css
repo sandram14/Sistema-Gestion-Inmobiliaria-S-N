@@ -221,7 +221,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
 }
 .loginMarca { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
 .loginMarca strong { font-size: 17px; font-weight: 600; color: var(--verde); }
-.loginMarca span { display: block; font-size: 13px; color: var(--gris); }
+.loginMarca div span { display: block; font-size: 13px; color: var(--gris); } /* solo el subtítulo, no la insignia */
 .loginCaja form { display: flex; flex-direction: column; gap: 14px; }
 
 /* ── Listados ─────────────────────────────────────────────────────── */

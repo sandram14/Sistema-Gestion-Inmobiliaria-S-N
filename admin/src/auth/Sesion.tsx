@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { api, ApiError, EVENTO_SESION_EXPIRADA } from '../api/cliente'
-import type { UsuarioSesion } from '../api/tipos'
+import type { Permiso, UsuarioSesion } from '../api/tipos'
 
 // Estado de la sesión en el navegador. La sesión real es la cookie HttpOnly del backend:
 // aquí solo se recuerda quién inició sesión para mostrarlo y para la navegación.
@@ -13,6 +13,8 @@ interface Sesion {
   expirada: boolean
   iniciar: (email: string, password: string) => Promise<void>
   cerrar: () => Promise<void>
+  /** Si el usuario tiene el permiso. Solo para mostrar u ocultar opciones: el backend lo vuelve a comprobar. */
+  puede: (permiso: Permiso) => boolean
 }
 
 const ContextoSesion = createContext<Sesion | null>(null)
@@ -47,6 +49,8 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
     setExpirada(false)
   }, [])
 
+  const puede = useCallback((permiso: Permiso) => usuario?.permisos?.includes(permiso) ?? false, [usuario])
+
   const cerrar = useCallback(async () => {
     try {
       await api.post('/api/admin/auth/logout')
@@ -58,7 +62,7 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <ContextoSesion.Provider value={{ usuario, cargando, expirada, iniciar, cerrar }}>{children}</ContextoSesion.Provider>
+    <ContextoSesion.Provider value={{ usuario, cargando, expirada, iniciar, cerrar, puede }}>{children}</ContextoSesion.Provider>
   )
 }
 

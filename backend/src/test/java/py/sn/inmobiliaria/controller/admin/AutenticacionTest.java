@@ -33,12 +33,18 @@ class AutenticacionTest {
     private AuthServlet servlet;
     private AuthFilter filtro;
     private Navegador navegador;
+    private AuthServiceTest.DaoFalso dao;
 
     @BeforeEach
     void iniciar() throws Exception {
         AppConfig config = AppConfig.desde(Map.of("APP_ORIGENES_PERMITIDOS", "http://localhost:5174"), new Properties());
-        servlet = ServletFalso.iniciar(new AuthServlet(), Map.of(AuthService.class, AuthServiceTest.nuevoServicio()));
-        filtro = ServletFalso.iniciarFiltro(new AuthFilter(), Map.of(AppConfig.class, config));
+        dao = new AuthServiceTest.DaoFalso();
+        dao.usuarios.put(8, AuthServiceTest.conRol(8, "gerente@sn.local", "GERENTE"));
+        dao.usuarios.put(9, AuthServiceTest.conRol(9, "vendedor@sn.local", "VENDEDOR"));
+        AuthService auth = AuthServiceTest.nuevoServicio(dao);
+        servlet = ServletFalso.iniciar(new AuthServlet(), Map.of(AuthService.class, auth));
+        // El filtro relee al usuario en cada petición: usa el mismo servicio (y la misma "base")
+        filtro = ServletFalso.iniciarFiltro(new AuthFilter(), Map.of(AppConfig.class, config, AuthService.class, auth));
         navegador = new Navegador();
     }
 
@@ -141,14 +147,62 @@ class AutenticacionTest {
         assertTrue(r.continuo());
     }
 
+    private Peticion loginComo(String email) {
+        return login("{\"email\":\"" + email + "\",\"password\":\"Clave-Correcta\"}");
+    }
+
+    private int estado(String metodo, String ruta) throws Exception {
+        var r = ServletFalso.filtrar(filtro, Peticion.de(metodo, ruta, null).navegador(navegador));
+        return r.continuo() ? 0 : r.respuesta().estado; // 0 = pasó el filtro
+    }
+
     @Test
-    void unaSesionSinRolAdministradorDa403() throws Exception {
+    void elVendedorNoPuedeDarDeBajaNiVerRutasSinRegla() throws Exception {
+        assertEquals(200, ServletFalso.ejecutar(servlet, loginComo("vendedor@sn.local")).estado);
+
+        assertEquals(0, estado("GET", "/api/admin/propiedades"));
+        assertEquals(0, estado("POST", "/api/admin/propiedades"));
+        assertEquals(403, estado("DELETE", "/api/admin/propiedades/5"));
+        assertEquals(0, estado("GET", "/api/admin/auth/me"));
+    }
+
+    @Test
+    void elGerentePuedeDarDeBaja() throws Exception {
+        ServletFalso.ejecutar(servlet, loginComo("gerente@sn.local"));
+
+        assertEquals(0, estado("DELETE", "/api/admin/propiedades/5"));
+    }
+
+    @Test
+    void unaRutaAdministrativaSinReglaQuedaBloqueadaInclusoParaElAdministrador() throws Exception {
         ServletFalso.ejecutar(servlet, login(LOGIN_OK));
-        navegador.sesion().atributos.put(UsuarioSesion.ATRIBUTO, new UsuarioSesion(9, "X", "Y", "x@y", "OTRO"));
 
-        var r = ServletFalso.filtrar(filtro, Peticion.de("GET", "/api/admin/propiedades", null).navegador(navegador));
+        assertEquals(403, estado("GET", "/api/admin/ruta-nueva-sin-regla"));
+        assertEquals(403, estado("PUT", "/api/admin/propiedades"));   // método sin regla
+    }
 
-        assertEquals(403, r.respuesta().estado);
+    @Test
+    void unaCuentaDesactivadaPierdeElAccesoEnLaSiguientePeticion() throws Exception {
+        ServletFalso.ejecutar(servlet, login(LOGIN_OK));
+        assertEquals(0, estado("GET", "/api/admin/propiedades"));
+
+        dao.usuarios.get(7).setActivo(false);
+
+        assertEquals(401, estado("GET", "/api/admin/propiedades"));
+        assertTrue(navegador.sesion() == null || navegador.sesion().atributos.isEmpty()); // sesión invalidada
+    }
+
+    @Test
+    void unCambioDeRolSeAplicaEnLaSiguientePeticion() throws Exception {
+        ServletFalso.ejecutar(servlet, login(LOGIN_OK));
+        assertEquals(0, estado("DELETE", "/api/admin/propiedades/5"));
+
+        dao.usuarios.get(7).setRol(py.sn.inmobiliaria.prueba.Entidades.crear(
+                py.sn.inmobiliaria.model.Rol.class, Map.of("id", 3, "nombre", "VENDEDOR")));
+
+        assertEquals(403, estado("DELETE", "/api/admin/propiedades/5"));
+        var enSesion = (UsuarioSesion) navegador.sesion().atributos.get(UsuarioSesion.ATRIBUTO);
+        assertEquals("VENDEDOR", enSesion.rol());                        // la sesión quedó actualizada
     }
 
     @Test

@@ -3,9 +3,11 @@ package py.sn.inmobiliaria.service;
 import py.sn.inmobiliaria.config.TxRunner;
 import py.sn.inmobiliaria.exception.DemasiadosIntentosException;
 import py.sn.inmobiliaria.exception.NoAutenticadoException;
+import py.sn.inmobiliaria.model.Usuario;
 import py.sn.inmobiliaria.repository.UsuarioDao;
 import py.sn.inmobiliaria.seguridad.ContrasenaHasher;
 import py.sn.inmobiliaria.seguridad.LimitadorIntentos;
+import py.sn.inmobiliaria.seguridad.Permiso;
 import py.sn.inmobiliaria.seguridad.UsuarioSesion;
 import py.sn.inmobiliaria.service.validacion.Errores;
 
@@ -62,12 +64,13 @@ public class AuthService extends ServicioBase {
         // Solo la lectura ocurre dentro de la transacción; la comparación BCrypt (lenta, a
         // propósito) se hace después, para no retener una conexión de la base.
         Optional<Candidato> candidato = leer(em -> usuarioDao.buscarActivoPorEmail(em, emailLimpio)
-                .map(u -> new Candidato(new UsuarioSesion(u.getId(), u.getNombre(), u.getApellido(), u.getEmail(),
-                        u.getRol().getNombre()), u.getPasswordHash())));
+                .map(u -> new Candidato(aSesion(u), u.getPasswordHash())));
 
         boolean valido;
         if (candidato.isPresent()) {
-            valido = hasher.verificar(contrasena, candidato.get().hash()) && candidato.get().usuario().esAdmin();
+            // Solo los roles del panel (ADMIN, GERENTE, VENDEDOR) pueden ingresar
+            valido = hasher.verificar(contrasena, candidato.get().hash())
+                    && Permiso.esRolValido(candidato.get().usuario().rol());
         } else {
             hasher.verificarFicticio(contrasena); // mismo tiempo de respuesta que con un email existente
             valido = false;
@@ -79,5 +82,20 @@ public class AuthService extends ServicioBase {
         }
         limitador.registrarExito(ip, emailLimpio);
         return candidato.get().usuario();
+    }
+
+    /**
+     * Vuelve a leer el usuario de la base (lo usa AuthFilter en cada petición administrativa).
+     *
+     * @return vacío si ya no existe, está desactivado o su rol no puede usar el panel
+     */
+    public Optional<UsuarioSesion> recargar(int idUsuario) {
+        return leer(em -> usuarioDao.buscarActivoPorId(em, idUsuario).map(AuthService::aSesion))
+                .filter(u -> Permiso.esRolValido(u.rol()));
+    }
+
+    static UsuarioSesion aSesion(Usuario u) {
+        return new UsuarioSesion(u.getId(), u.getNombre(), u.getApellido(), u.getEmail(), u.getRol().getNombre(),
+                u.isDebeCambiarPassword());
     }
 }

@@ -4,9 +4,11 @@ import { Plus } from 'lucide-react'
 import { api, ApiError } from '../api/cliente'
 import type { PropiedadResumen } from '../api/tipos'
 import { textoFecha, textoOperacion } from '../componentes/formato'
+import { useSesion } from '../auth/Sesion'
 import ui from '../ui.module.css'
 
 export default function ListadoPropiedades() {
+  const { puede } = useSesion()
   const [propiedades, setPropiedades] = useState<PropiedadResumen[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -58,9 +60,11 @@ export default function ListadoPropiedades() {
     <>
       <div className={ui.tituloPagina}>
         <h1>Propiedades</h1>
-        <Link to="/propiedades/nueva" className={ui.boton}>
-          <Plus size={16} aria-hidden="true" /> Nueva propiedad
-        </Link>
+        {puede('PROPIEDADES_EDITAR') && (
+          <Link to="/propiedades/nueva" className={ui.boton}>
+            <Plus size={16} aria-hidden="true" /> Nueva propiedad
+          </Link>
+        )}
       </div>
 
       {mensaje && <div className={ui.avisoExito}>{mensaje}</div>}
@@ -105,7 +109,7 @@ export default function ListadoPropiedades() {
                   <td>
                     <div className={ui.acciones}>
                       <Link to={`/propiedades/${p.id}`} className={`${ui.botonSecundario} ${ui.botonChico}`}>Editar</Link>
-                      {p.estado !== 'Inactivo' && (
+                      {p.estado !== 'Inactivo' && puede('PROPIEDADES_BAJA') && (
                         <button className={`${ui.botonPeligro} ${ui.botonChico}`} onClick={() => darDeBaja(p)}>Dar de baja</button>
                       )}
                     </div>

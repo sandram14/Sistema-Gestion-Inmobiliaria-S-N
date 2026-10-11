@@ -12,12 +12,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import py.sn.inmobiliaria.config.AppConfig;
 import py.sn.inmobiliaria.dto.response.ErrorResponse;
+import py.sn.inmobiliaria.seguridad.Permiso;
+import py.sn.inmobiliaria.seguridad.ReglasAcceso;
 import py.sn.inmobiliaria.seguridad.UsuarioSesion;
+import py.sn.inmobiliaria.service.AuthService;
 import py.sn.inmobiliaria.util.RespuestaJson;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -32,7 +36,10 @@ import java.util.Set;
  *       (application/json o multipart/form-data). Las peticiones sin cuerpo (por ejemplo,
  *       DELETE o PATCH .../principal) no pueden transportar un formulario. A esto se suma la
  *       cookie SameSite=Lax (META-INF/context.xml).</li>
- *   <li><b>Autenticación</b>: salvo login y logout, exige una sesión con un administrador.</li>
+ *   <li><b>Autenticación</b>: salvo login y logout, exige una sesión, y relee el usuario de la
+ *       base en cada petición (una cuenta desactivada o con otro rol pierde el acceso enseguida).</li>
+ *   <li><b>Autorización</b>: cada ruta exige un permiso según {@link ReglasAcceso}; el rol del
+ *       usuario debe tenerlo ({@link Permiso}). Una ruta sin regla queda bloqueada (403).</li>
  * </ol>
  */
 @WebFilter(filterName = "AuthFilter", urlPatterns = "/api/admin/*")
@@ -42,10 +49,12 @@ public class AuthFilter implements Filter {
     private static final Set<String> METODOS_QUE_MODIFICAN = Set.of("POST", "PUT", "PATCH", "DELETE");
 
     private Set<String> origenesPermitidos = Set.of();
+    private jakarta.servlet.ServletContext contexto;
 
     @Override
     public void init(FilterConfig filterConfig) {
-        Object config = filterConfig.getServletContext().getAttribute(AppConfig.ATRIBUTO_CONTEXTO);
+        contexto = filterConfig.getServletContext();
+        Object config = contexto.getAttribute(AppConfig.ATRIBUTO_CONTEXTO);
         if (config instanceof AppConfig c) {
             origenesPermitidos = c.origenesPermitidos();
         }
@@ -72,15 +81,43 @@ public class AuthFilter implements Filter {
 
         if (!RUTAS_PUBLICAS.contains(ruta)) {
             HttpSession sesion = req.getSession(false);
-            Object usuario = sesion == null ? null : sesion.getAttribute(UsuarioSesion.ATRIBUTO);
-            if (!(usuario instanceof UsuarioSesion u)) {
+            Object guardado = sesion == null ? null : sesion.getAttribute(UsuarioSesion.ATRIBUTO);
+            if (!(guardado instanceof UsuarioSesion enSesion)) {
                 rechazar(resp, 401, "NO_AUTENTICADO", "Inicie sesión para continuar");
                 return;
             }
-            if (!u.esAdmin()) {
+
+            // 1. Se relee el usuario de la base: una cuenta desactivada o con otro rol
+            //    pierde el acceso en la siguiente petición, sin esperar a que venza la sesión.
+            Object servicio = contexto.getAttribute(AuthService.class.getName());
+            if (!(servicio instanceof AuthService auth)) {
+                rechazar(resp, 503, "SERVICIO_NO_DISPONIBLE", "La base de datos no está disponible");
+                return;
+            }
+            Optional<UsuarioSesion> actual;
+            try {
+                actual = auth.recargar(enSesion.id());
+            } catch (RuntimeException e) {
+                rechazar(resp, 503, "SERVICIO_NO_DISPONIBLE", "La base de datos no está disponible");
+                return;
+            }
+            if (actual.isEmpty()) {
+                sesion.invalidate();
+                rechazar(resp, 401, "NO_AUTENTICADO", "Su cuenta no está activa. Inicie sesión nuevamente");
+                return;
+            }
+            UsuarioSesion u = actual.get();
+            if (!u.equals(enSesion)) {
+                sesion.setAttribute(UsuarioSesion.ATRIBUTO, u);
+            }
+
+            // 2. Permiso que exige la ruta. Sin regla declarada, la ruta queda bloqueada.
+            Optional<Permiso> exigido = ReglasAcceso.permisoPara(metodo, ruta);
+            if (exigido.isEmpty() || !u.tiene(exigido.get())) {
                 rechazar(resp, 403, "ACCESO_DENEGADO", "No tiene permisos para esta operación");
                 return;
             }
+            req.setAttribute(UsuarioSesion.ATRIBUTO_PETICION, u);
         }
         chain.doFilter(request, response);
     }

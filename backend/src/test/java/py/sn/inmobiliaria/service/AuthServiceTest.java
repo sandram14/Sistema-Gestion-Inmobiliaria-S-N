@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -45,13 +46,39 @@ public class AuthServiceTest {
         return u;
     }
 
-    /** DAO de prueba: un único usuario, búsqueda sin distinguir mayúsculas. */
-    static final UsuarioDao DAO = (em, email) ->
-            "admin@sn.local".equalsIgnoreCase(email) ? Optional.of(admin()) : Optional.empty();
+    public static Usuario conRol(int id, String email, String rol) {
+        Usuario u = new Usuario("Persona", "Prueba", email, HASHER.hashear("Clave-Correcta"),
+                Entidades.crear(Rol.class, Map.of("id", id, "nombre", rol)));
+        Entidades.asignar(u, "id", id);
+        return u;
+    }
+
+    /** DAO de prueba con usuarios en memoria; se pueden desactivar o cambiar de rol durante la prueba. */
+    public static final class DaoFalso implements UsuarioDao {
+        public final Map<Integer, Usuario> usuarios = new java.util.HashMap<>();
+
+        public DaoFalso() {
+            usuarios.put(7, admin());
+        }
+
+        @Override
+        public Optional<Usuario> buscarActivoPorEmail(jakarta.persistence.EntityManager em, String email) {
+            return usuarios.values().stream().filter(u -> u.isActivo() && u.getEmail().equalsIgnoreCase(email)).findFirst();
+        }
+
+        @Override
+        public Optional<Usuario> buscarActivoPorId(jakarta.persistence.EntityManager em, int id) {
+            return Optional.ofNullable(usuarios.get(id)).filter(Usuario::isActivo);
+        }
+    }
 
     /** Service con un administrador admin@sn.local / Clave-Correcta (usado también por AutenticacionTest). */
     public static AuthService nuevoServicio() {
-        return new AuthService(new TxSinBase(), DAO, HASHER, new LimitadorIntentos());
+        return nuevoServicio(new DaoFalso());
+    }
+
+    public static AuthService nuevoServicio(DaoFalso dao) {
+        return new AuthService(new TxSinBase(), dao, HASHER, new LimitadorIntentos());
     }
 
     private final AuthService auth = nuevoServicio();
@@ -97,5 +124,43 @@ public class AuthServiceTest {
         assertEquals(429, e.estadoHttp());
         // Desde otra IP sí puede ingresar
         assertEquals(7, auth.login("admin@sn.local", "Clave-Correcta", "10.0.0.2").id());
+    }
+
+    // ---- Etapa 2A: roles del panel y relectura del usuario ----
+
+    @Test
+    void gerenteYVendedorPuedenIngresarConSusPermisos() {
+        DaoFalso dao = new DaoFalso();
+        dao.usuarios.put(8, conRol(8, "gerente@sn.local", "GERENTE"));
+        dao.usuarios.put(9, conRol(9, "vendedor@sn.local", "VENDEDOR"));
+        AuthService s = nuevoServicio(dao);
+
+        var gerente = s.login("gerente@sn.local", "Clave-Correcta", "1.1.1.1");
+        var vendedor = s.login("vendedor@sn.local", "Clave-Correcta", "1.1.1.2");
+
+        assertTrue(gerente.permisos().contains("USUARIOS_VER"));
+        assertFalse(gerente.permisos().contains("USUARIOS_GESTIONAR"));
+        assertTrue(vendedor.permisos().contains("PROPIEDADES_EDITAR"));
+        assertFalse(vendedor.permisos().contains("PROPIEDADES_BAJA"));
+    }
+
+    @Test
+    void unRolQueNoEsDelPanelNoPuedeIngresar() {
+        DaoFalso dao = new DaoFalso();
+        dao.usuarios.put(10, conRol(10, "otro@sn.local", "INVITADO"));
+
+        assertThrows(py.sn.inmobiliaria.exception.NoAutenticadoException.class,
+                () -> nuevoServicio(dao).login("otro@sn.local", "Clave-Correcta", "1.1.1.3"));
+    }
+
+    @Test
+    void recargarReflejaLosCambiosDeLaBase() {
+        DaoFalso dao = new DaoFalso();
+        AuthService s = nuevoServicio(dao);
+        assertEquals("ADMIN", s.recargar(7).orElseThrow().rol());
+
+        dao.usuarios.get(7).setActivo(false);
+        assertTrue(s.recargar(7).isEmpty());          // desactivado: pierde el acceso
+        assertTrue(s.recargar(999).isEmpty());        // inexistente
     }
 }

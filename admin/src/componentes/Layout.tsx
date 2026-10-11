@@ -10,7 +10,7 @@ import ui from '../ui.module.css'
  * se abre con un botón. El menú solo muestra secciones que ya funcionan.
  */
 export default function Layout() {
-  const { usuario, cerrar } = useSesion()
+  const { usuario, cerrar, puede } = useSesion()
   const navegar = useNavigate()
   const { pathname } = useLocation()
   const [menuAbierto, setMenuAbierto] = useState(false)
@@ -39,12 +39,16 @@ export default function Layout() {
         <nav className={ui.menu}>
           <div className={ui.menuGrupo}>
             <div className={ui.menuTitulo}>Propiedades</div>
-            <NavLink to="/propiedades" end className={enlace}>
-              <Building2 size={18} aria-hidden="true" /> Listado
-            </NavLink>
-            <NavLink to="/propiedades/nueva" className={enlace}>
-              <Plus size={18} aria-hidden="true" /> Nueva propiedad
-            </NavLink>
+            {puede('PROPIEDADES_VER') && (
+              <NavLink to="/propiedades" end className={enlace}>
+                <Building2 size={18} aria-hidden="true" /> Listado
+              </NavLink>
+            )}
+            {puede('PROPIEDADES_EDITAR') && (
+              <NavLink to="/propiedades/nueva" className={enlace}>
+                <Plus size={18} aria-hidden="true" /> Nueva propiedad
+              </NavLink>
+            )}
           </div>
           <div className={ui.menuGrupo}>
             <div className={ui.menuTitulo}>Cuenta</div>
