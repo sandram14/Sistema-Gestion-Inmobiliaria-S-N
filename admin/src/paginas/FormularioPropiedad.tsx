@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { ChevronLeft } from 'lucide-react'
 import { api, ApiError } from '../api/cliente'
 import type { Catalogos, PropiedadDetalle, PropiedadRequest, TipoPropiedad } from '../api/tipos'
 import EditorOperaciones, { type FilaOperacion } from '../componentes/EditorOperaciones'
@@ -188,7 +189,7 @@ export default function FormularioPropiedad() {
     <>
       <div className={ui.tituloPagina}>
         <h1>{esEdicion ? `Editar ${detalle?.codigo ?? ''}` : 'Nueva propiedad'}</h1>
-        <Link to="/propiedades" className={ui.botonSecundario}>← Volver al listado</Link>
+        <Link to="/propiedades" className={ui.botonSecundario}><ChevronLeft size={16} aria-hidden="true" /> Volver al listado</Link>
       </div>
 
       {mensaje && <div className={ui.avisoExito}>{mensaje}</div>}

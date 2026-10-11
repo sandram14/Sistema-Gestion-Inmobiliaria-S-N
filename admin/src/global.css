@@ -1,21 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
+/* Identidad de S&N Inmobiliaria: los mismos colores del sitio público */
 :root {
-  --verde: #2e5438;
-  --verde-claro: #e8f0ea;
-  --verde-medio: #4a7a56;
-  --texto: #1f2a22;
+  --verde: #23412a;
+  --verde-oscuro: #1a3020;
+  --verde-medio: #3a6b46;
+  --acento: #a8d66f;
+  --acento-suave: #eef4e4;
+
+  --texto: #1a1a1a;
+  --texto-secundario: #4b5563;
   --gris: #6b7280;
-  --borde: #d7ddd8;
-  --fondo: #f6f8f6;
+  --borde: #dfe3dc;
+  --borde-fuerte: #c9cfc6;
+  --fondo: #f4f5ee;
+  --superficie: #ffffff;
+  --fila-alterna: #f9faf7;
+
   --rojo: #b42318;
-  --rojo-claro: #fdecea;
-  --ambar-claro: #fff6e0;
+  --rojo-suave: #fdf0ee;
+  --ambar-suave: #fff7e6;
+  --ambar-borde: #ecd49a;
+
+  --fuente: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --radio: 6px;
+  --radio-chico: 4px;
+  --ancho-menu: 232px;
 }
+
 * { box-sizing: border-box; }
+
 body {
   margin: 0;
-  font-family: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--fuente);
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--texto);
   background: var(--fondo);
+  -webkit-font-smoothing: antialiased;
 }
-a { color: var(--verde); }
-button, input, select, textarea { font: inherit; }
+
+a { color: var(--verde-medio); }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* Foco visible al navegar con teclado */
+:focus-visible {
+  outline: 2px solid var(--verde-medio);
+  outline-offset: 2px;
+}
+
+/* Íconos (lucide-react): trazo uniforme */
+.lucide { stroke-width: 1.75; flex-shrink: 0; }

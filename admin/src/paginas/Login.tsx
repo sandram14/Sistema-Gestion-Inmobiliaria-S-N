@@ -38,8 +38,13 @@ export default function Login() {
   return (
     <div className={ui.loginFondo}>
       <div className={ui.loginCaja}>
-        <h1>S&N Inmobiliaria</h1>
-        <p>Panel administrativo</p>
+        <div className={ui.loginMarca}>
+          <span className={ui.marcaInsignia}>S&N</span>
+          <div>
+            <strong>Inmobiliaria</strong>
+            <span>Panel administrativo</span>
+          </div>
+        </div>
         {expirada && <div className={ui.aviso}>Su sesión expiró. Vuelva a iniciar sesión.</div>}
         {error && (
           <div className={ui.avisoError} role="alert">

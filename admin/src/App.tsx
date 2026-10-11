@@ -4,8 +4,9 @@ import Layout from './componentes/Layout'
 import Login from './paginas/Login'
 import ListadoPropiedades from './paginas/ListadoPropiedades'
 import FormularioPropiedad from './paginas/FormularioPropiedad'
+import MiCuenta from './paginas/MiCuenta'
 
-// Rutas: /admin/login · /admin · /admin/propiedades · /admin/propiedades/nueva · /admin/propiedades/:id
+// Rutas: /admin/login · /admin · /admin/propiedades · /admin/propiedades/nueva · /admin/propiedades/:id · /admin/cuenta
 export default function App() {
   return (
     <Routes>
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/propiedades" element={<ListadoPropiedades />} />
           <Route path="/propiedades/nueva" element={<FormularioConClave />} />
           <Route path="/propiedades/:id" element={<FormularioConClave />} />
+          <Route path="/cuenta" element={<MiCuenta />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

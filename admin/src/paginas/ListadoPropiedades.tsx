@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { Plus } from 'lucide-react'
 import { api, ApiError } from '../api/cliente'
 import type { PropiedadResumen } from '../api/tipos'
 import { textoFecha, textoOperacion } from '../componentes/formato'
@@ -58,7 +59,7 @@ export default function ListadoPropiedades() {
       <div className={ui.tituloPagina}>
         <h1>Propiedades</h1>
         <Link to="/propiedades/nueva" className={ui.boton}>
-          + Nueva propiedad
+          <Plus size={16} aria-hidden="true" /> Nueva propiedad
         </Link>
       </div>
 
@@ -98,9 +99,9 @@ export default function ListadoPropiedades() {
                   <td>{p.titulo}</td>
                   <td>{p.tipo}</td>
                   <td><span className={`${ui.estado} ${p.estado === 'Inactivo' ? ui.estadoInactivo : ''}`}>{p.estado}</span></td>
-                  <td>{p.ciudad}<br /><small>{p.barrio}</small></td>
+                  <td>{p.ciudad}<br /><span className={ui.secundario}>{p.barrio}</span></td>
                   <td>{p.operaciones.map((o) => <div key={o.operacion}>{textoOperacion(o)}</div>)}</td>
-                  <td><small>{textoFecha(p.actualizadoEn)}</small></td>
+                  <td className={ui.secundario}>{textoFecha(p.actualizadoEn)}</td>
                   <td>
                     <div className={ui.acciones}>
                       <Link to={`/propiedades/${p.id}`} className={`${ui.botonSecundario} ${ui.botonChico}`}>Editar</Link>
@@ -112,13 +113,13 @@ export default function ListadoPropiedades() {
                 </tr>
               ))}
               {visibles.length === 0 && (
-                <tr><td colSpan={9} className={ui.cargando}>No hay propiedades que coincidan con la búsqueda.</td></tr>
+                <tr><td colSpan={9} className={ui.vacio}>No hay propiedades que coincidan con la búsqueda.</td></tr>
               )}
             </tbody>
           </table>
         </div>
       )}
-      <p className={ui.ayuda}>{visibles.length} de {propiedades.length} propiedades</p>
+      <p className={ui.pieTabla}>{visibles.length} de {propiedades.length} propiedades</p>
     </>
   )
 }

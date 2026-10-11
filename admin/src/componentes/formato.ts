@@ -10,3 +10,9 @@ export function textoFecha(iso: string | null | undefined): string {
   const d = new Date(iso)
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleString('es-PY', { dateStyle: 'short', timeStyle: 'short' })
 }
+
+/** Nombre del rol para mostrar ("ADMIN" -> "Administrador"). */
+export function nombreDelRol(rol: string | null | undefined): string {
+  const nombres: Record<string, string> = { ADMIN: 'Administrador', GERENTE: 'Gerente', VENDEDOR: 'Vendedor' }
+  return rol ? nombres[rol] ?? rol : ''
+}
