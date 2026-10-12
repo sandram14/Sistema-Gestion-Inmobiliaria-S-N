@@ -5,6 +5,9 @@ import Login from './paginas/Login'
 import ListadoPropiedades from './paginas/ListadoPropiedades'
 import FormularioPropiedad from './paginas/FormularioPropiedad'
 import MiCuenta from './paginas/MiCuenta'
+import CambiarContrasena from './paginas/CambiarContrasena'
+import Usuarios from './paginas/Usuarios'
+import FormularioUsuario from './paginas/FormularioUsuario'
 
 // Rutas: /admin/login · /admin · /admin/propiedades · /admin/propiedades/nueva · /admin/propiedades/:id · /admin/cuenta
 export default function App() {
@@ -18,6 +21,10 @@ export default function App() {
           <Route path="/propiedades/nueva" element={<FormularioConClave />} />
           <Route path="/propiedades/:id" element={<FormularioConClave />} />
           <Route path="/cuenta" element={<MiCuenta />} />
+          <Route path="/cuenta/contrasena" element={<CambiarContrasena />} />
+          <Route path="/usuarios" element={<Usuarios />} />
+          <Route path="/usuarios/nuevo" element={<UsuarioConClave />} />
+          <Route path="/usuarios/:id" element={<UsuarioConClave />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -32,4 +39,9 @@ export default function App() {
 function FormularioConClave() {
   const { id } = useParams()
   return <FormularioPropiedad key={id ?? 'nueva'} />
+}
+
+function UsuarioConClave() {
+  const { id } = useParams()
+  return <FormularioUsuario key={id ?? 'nuevo'} />
 }

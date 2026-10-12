@@ -19,6 +19,8 @@ import py.sn.inmobiliaria.exception.ValidacionException;
 import py.sn.inmobiliaria.mapper.PropiedadAdminMapper;
 import py.sn.inmobiliaria.model.Propiedad;
 import py.sn.inmobiliaria.service.AlmacenImagenes;
+import py.sn.inmobiliaria.seguridad.Permiso;
+import py.sn.inmobiliaria.seguridad.UsuarioSesion;
 import py.sn.inmobiliaria.service.PropiedadAdminService;
 import py.sn.inmobiliaria.service.PropiedadAdminService.PropiedadGuardada;
 
@@ -71,19 +73,28 @@ public class PropiedadAdminServlet extends ApiServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         if (esColeccion(req)) {
-            PropiedadGuardada g = admin().crear(leerJson(req, PropiedadRequest.class));
+            PropiedadRequest datos = leerJson(req, PropiedadRequest.class);
+            UsuarioSesion actor = actor(req);
+            // El vendedor queda como responsable de lo que crea; ADMIN y GERENTE eligen el responsable
+            PropiedadGuardada g = admin().crear(datos,
+                    actor.tiene(Permiso.PROPIEDADES_EDITAR_TODAS) ? datos.idResponsable() : Integer.valueOf(actor.id()));
             resp.setHeader("Location", req.getContextPath() + "/api/admin/propiedades/" + g.id());
             escribirJson(resp, HttpServletResponse.SC_CREATED, detalle(g.id()));
             return;
         }
         long id = idDe(IMAGENES, req);
+        admin().verificarPuedeEditar(id, actor(req));
         subirImagen(id, req, resp);
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         long id = idDe(PROPIEDAD, req);
-        admin().actualizar(id, leerJson(req, PropiedadRequest.class));
+        PropiedadRequest datos = leerJson(req, PropiedadRequest.class);
+        UsuarioSesion actor = actor(req);
+        admin().verificarPuedeEditar(id, actor);
+        boolean todas = actor.tiene(Permiso.PROPIEDADES_EDITAR_TODAS);
+        admin().actualizar(id, datos, todas, todas ? datos.idResponsable() : null);
         escribirJson(resp, HttpServletResponse.SC_OK, detalle(id));
     }
 
@@ -92,6 +103,7 @@ public class PropiedadAdminServlet extends ApiServlet {
         Matcher imagen = IMAGEN.matcher(ruta(req));
         if (imagen.matches()) {
             long id = Long.parseLong(imagen.group(1));
+            admin().verificarPuedeEditar(id, actor(req));
             String url = admin().eliminarImagen(id, Long.parseLong(imagen.group(2)));
             servicio(AlmacenImagenes.class).eliminar(url); // solo borra archivos de /uploads
             escribirJson(resp, HttpServletResponse.SC_OK, detalle(id));
@@ -108,6 +120,7 @@ public class PropiedadAdminServlet extends ApiServlet {
             throw rutaInexistenteOMetodo(req);
         }
         long id = Long.parseLong(m.group(1));
+        admin().verificarPuedeEditar(id, actor(req));
         admin().marcarPrincipal(id, Long.parseLong(m.group(2)));
         escribirJson(resp, HttpServletResponse.SC_OK, detalle(id));
     }
@@ -160,6 +173,15 @@ public class PropiedadAdminServlet extends ApiServlet {
 
     private PropiedadAdminService admin() {
         return servicio(PropiedadAdminService.class);
+    }
+
+    /** Usuario que hace la petición, releído por AuthFilter. Sin él, la petición se rechaza. */
+    static UsuarioSesion actor(HttpServletRequest req) {
+        Object u = req.getAttribute(UsuarioSesion.ATRIBUTO_PETICION);
+        if (!(u instanceof UsuarioSesion actor)) {
+            throw new py.sn.inmobiliaria.exception.NoAutenticadoException("Inicie sesión para continuar");
+        }
+        return actor;
     }
 
     private PropiedadDetalleDto detalle(long id) {

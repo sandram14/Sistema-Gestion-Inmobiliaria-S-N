@@ -80,6 +80,11 @@ public class PropiedadAdminService extends ServicioBase {
     // =====================================================================
 
     public PropiedadGuardada crear(PropiedadRequest req) {
+        return crear(req, null);
+    }
+
+    /** @param idResponsable usuario responsable (null: sin responsable); debe existir y estar activo */
+    public PropiedadGuardada crear(PropiedadRequest req, Integer idResponsable) {
         PropiedadValidada v = ValidadorPropiedad.validar(req);
         verificarUbicacion(v);
 
@@ -95,6 +100,7 @@ public class PropiedadAdminService extends ServicioBase {
             Propiedad p = new Propiedad(codigo, v.titulo(), v.latitud(), v.longitud(), tipo, estado, barrio);
             p.setDescripcion(v.descripcion());
             p.setDireccion(v.direccion());
+            p.setResponsable(responsable(em, idResponsable));
             if (v.casa() != null) {
                 p.asignarCasa(nuevaCasa(v.casa()));
             } else {
@@ -115,11 +121,21 @@ public class PropiedadAdminService extends ServicioBase {
      * (aunque cambie el tipo), para no romper enlaces ni carpetas de imágenes.
      */
     public PropiedadGuardada actualizar(long id, PropiedadRequest req) {
+        return actualizar(id, req, false, null);
+    }
+
+    /**
+     * @param cambiarResponsable true para asignar idResponsable (solo ADMIN y GERENTE); false lo deja igual
+     */
+    public PropiedadGuardada actualizar(long id, PropiedadRequest req, boolean cambiarResponsable, Integer idResponsable) {
         PropiedadValidada v = ValidadorPropiedad.validar(req);
         verificarUbicacion(v);
 
         return escribir(em -> {
             Propiedad p = buscarOFallar(em, id);
+            if (cambiarResponsable) {
+                p.setResponsable(responsable(em, idResponsable));
+            }
             Map<String, OperacionValidada> nuevas = v.operaciones().stream()
                     .collect(Collectors.toMap(OperacionValidada::operacion, Function.identity()));
 
@@ -287,6 +303,38 @@ public class PropiedadAdminService extends ServicioBase {
             throw ValidacionException.deCampo("latitud",
                     "La ubicación marcada en el mapa no está dentro del barrio seleccionado");
         }
+    }
+
+    /**
+     * Un usuario sin el permiso de editar todas las propiedades (vendedor) solo puede modificar
+     * las que tiene asignadas. Se usa antes de actualizar y de tocar las imágenes.
+     *
+     * @throws py.sn.inmobiliaria.exception.AccesoDenegadoException si la propiedad es de otro responsable (403)
+     */
+    public void verificarPuedeEditar(long idPropiedad, py.sn.inmobiliaria.seguridad.UsuarioSesion actor) {
+        if (actor.tiene(py.sn.inmobiliaria.seguridad.Permiso.PROPIEDADES_EDITAR_TODAS)) {
+            return;
+        }
+        Integer responsable = leer(em -> {
+            Propiedad p = buscarOFallar(em, idPropiedad);
+            return p.getResponsable() == null ? null : p.getResponsable().getId();
+        });
+        if (responsable == null || responsable != actor.id()) {
+            throw new py.sn.inmobiliaria.exception.AccesoDenegadoException(
+                    "Esta propiedad está asignada a otro responsable. Solo puede verla.");
+        }
+    }
+
+    /** Usuario activo para asignar como responsable; null si no se indica. */
+    private py.sn.inmobiliaria.model.Usuario responsable(EntityManager em, Integer idUsuario) {
+        if (idUsuario == null) {
+            return null;
+        }
+        py.sn.inmobiliaria.model.Usuario u = em.find(py.sn.inmobiliaria.model.Usuario.class, idUsuario);
+        if (u == null || !u.isActivo()) {
+            throw ValidacionException.deCampo("idResponsable", "El responsable debe ser un usuario activo");
+        }
+        return u;
     }
 
     private Propiedad buscarOFallar(EntityManager em, long id) {

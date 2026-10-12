@@ -15,6 +15,8 @@ interface Sesion {
   cerrar: () => Promise<void>
   /** Si el usuario tiene el permiso. Solo para mostrar u ocultar opciones: el backend lo vuelve a comprobar. */
   puede: (permiso: Permiso) => boolean
+  /** Vuelve a leer el usuario del backend (después de cambiar datos o la contraseña). */
+  recargar: () => Promise<void>
 }
 
 const ContextoSesion = createContext<Sesion | null>(null)
@@ -49,6 +51,11 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
     setExpirada(false)
   }, [])
 
+  const recargar = useCallback(async () => {
+    const r = await api.get<{ usuario: UsuarioSesion }>('/api/admin/auth/me')
+    setUsuario(r.usuario)
+  }, [])
+
   const puede = useCallback((permiso: Permiso) => usuario?.permisos?.includes(permiso) ?? false, [usuario])
 
   const cerrar = useCallback(async () => {
@@ -62,7 +69,7 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <ContextoSesion.Provider value={{ usuario, cargando, expirada, iniciar, cerrar, puede }}>{children}</ContextoSesion.Provider>
+    <ContextoSesion.Provider value={{ usuario, cargando, expirada, iniciar, cerrar, puede, recargar }}>{children}</ContextoSesion.Provider>
   )
 }
 

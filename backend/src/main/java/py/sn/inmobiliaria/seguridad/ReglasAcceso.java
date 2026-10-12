@@ -40,7 +40,31 @@ public final class ReglasAcceso {
             r("POST", "/api/admin/propiedades/" + ID + "/imagenes", Permiso.PROPIEDADES_EDITAR),
             r("DELETE", "/api/admin/propiedades/" + ID + "/imagenes/" + ID, Permiso.PROPIEDADES_EDITAR),
             r("PATCH", "/api/admin/propiedades/" + ID + "/imagenes/" + ID + "/principal", Permiso.PROPIEDADES_EDITAR),
-            r("GET", "/api/admin/ubicacion", Permiso.PROPIEDADES_EDITAR));
+            r("GET", "/api/admin/ubicacion", Permiso.PROPIEDADES_EDITAR),
+            // Usuarios: consultar (ADMIN y GERENTE) y gestionar (solo ADMIN)
+            r("GET", "/api/admin/usuarios", Permiso.USUARIOS_VER),
+            r("GET", "/api/admin/usuarios/" + ID, Permiso.USUARIOS_VER),
+            r("POST", "/api/admin/usuarios", Permiso.USUARIOS_GESTIONAR),
+            r("PUT", "/api/admin/usuarios/" + ID, Permiso.USUARIOS_GESTIONAR),
+            r("PATCH", "/api/admin/usuarios/" + ID + "/estado", Permiso.USUARIOS_GESTIONAR),
+            r("POST", "/api/admin/usuarios/" + ID + "/contrasena-temporal", Permiso.USUARIOS_GESTIONAR),
+            // Cuenta propia
+            r("GET", "/api/admin/cuenta", Permiso.CUENTA_PROPIA),
+            r("PUT", "/api/admin/cuenta", Permiso.CUENTA_PROPIA),
+            r("PUT", "/api/admin/cuenta/email", Permiso.CUENTA_PROPIA),
+            r("PUT", "/api/admin/cuenta/contrasena", Permiso.CUENTA_PROPIA));
+
+    /** Rutas permitidas mientras el usuario tiene una contraseña temporal sin cambiar. */
+    private static final List<Regla> CON_CONTRASENA_TEMPORAL = List.of(
+            r("GET", "/api/admin/auth/me", Permiso.CUENTA_PROPIA),
+            r("GET", "/api/admin/cuenta", Permiso.CUENTA_PROPIA),
+            r("PUT", "/api/admin/cuenta/contrasena", Permiso.CUENTA_PROPIA));
+
+    /** ¿La ruta se puede usar antes de cambiar la contraseña temporal? */
+    public static boolean permitidaConContrasenaTemporal(String metodo, String ruta) {
+        String m = metodo.toUpperCase(Locale.ROOT);
+        return CON_CONTRASENA_TEMPORAL.stream().anyMatch(r -> r.metodo().equals(m) && r.ruta().matcher(ruta).matches());
+    }
 
     /**
      * @param metodo método HTTP

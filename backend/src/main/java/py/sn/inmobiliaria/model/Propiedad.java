@@ -67,6 +67,11 @@ public class Propiedad {
     @JoinColumn(name = "id_barrio", nullable = false)
     private Barrio barrio;
 
+    /** Usuario responsable de la propiedad (opcional, migración 002). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_responsable")
+    private Usuario responsable;
+
     /** Lo completa PostgreSQL (DEFAULT now()). */
     @Column(name = "creado_en", nullable = false, insertable = false, updatable = false,
             columnDefinition = "timestamptz")
@@ -211,6 +216,14 @@ public class Propiedad {
 
     public void setEstado(EstadoPropiedad estado) {
         this.estado = estado;
+    }
+
+    public Usuario getResponsable() {
+        return responsable;
+    }
+
+    public void setResponsable(Usuario responsable) {
+        this.responsable = responsable;
     }
 
     public Barrio getBarrio() {

@@ -15,10 +15,13 @@ export default function GaleriaImagenes({
   idPropiedad,
   imagenes,
   onActualizado,
+  soloLectura = false,
 }: {
   idPropiedad: number
   imagenes: ImagenDto[]
   onActualizado: (detalle: PropiedadDetalle) => void
+  /** Sin acciones (por ejemplo, un vendedor viendo una propiedad ajena) */
+  soloLectura?: boolean
 }) {
   const entrada = useRef<HTMLInputElement>(null)
   const [archivo, setArchivo] = useState<File | null>(null)
@@ -74,7 +77,7 @@ export default function GaleriaImagenes({
           {imagenes.map((img) => (
             <figure key={img.id} className={`${ui.foto} ${img.esPrincipal ? ui.fotoPrincipal : ''}`} style={{ margin: 0 }}>
               <img src={img.url} alt={img.descripcion ?? ''} />
-              <div className={ui.fotoAcciones}>
+              {!soloLectura && <div className={ui.fotoAcciones}>
                 {img.esPrincipal ? (
                   <span className={ui.estado}>Principal</span>
                 ) : (
@@ -89,13 +92,13 @@ export default function GaleriaImagenes({
                   }}>
                   Eliminar
                 </button>
-              </div>
+              </div>}
             </figure>
           ))}
         </div>
       )}
 
-      <div className={ui.subida}>
+      {!soloLectura && <div className={ui.subida}>
         <label className={ui.campo}>
           <span className={ui.etiqueta}>Nueva foto (JPEG, PNG o WebP, hasta 5 MB)</span>
           <input ref={entrada} className={ui.input} type="file" accept="image/jpeg,image/png,image/webp"
@@ -108,7 +111,7 @@ export default function GaleriaImagenes({
         <button type="button" className={ui.boton} disabled={!archivo || ocupado} onClick={() => void subir()}>
           {ocupado ? 'Procesando…' : 'Subir foto'}
         </button>
-      </div>
+      </div>}
     </div>
   )
 }

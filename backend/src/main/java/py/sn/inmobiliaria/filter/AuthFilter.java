@@ -111,7 +111,13 @@ public class AuthFilter implements Filter {
                 sesion.setAttribute(UsuarioSesion.ATRIBUTO, u);
             }
 
-            // 2. Permiso que exige la ruta. Sin regla declarada, la ruta queda bloqueada.
+            // 2. Con una contraseña temporal, solo puede cambiarla (y consultar sus datos)
+            if (u.debeCambiarPassword() && !ReglasAcceso.permitidaConContrasenaTemporal(metodo, ruta)) {
+                rechazar(resp, 403, "CAMBIO_CONTRASENA_REQUERIDO", "Debe cambiar su contraseña temporal antes de continuar");
+                return;
+            }
+
+            // 3. Permiso que exige la ruta. Sin regla declarada, la ruta queda bloqueada.
             Optional<Permiso> exigido = ReglasAcceso.permisoPara(metodo, ruta);
             if (exigido.isEmpty() || !u.tiene(exigido.get())) {
                 rechazar(resp, 403, "ACCESO_DENEGADO", "No tiene permisos para esta operación");

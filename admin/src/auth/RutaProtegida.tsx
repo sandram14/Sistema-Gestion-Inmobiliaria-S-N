@@ -12,5 +12,9 @@ export default function RutaProtegida() {
 
   if (cargando) return <p className={ui.cargando}>Verificando sesión…</p>
   if (!usuario) return <Navigate to="/login" replace state={{ desde: ubicacion.pathname }} />
+  // Con una contraseña temporal, solo se puede cambiarla (el backend bloquea todo lo demás)
+  if (usuario.debeCambiarPassword && ubicacion.pathname !== '/cuenta/contrasena') {
+    return <Navigate to="/cuenta/contrasena" replace />
+  }
   return <Outlet />
 }

@@ -60,7 +60,8 @@ export const api = {
   post: <T>(path: string, cuerpo?: unknown) =>
     pedir<T>('POST', path, cuerpo === undefined ? undefined : JSON.stringify(cuerpo), cuerpo === undefined ? undefined : 'application/json'),
   put: <T>(path: string, cuerpo: unknown) => pedir<T>('PUT', path, JSON.stringify(cuerpo), 'application/json'),
-  patch: <T>(path: string) => pedir<T>('PATCH', path),
+  patch: <T>(path: string, cuerpo?: unknown) =>
+    pedir<T>('PATCH', path, cuerpo === undefined ? undefined : JSON.stringify(cuerpo), cuerpo === undefined ? undefined : 'application/json'),
   delete: <T>(path: string) => pedir<T>('DELETE', path),
   /** Subida de archivos (multipart). El navegador arma el Content-Type con su boundary. */
   subir: <T>(path: string, datos: FormData) => pedir<T>('POST', path, datos),

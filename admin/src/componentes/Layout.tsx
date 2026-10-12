@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Building2, LogOut, Menu, Plus, UserRound, X } from 'lucide-react'
+import { Building2, LogOut, Menu, Plus, UserRound, Users, X } from 'lucide-react'
 import { useSesion } from '../auth/Sesion'
 import { nombreDelRol } from './formato'
 import ui from '../ui.module.css'
@@ -50,9 +50,17 @@ export default function Layout() {
               </NavLink>
             )}
           </div>
+          {puede('USUARIOS_VER') && (
+            <div className={ui.menuGrupo}>
+              <div className={ui.menuTitulo}>Administración</div>
+              <NavLink to="/usuarios" className={enlace}>
+                <Users size={18} aria-hidden="true" /> Usuarios
+              </NavLink>
+            </div>
+          )}
           <div className={ui.menuGrupo}>
             <div className={ui.menuTitulo}>Cuenta</div>
-            <NavLink to="/cuenta" className={enlace}>
+            <NavLink to="/cuenta" end className={enlace}>
               <UserRound size={18} aria-hidden="true" /> Mi cuenta
             </NavLink>
           </div>

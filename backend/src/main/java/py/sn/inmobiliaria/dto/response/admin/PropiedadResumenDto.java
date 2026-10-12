@@ -21,5 +21,10 @@ public record PropiedadResumenDto(
         String barrio,
         List<OperacionDto> operaciones,
         String imagenPrincipal,
-        OffsetDateTime actualizadoEn) {
+        OffsetDateTime actualizadoEn,
+        ResponsableDto responsable) {
+
+    /** Responsable de la propiedad; null si no tiene. "activo" permite señalar cuentas desactivadas. */
+    public record ResponsableDto(int id, String nombre, boolean activo) {
+    }
 }

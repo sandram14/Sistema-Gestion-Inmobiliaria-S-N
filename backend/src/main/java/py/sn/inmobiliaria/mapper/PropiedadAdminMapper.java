@@ -28,7 +28,13 @@ public final class PropiedadAdminMapper {
                 p.getBarrio().getNombre(),
                 Formato.operaciones(p),
                 imagenPrincipal,
-                p.getActualizadoEn());
+                p.getActualizadoEn(),
+                responsable(p));
+    }
+
+    static PropiedadResumenDto.ResponsableDto responsable(Propiedad p) {
+        var u = p.getResponsable();
+        return u == null ? null : new PropiedadResumenDto.ResponsableDto(u.getId(), u.getNombre() + " " + u.getApellido(), u.isActivo());
     }
 
     public static PropiedadDetalleDto detalle(Propiedad p) {
@@ -59,6 +65,7 @@ public final class PropiedadAdminMapper {
                                 i.isEsPrincipal(), i.getOrden()))
                         .toList(),
                 p.getCreadoEn(),
-                p.getActualizadoEn());
+                p.getActualizadoEn(),
+                responsable(p));
     }
 }

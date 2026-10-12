@@ -1,8 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
+import { useSesion } from '../auth/Sesion'
 import { api, ApiError } from '../api/cliente'
-import type { Catalogos, PropiedadDetalle, PropiedadRequest, TipoPropiedad } from '../api/tipos'
+import type { Catalogos, PropiedadDetalle, PropiedadRequest, TipoPropiedad, UsuarioDto } from '../api/tipos'
 import EditorOperaciones, { type FilaOperacion } from '../componentes/EditorOperaciones'
 import GaleriaImagenes from '../componentes/GaleriaImagenes'
 import SelectorUbicacion, { type ValorUbicacion } from '../componentes/SelectorUbicacion'
@@ -56,6 +57,10 @@ export default function FormularioPropiedad() {
   const navegar = useNavigate()
   const estadoNavegacion = useLocation().state as { mensaje?: string } | null
 
+  const { puede, usuario: yo } = useSesion()
+  const editaTodas = puede('PROPIEDADES_EDITAR_TODAS')
+  const [responsables, setResponsables] = useState<UsuarioDto[]>([])
+  const [idResponsable, setIdResponsable] = useState('')
   const [catalogos, setCatalogos] = useState<Catalogos | null>(null)
   const [detalle, setDetalle] = useState<PropiedadDetalle | null>(null)
   const [form, setForm] = useState<Formulario>(VACIO)
@@ -70,6 +75,7 @@ export default function FormularioPropiedad() {
   function cargarDetalle(d: PropiedadDetalle) {
     setDetalle(d)
     setForm(desdeDetalle(d))
+    setIdResponsable(d.responsable ? String(d.responsable.id) : '')
     setOperaciones(d.operaciones.map((o) => ({ operacion: o.operacion, precio: String(o.precio), moneda: o.moneda })))
     setUbicacion({
       latitud: d.latitud,
@@ -98,6 +104,13 @@ export default function FormularioPropiedad() {
       .catch((e) => setErrorGeneral(e instanceof ApiError ? e.message : 'No se pudieron cargar los datos.'))
       .finally(() => setCargando(false))
   }, [id, esEdicion])
+
+  useEffect(() => {
+    if (editaTodas) api.get<UsuarioDto[]>('/api/admin/usuarios').then(setResponsables).catch(() => setResponsables([]))
+  }, [editaTodas])
+
+  // Un vendedor puede ver cualquier propiedad, pero solo editar las asignadas a él
+  const soloLectura = esEdicion && detalle !== null && !editaTodas && detalle.responsable?.id !== yo?.id
 
   function cambiar<K extends keyof Formulario>(campo: K, valor: Formulario[K]) {
     setForm((f) => ({ ...f, [campo]: valor }))
@@ -133,6 +146,8 @@ export default function FormularioPropiedad() {
         ? null
         : { superficie: numero(form.superficie), frente: numero(form.frente), fondo: numero(form.fondo), tieneTitulo: form.tieneTitulo },
       operaciones: operaciones.map((o) => ({ operacion: o.operacion, precio: numero(o.precio), moneda: o.moneda })),
+      // Solo ADMIN y GERENTE eligen el responsable; lo que crea un vendedor queda a su nombre (lo decide el backend)
+      idResponsable: editaTodas && idResponsable ? Number(idResponsable) : null,
     }
   }
 
@@ -179,7 +194,7 @@ export default function FormularioPropiedad() {
   if (!catalogos) return <div className={ui.avisoError}>{errorGeneral ?? 'No se pudieron cargar los datos.'}</div>
 
   // Errores que no corresponden a un campo visible (para no perder ninguno)
-  const camposVisibles = /^(titulo|descripcion|direccion|tipo|estado|ubicacion|latitud|longitud|idBarrio|casa|terreno|operaciones)/
+  const camposVisibles = /^(titulo|descripcion|direccion|tipo|estado|ubicacion|latitud|longitud|idBarrio|idResponsable|casa|terreno|operaciones)/
   const otrosErrores = Object.entries(errores).filter(([k]) => !camposVisibles.test(k))
   const err = (campo: string) => errores[campo] && <span className={ui.errorCampo}>{errores[campo]}</span>
   const clase = (campo: string) => `${ui.input} ${errores[campo] ? ui.inputConError : ''}`
@@ -188,7 +203,7 @@ export default function FormularioPropiedad() {
   return (
     <>
       <div className={ui.tituloPagina}>
-        <h1>{esEdicion ? `Editar ${detalle?.codigo ?? ''}` : 'Nueva propiedad'}</h1>
+        <h1>{esEdicion ? `${soloLectura ? 'Propiedad' : 'Editar'} ${detalle?.codigo ?? ''}` : 'Nueva propiedad'}</h1>
         <Link to="/propiedades" className={ui.botonSecundario}><ChevronLeft size={16} aria-hidden="true" /> Volver al listado</Link>
       </div>
 
@@ -201,7 +216,11 @@ export default function FormularioPropiedad() {
       )}
       {detalle && <p className={ui.ayuda}>Creada {textoFecha(detalle.creadoEn)} · Última modificación {textoFecha(detalle.actualizadoEn)}</p>}
 
+      {soloLectura && (
+        <div className={ui.aviso}>Esta propiedad está asignada a otro responsable. Puede verla, pero no modificarla.</div>
+      )}
       <form onSubmit={guardar} noValidate>
+        <fieldset disabled={soloLectura} style={{ border: 'none', padding: 0, margin: 0, minWidth: 0 }}>
         <section className={ui.tarjeta}>
           <h2>Datos generales</h2>
           <div className={ui.grilla}>
@@ -308,18 +327,37 @@ export default function FormularioPropiedad() {
           <SelectorUbicacion valor={ubicacion} onCambio={setUbicacion} error={errorUbicacion} />
         </section>
 
+        <section className={ui.tarjeta}>
+          <h2>Responsable</h2>
+          {editaTodas ? (
+            <label className={ui.campo} style={{ maxWidth: 360 }}>
+              <span className={ui.etiqueta}>Usuario responsable</span>
+              <select className={ui.input} value={idResponsable} onChange={(e) => setIdResponsable(e.target.value)}>
+                <option value="">Sin asignar</option>
+                {responsables.filter((u) => u.activo || String(u.id) === idResponsable).map((u) => (
+                  <option key={u.id} value={u.id}>{u.nombre} {u.apellido}{u.activo ? '' : ' (desactivado)'}</option>
+                ))}
+              </select>
+              {errores['idResponsable'] && <span className={ui.errorCampo}>{errores['idResponsable']}</span>}
+            </label>
+          ) : (
+            <p className={ui.ayuda}>{detalle?.responsable ? detalle.responsable.nombre : esEdicion ? 'Sin asignar' : 'Usted quedará como responsable de esta propiedad.'}</p>
+          )}
+        </section>
+        </fieldset>
+
         <div className={ui.acciones}>
           <Link to="/propiedades" className={ui.botonSecundario}>Cancelar</Link>
-          <button type="submit" className={ui.boton} disabled={guardando}>
+          {!soloLectura && <button type="submit" className={ui.boton} disabled={guardando}>
             {guardando ? 'Guardando…' : esEdicion ? 'Guardar cambios' : 'Crear propiedad'}
-          </button>
+          </button>}
         </div>
       </form>
 
       {esEdicion && detalle && (
         <section className={ui.tarjeta} style={{ marginTop: '1.5rem' }}>
           <h2>Fotos</h2>
-          <GaleriaImagenes idPropiedad={detalle.id} imagenes={detalle.imagenes} onActualizado={cargarDetalle} />
+          <GaleriaImagenes idPropiedad={detalle.id} imagenes={detalle.imagenes} onActualizado={cargarDetalle} soloLectura={soloLectura} />
         </section>
       )}
     </>

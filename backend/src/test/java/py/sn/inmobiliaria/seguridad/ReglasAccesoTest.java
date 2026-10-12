@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ReglasAccesoTest {
@@ -29,7 +30,7 @@ class ReglasAccesoTest {
 
     @Test
     void lasRutasSinReglaNoTienenPermisoYQuedanBloqueadas() {
-        assertTrue(p("GET", "/api/admin/usuarios").isEmpty());          // todavía no existe
+        assertTrue(p("DELETE", "/api/admin/usuarios/3").isEmpty());     // los usuarios no se borran
         assertTrue(p("PUT", "/api/admin/propiedades").isEmpty());       // método no previsto
         assertTrue(p("DELETE", "/api/admin/propiedades/abc").isEmpty()); // id no numérico
         assertTrue(p("GET", "/api/admin/propiedades/12/../usuarios").isEmpty());
@@ -38,5 +39,28 @@ class ReglasAccesoTest {
     @Test
     void ignoraMayusculasEnElMetodoYLaBarraFinal() {
         assertEquals(Optional.of(Permiso.PROPIEDADES_VER), p("get", "/api/admin/propiedades/"));
+    }
+
+    @Test
+    void usuariosYCuenta() {
+        assertEquals(Optional.of(Permiso.USUARIOS_VER), p("GET", "/api/admin/usuarios"));
+        assertEquals(Optional.of(Permiso.USUARIOS_VER), p("GET", "/api/admin/usuarios/3"));
+        assertEquals(Optional.of(Permiso.USUARIOS_GESTIONAR), p("POST", "/api/admin/usuarios"));
+        assertEquals(Optional.of(Permiso.USUARIOS_GESTIONAR), p("PUT", "/api/admin/usuarios/3"));
+        assertEquals(Optional.of(Permiso.USUARIOS_GESTIONAR), p("PATCH", "/api/admin/usuarios/3/estado"));
+        assertEquals(Optional.of(Permiso.USUARIOS_GESTIONAR), p("POST", "/api/admin/usuarios/3/contrasena-temporal"));
+        for (String[] r : new String[][] {{"GET", "/api/admin/cuenta"}, {"PUT", "/api/admin/cuenta"},
+                {"PUT", "/api/admin/cuenta/email"}, {"PUT", "/api/admin/cuenta/contrasena"}}) {
+            assertEquals(Optional.of(Permiso.CUENTA_PROPIA), p(r[0], r[1]));
+        }
+    }
+
+    @Test
+    void conContrasenaTemporalSoloSePuedeCambiarla() {
+        assertTrue(ReglasAcceso.permitidaConContrasenaTemporal("PUT", "/api/admin/cuenta/contrasena"));
+        assertTrue(ReglasAcceso.permitidaConContrasenaTemporal("GET", "/api/admin/auth/me"));
+        assertTrue(ReglasAcceso.permitidaConContrasenaTemporal("GET", "/api/admin/cuenta"));
+        assertFalse(ReglasAcceso.permitidaConContrasenaTemporal("GET", "/api/admin/propiedades"));
+        assertFalse(ReglasAcceso.permitidaConContrasenaTemporal("PUT", "/api/admin/cuenta/email"));
     }
 }

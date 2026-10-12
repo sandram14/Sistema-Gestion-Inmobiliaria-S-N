@@ -35,6 +35,11 @@ public class AuthServiceTest {
         public <T> T soloLectura(Function<EntityManager, T> trabajo) {
             return trabajo.apply(null);
         }
+
+        @Override
+        public <T> T enTransaccion(Function<EntityManager, T> trabajo) {
+            return trabajo.apply(null);
+        }
     }
 
     private static final ContrasenaHasher HASHER = new ContrasenaHasher(4);
@@ -69,6 +74,45 @@ public class AuthServiceTest {
         @Override
         public Optional<Usuario> buscarActivoPorId(jakarta.persistence.EntityManager em, int id) {
             return Optional.ofNullable(usuarios.get(id)).filter(Usuario::isActivo);
+        }
+
+        public final Map<Integer, Long> asignadas = new java.util.HashMap<>();
+
+        @Override
+        public Optional<Usuario> buscarPorId(jakarta.persistence.EntityManager em, int id) {
+            return Optional.ofNullable(usuarios.get(id));
+        }
+
+        @Override
+        public java.util.List<Usuario> listar(jakarta.persistence.EntityManager em) {
+            return new java.util.ArrayList<>(usuarios.values());
+        }
+
+        @Override
+        public boolean existeEmail(jakarta.persistence.EntityManager em, String email, Integer excluirId) {
+            return usuarios.values().stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(email) && !u.getId().equals(excluirId));
+        }
+
+        @Override
+        public boolean existeCedula(jakarta.persistence.EntityManager em, String cedula, Integer excluirId) {
+            return usuarios.values().stream().anyMatch(u -> cedula.equals(u.getCedula()) && !u.getId().equals(excluirId));
+        }
+
+        @Override
+        public long contarAdministradoresActivos(jakarta.persistence.EntityManager em) {
+            return usuarios.values().stream().filter(u -> u.isActivo() && "ADMIN".equals(u.getRol().getNombre())).count();
+        }
+
+        @Override
+        public Map<Integer, Long> propiedadesPorResponsable(jakarta.persistence.EntityManager em) {
+            return asignadas;
+        }
+
+        @Override
+        public void guardar(jakarta.persistence.EntityManager em, Usuario usuario) {
+            int id = usuarios.keySet().stream().mapToInt(Integer::intValue).max().orElse(0) + 1;
+            Entidades.asignar(usuario, "id", id);
+            usuarios.put(id, usuario);
         }
     }
 

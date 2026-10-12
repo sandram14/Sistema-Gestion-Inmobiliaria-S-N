@@ -40,6 +40,35 @@ export interface PropiedadResumen {
   operaciones: OperacionPrecio[]
   imagenPrincipal: string | null
   actualizadoEn: string
+  responsable: ResponsableDto | null
+}
+
+/** Responsable de una propiedad ("activo" en false si la cuenta fue desactivada). */
+export interface ResponsableDto {
+  id: number
+  nombre: string
+  activo: boolean
+}
+
+/** Usuario del panel (GET /api/admin/usuarios). Nunca incluye contraseñas. */
+export interface UsuarioDto {
+  id: number
+  nombre: string
+  apellido: string
+  email: string
+  cedula: string | null
+  telefono: string | null
+  rol: string
+  activo: boolean
+  debeCambiarPassword: boolean
+  creadoEn: string
+  propiedadesAsignadas: number
+}
+
+/** Respuesta del alta o del restablecimiento: la contraseña temporal se muestra una sola vez. */
+export interface UsuarioConContrasena {
+  usuario: UsuarioDto
+  contrasenaTemporal: string
 }
 
 export interface ImagenDto {
@@ -88,6 +117,7 @@ export interface PropiedadDetalle {
   imagenes: ImagenDto[]
   creadoEn: string
   actualizadoEn: string
+  responsable: ResponsableDto | null
 }
 
 /** Cuerpo de POST/PUT /api/admin/propiedades */
@@ -116,6 +146,8 @@ export interface PropiedadRequest {
     tieneTitulo: boolean
   } | null
   operaciones: { operacion: string; precio: number | null; moneda: string }[]
+  /** Solo lo considera el backend si el usuario puede editar todas las propiedades */
+  idResponsable: number | null
 }
 
 /** GET /api/catalogos */

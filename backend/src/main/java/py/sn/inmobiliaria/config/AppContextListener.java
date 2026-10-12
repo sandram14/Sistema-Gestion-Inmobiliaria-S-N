@@ -24,6 +24,7 @@ import py.sn.inmobiliaria.seguridad.LimitadorIntentos;
 import py.sn.inmobiliaria.integration.ClienteIa;
 import py.sn.inmobiliaria.integration.GeminiClient;
 import py.sn.inmobiliaria.service.AlmacenImagenes;
+import py.sn.inmobiliaria.service.UsuarioService;
 import py.sn.inmobiliaria.service.asistente.AsistenteService;
 import py.sn.inmobiliaria.service.asistente.LimitadorAsistente;
 import py.sn.inmobiliaria.service.AuthService;
@@ -104,6 +105,8 @@ public class AppContextListener implements ServletContextListener {
             registrar(contexto, PropiedadAdminService.class,
                     new PropiedadAdminService(tx, propiedadDao, catalogoDao, imagenDao, ubicacionDao));
             registrar(contexto, CatalogoService.class, new CatalogoService(tx, catalogoDao, ubicacionService));
+            registrar(contexto, UsuarioService.class,
+                    new UsuarioService(tx, new JpaUsuarioDao(), catalogoDao, new ContrasenaHasher()));
 
             propiedadesDisponibles = () -> tx.soloLectura(propiedadDao::contarDisponibles);
 

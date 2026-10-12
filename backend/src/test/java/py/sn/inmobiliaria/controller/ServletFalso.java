@@ -94,6 +94,10 @@ public final class ServletFalso {
         Navegador navegador = new Navegador();
         final Map<String, byte[]> partes = new HashMap<>();
         final java.util.List<jakarta.servlet.http.Cookie> cookies = new java.util.ArrayList<>();
+        /** Atributos de la petición. Por defecto, un administrador: equivale a haber pasado por AuthFilter. */
+        final Map<String, Object> atributosPeticion = new HashMap<>(Map.of(
+                py.sn.inmobiliaria.seguridad.UsuarioSesion.ATRIBUTO_PETICION,
+                new py.sn.inmobiliaria.seguridad.UsuarioSesion(1, "Admin", "Prueba", "admin@sn.local", "ADMIN")));
 
         public static Peticion de(String metodo, String servletPath, String pathInfo) {
             Peticion p = new Peticion();
@@ -122,6 +126,16 @@ public final class ServletFalso {
             cuerpo = contenido.getBytes(StandardCharsets.UTF_8);
             if (contentType != null) {
                 cabecera("Content-Type", contentType);
+            }
+            return this;
+        }
+
+        /** Usuario que hace la petición (como lo dejaría AuthFilter); null = sin usuario. */
+        public Peticion actor(py.sn.inmobiliaria.seguridad.UsuarioSesion actor) {
+            if (actor == null) {
+                atributosPeticion.remove(py.sn.inmobiliaria.seguridad.UsuarioSesion.ATRIBUTO_PETICION);
+            } else {
+                atributosPeticion.put(py.sn.inmobiliaria.seguridad.UsuarioSesion.ATRIBUTO_PETICION, actor);
             }
             return this;
         }
@@ -299,6 +313,9 @@ public final class ServletFalso {
         return (HttpServletRequest) Proxy.newProxyInstance(ServletFalso.class.getClassLoader(),
                 new Class<?>[]{HttpServletRequest.class}, (p, m, args) -> switch (m.getName()) {
                     case "getMethod" -> pet.metodo;
+                    case "getAttribute" -> pet.atributosPeticion.get((String) args[0]);
+                    case "setAttribute" -> pet.atributosPeticion.put((String) args[0], args[1]);
+                    case "removeAttribute" -> pet.atributosPeticion.remove((String) args[0]);
                     case "getServletPath" -> pet.servletPath;
                     case "getPathInfo" -> pet.pathInfo;
                     case "getRequestURI" -> uri;

@@ -263,6 +263,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
 .estadoInactivo { background: #eceeea; color: var(--gris); }
 .codigo { font-family: ui-monospace, Consolas, monospace; font-size: 13px; white-space: nowrap; }
 .secundario { color: var(--gris); font-size: 12px; }
+.tabla .numero { text-align: right; font-variant-numeric: tabular-nums; }
 .pieTabla { margin-top: 8px; color: var(--gris); font-size: 12px; }
 
 /* ── Operaciones ──────────────────────────────────────────────────── */

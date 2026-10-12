@@ -246,4 +246,31 @@ class AutenticacionTest {
         assertEquals(415, formulario.respuesta().estado);
         assertFalse(formulario.continuo());
     }
+
+    @Test
+    void conContrasenaTemporalSoloPuedeCambiarla() throws Exception {
+        dao.usuarios.get(9).setDebeCambiarPassword(true);
+        ServletFalso.ejecutar(servlet, loginComo("vendedor@sn.local"));
+
+        var r = ServletFalso.filtrar(filtro, Peticion.de("GET", "/api/admin/propiedades", null).navegador(navegador));
+        assertEquals(403, r.respuesta().estado);
+        assertTrue(r.respuesta().cuerpo.toString(java.nio.charset.StandardCharsets.UTF_8).contains("CAMBIO_CONTRASENA_REQUERIDO"));
+        assertEquals(0, estado("GET", "/api/admin/auth/me"));
+        assertEquals(0, estado("PUT", "/api/admin/cuenta/contrasena"));
+    }
+
+    @Test
+    void elGerenteConsultaUsuariosPeroNoLosGestiona() throws Exception {
+        ServletFalso.ejecutar(servlet, loginComo("gerente@sn.local"));
+        assertEquals(0, estado("GET", "/api/admin/usuarios"));
+        assertEquals(403, estado("POST", "/api/admin/usuarios"));
+        assertEquals(403, estado("PATCH", "/api/admin/usuarios/9/estado"));
+    }
+
+    @Test
+    void elVendedorNoVeUsuarios() throws Exception {
+        ServletFalso.ejecutar(servlet, loginComo("vendedor@sn.local"));
+        assertEquals(403, estado("GET", "/api/admin/usuarios"));
+        assertEquals(0, estado("GET", "/api/admin/cuenta"));
+    }
 }

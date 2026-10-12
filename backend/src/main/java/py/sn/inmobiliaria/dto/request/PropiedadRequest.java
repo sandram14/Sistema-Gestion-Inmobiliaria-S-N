@@ -36,7 +36,15 @@ public record PropiedadRequest(
         String estado,
         CasaRequest casa,
         TerrenoRequest terreno,
-        List<OperacionRequest> operaciones) {
+        List<OperacionRequest> operaciones,
+        Integer idResponsable) {
+
+    /** Sin responsable (forma anterior a la etapa 2B). */
+    public PropiedadRequest(String titulo, String descripcion, String direccion, BigDecimal latitud, BigDecimal longitud,
+                            Integer idBarrio, String tipo, String estado, CasaRequest casa, TerrenoRequest terreno,
+                            List<OperacionRequest> operaciones) {
+        this(titulo, descripcion, direccion, latitud, longitud, idBarrio, tipo, estado, casa, terreno, operaciones, null);
+    }
 
     /** Datos de casa (obligatorios si tipo = Casa). */
     public record CasaRequest(

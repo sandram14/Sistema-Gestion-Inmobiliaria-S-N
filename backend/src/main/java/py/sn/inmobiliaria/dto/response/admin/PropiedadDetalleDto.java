@@ -30,7 +30,8 @@ public record PropiedadDetalleDto(
         List<OperacionDto> operaciones,
         List<ImagenDto> imagenes,
         OffsetDateTime creadoEn,
-        OffsetDateTime actualizadoEn) {
+        OffsetDateTime actualizadoEn,
+        PropiedadResumenDto.ResponsableDto responsable) {
 
     /** Barrio, ciudad y departamento (para preseleccionar los combos del formulario). */
     public record Ubicacion(int idBarrio, String barrio, int idCiudad, String ciudad,

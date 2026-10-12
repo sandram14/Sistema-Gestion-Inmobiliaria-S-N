@@ -8,7 +8,9 @@ import { useSesion } from '../auth/Sesion'
 import ui from '../ui.module.css'
 
 export default function ListadoPropiedades() {
-  const { puede } = useSesion()
+  const { puede, usuario } = useSesion()
+  const editaTodas = puede('PROPIEDADES_EDITAR_TODAS')
+  const puedeEditar = (p: PropiedadResumen) => editaTodas || (puede('PROPIEDADES_EDITAR') && p.responsable?.id === usuario?.id)
   const [propiedades, setPropiedades] = useState<PropiedadResumen[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -92,7 +94,7 @@ export default function ListadoPropiedades() {
             <thead>
               <tr>
                 <th>Foto</th><th>Código</th><th>Título</th><th>Tipo</th><th>Estado</th>
-                <th>Ubicación</th><th>Operaciones</th><th>Actualizado</th><th></th>
+                <th>Ubicación</th><th>Operaciones</th><th>Responsable</th><th>Actualizado</th><th></th>
               </tr>
             </thead>
             <tbody>
@@ -105,10 +107,11 @@ export default function ListadoPropiedades() {
                   <td><span className={`${ui.estado} ${p.estado === 'Inactivo' ? ui.estadoInactivo : ''}`}>{p.estado}</span></td>
                   <td>{p.ciudad}<br /><span className={ui.secundario}>{p.barrio}</span></td>
                   <td>{p.operaciones.map((o) => <div key={o.operacion}>{textoOperacion(o)}</div>)}</td>
+                  <td>{p.responsable ? <>{p.responsable.nombre}{!p.responsable.activo && <div className={ui.secundario}>Cuenta desactivada</div>}</> : <span className={ui.secundario}>Sin asignar</span>}</td>
                   <td className={ui.secundario}>{textoFecha(p.actualizadoEn)}</td>
                   <td>
                     <div className={ui.acciones}>
-                      <Link to={`/propiedades/${p.id}`} className={`${ui.botonSecundario} ${ui.botonChico}`}>Editar</Link>
+                      <Link to={`/propiedades/${p.id}`} className={`${ui.botonSecundario} ${ui.botonChico}`}>{puedeEditar(p) ? 'Editar' : 'Ver'}</Link>
                       {p.estado !== 'Inactivo' && puede('PROPIEDADES_BAJA') && (
                         <button className={`${ui.botonPeligro} ${ui.botonChico}`} onClick={() => darDeBaja(p)}>Dar de baja</button>
                       )}
@@ -117,7 +120,7 @@ export default function ListadoPropiedades() {
                 </tr>
               ))}
               {visibles.length === 0 && (
-                <tr><td colSpan={9} className={ui.vacio}>No hay propiedades que coincidan con la búsqueda.</td></tr>
+                <tr><td colSpan={10} className={ui.vacio}>No hay propiedades que coincidan con la búsqueda.</td></tr>
               )}
             </tbody>
           </table>

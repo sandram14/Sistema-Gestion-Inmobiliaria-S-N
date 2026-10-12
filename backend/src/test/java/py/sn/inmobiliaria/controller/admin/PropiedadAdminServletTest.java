@@ -65,16 +65,30 @@ class PropiedadAdminServletTest {
             return conversor.apply(Entidades.casaProp001());
         }
 
+        Integer ultimoResponsable;
+        boolean ultimoCambiaResponsable;
+
+        /** La propiedad 1 está asignada al vendedor con id 50. */
         @Override
-        public PropiedadGuardada crear(PropiedadRequest req) {
+        public void verificarPuedeEditar(long id, py.sn.inmobiliaria.seguridad.UsuarioSesion actor) {
+            if (!actor.tiene(py.sn.inmobiliaria.seguridad.Permiso.PROPIEDADES_EDITAR_TODAS) && actor.id() != 50) {
+                throw new py.sn.inmobiliaria.exception.AccesoDenegadoException("Esta propiedad está asignada a otro responsable");
+            }
+        }
+
+        @Override
+        public PropiedadGuardada crear(PropiedadRequest req, Integer idResponsable) {
             llamadas.add("crear");
             ultimaRequest = req;
+            ultimoResponsable = idResponsable;
             return new PropiedadGuardada(1, "prop-001");
         }
 
         @Override
-        public PropiedadGuardada actualizar(long id, PropiedadRequest req) {
+        public PropiedadGuardada actualizar(long id, PropiedadRequest req, boolean cambiarResponsable, Integer idResponsable) {
             existe(id);
+            ultimoCambiaResponsable = cambiarResponsable;
+            ultimoResponsable = idResponsable;
             llamadas.add("actualizar " + id);
             ultimaRequest = req;
             return new PropiedadGuardada(id, "prop-001");
@@ -287,5 +301,53 @@ class PropiedadAdminServletTest {
             var r = ServletFalso.ejecutar(uploads, Peticion.de("GET", "/uploads", ruta));
             assertEquals(404, r.estado, ruta);
         }
+    }
+
+    // ---- Etapa 2B: responsable y control de propiedad ----
+
+    private static py.sn.inmobiliaria.seguridad.UsuarioSesion vendedor(int id) {
+        return new py.sn.inmobiliaria.seguridad.UsuarioSesion(id, "Ven", "Dedor", "v@x.com", "VENDEDOR");
+    }
+
+    @Test
+    void sinUsuarioActualLaPeticionSeRechaza() throws Exception {
+        var r = ServletFalso.ejecutar(servlet, Peticion.de("PUT", "/api/admin/propiedades", "/1").json(PROPIEDAD_JSON).actor(null));
+        assertEquals(401, r.estado);
+        assertTrue(admin.llamadas.isEmpty());
+    }
+
+    @Test
+    void loQueCreaUnVendedorQuedaAsignadoAEl() throws Exception {
+        String json = PROPIEDAD_JSON.replace("\"tipo\":\"Casa\",", "\"tipo\":\"Casa\",\"idResponsable\":99,");
+        ServletFalso.ejecutar(servlet, Peticion.de("POST", "/api/admin/propiedades", null).json(json).actor(vendedor(50)));
+        assertEquals(50, admin.ultimoResponsable);                 // ignora el idResponsable que envió
+    }
+
+    @Test
+    void elAdministradorEligeElResponsableAlCrearYEditar() throws Exception {
+        String json = PROPIEDAD_JSON.replace("\"tipo\":\"Casa\",", "\"tipo\":\"Casa\",\"idResponsable\":7,");
+        ServletFalso.ejecutar(servlet, Peticion.de("POST", "/api/admin/propiedades", null).json(json));
+        assertEquals(7, admin.ultimoResponsable);
+        ServletFalso.ejecutar(servlet, Peticion.de("PUT", "/api/admin/propiedades", "/1").json(json));
+        assertTrue(admin.ultimoCambiaResponsable);
+        assertEquals(7, admin.ultimoResponsable);
+    }
+
+    @Test
+    void unVendedorEditaSuPropiedadPeroNoCambiaElResponsable() throws Exception {
+        var r = ServletFalso.ejecutar(servlet, Peticion.de("PUT", "/api/admin/propiedades", "/1").json(PROPIEDAD_JSON).actor(vendedor(50)));
+        assertEquals(200, r.estado);
+        assertFalse(admin.ultimoCambiaResponsable);
+    }
+
+    @Test
+    void unVendedorNoPuedeEditarNiTocarFotosDePropiedadesAjenas() throws Exception {
+        assertEquals(403, ServletFalso.ejecutar(servlet,
+                Peticion.de("PUT", "/api/admin/propiedades", "/1").json(PROPIEDAD_JSON).actor(vendedor(51))).estado);
+        assertEquals(403, ServletFalso.ejecutar(servlet,
+                Peticion.de("PATCH", "/api/admin/propiedades", "/1/imagenes/3/principal").actor(vendedor(51))).estado);
+        assertEquals(403, ServletFalso.ejecutar(servlet,
+                Peticion.de("DELETE", "/api/admin/propiedades", "/1/imagenes/3").actor(vendedor(51))).estado);
+        assertTrue(admin.llamadas.isEmpty());
     }
 }
