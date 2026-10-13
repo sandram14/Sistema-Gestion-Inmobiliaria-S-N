@@ -1,17 +1,24 @@
+import { lazy } from 'react'
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import RutaProtegida from './auth/RutaProtegida'
 import Layout from './componentes/Layout'
 import Login from './paginas/Login'
-import ListadoPropiedades from './paginas/ListadoPropiedades'
-import FormularioPropiedad from './paginas/FormularioPropiedad'
-import MiCuenta from './paginas/MiCuenta'
-import CambiarContrasena from './paginas/CambiarContrasena'
-import Usuarios from './paginas/Usuarios'
-import FormularioUsuario from './paginas/FormularioUsuario'
-import ConsultasHistorial from './paginas/ConsultasHistorial'
-import ConsultasAnalisis from './paginas/ConsultasAnalisis'
-import DetalleConsulta from './paginas/DetalleConsulta'
-import ConsultasCalidad from './paginas/ConsultasCalidad'
+
+// Cada pantalla se descarga recién cuando se abre (carga diferida): el archivo inicial del panel
+// queda chico aunque se agreguen secciones. Mientras carga, Layout muestra "Cargando…".
+const ListadoPropiedades = lazy(() => import('./paginas/ListadoPropiedades'))
+const FormularioPropiedad = lazy(() => import('./paginas/FormularioPropiedad'))
+const MiCuenta = lazy(() => import('./paginas/MiCuenta'))
+const CambiarContrasena = lazy(() => import('./paginas/CambiarContrasena'))
+const Usuarios = lazy(() => import('./paginas/Usuarios'))
+const FormularioUsuario = lazy(() => import('./paginas/FormularioUsuario'))
+const ConsultasHistorial = lazy(() => import('./paginas/ConsultasHistorial'))
+const ConsultasAnalisis = lazy(() => import('./paginas/ConsultasAnalisis'))
+const DetalleConsulta = lazy(() => import('./paginas/DetalleConsulta'))
+const ConsultasCalidad = lazy(() => import('./paginas/ConsultasCalidad'))
+const ClientesPotenciales = lazy(() => import('./paginas/ClientesPotenciales'))
+const DetalleClientePotencial = lazy(() => import('./paginas/DetalleClientePotencial'))
+const NuevoClientePotencial = lazy(() => import('./paginas/NuevoClientePotencial'))
 
 // Rutas: /admin/login · /admin · /admin/propiedades · /admin/propiedades/nueva · /admin/propiedades/:id · /admin/cuenta
 export default function App() {
@@ -29,6 +36,9 @@ export default function App() {
           <Route path="/consultas" element={<ConsultasHistorial />} />
           <Route path="/consultas/analisis" element={<ConsultasAnalisis />} />
           <Route path="/consultas/calidad" element={<ConsultasCalidad />} />
+          <Route path="/consultas/clientes" element={<ClientesPotenciales />} />
+          <Route path="/consultas/clientes/nuevo" element={<NuevoClientePotencial />} />
+          <Route path="/consultas/clientes/:id" element={<DetalleClientePotencial />} />
           <Route path="/consultas/:id" element={<DetalleConsulta />} />
           <Route path="/usuarios" element={<Usuarios />} />
           <Route path="/usuarios/nuevo" element={<UsuarioConClave />} />

@@ -31,6 +31,12 @@ public enum Permiso {
     USUARIOS_VER,
     /** Crear, editar, asignar rol, activar y desactivar usuarios. */
     USUARIOS_GESTIONAR,
+    /** Clientes potenciales: el vendedor solo los asignados a él (registrar a mano y cambiar su estado). */
+    CLIENTES_VER,
+    /** Clientes potenciales: todos. */
+    CLIENTES_VER_TODOS,
+    /** Asignar el responsable de un cliente potencial. */
+    CLIENTES_ASIGNAR,
     /** Ver y editar los datos de la propia cuenta. Lo tiene todo usuario del panel. */
     CUENTA_PROPIA;
 
@@ -42,8 +48,8 @@ public enum Permiso {
             ADMIN, EnumSet.allOf(Permiso.class),
             GERENTE, EnumSet.of(PROPIEDADES_VER, PROPIEDADES_EDITAR, PROPIEDADES_EDITAR_TODAS, PROPIEDADES_BAJA,
                     OFERTAS_GESTIONAR, CONTENIDO_EDITAR, CONFIGURACION_VER, CONSULTAS_VER, CONSULTAS_VER_TODAS,
-                    ESTADISTICAS_VER, USUARIOS_VER, CUENTA_PROPIA),
-            VENDEDOR, EnumSet.of(PROPIEDADES_VER, PROPIEDADES_EDITAR, CONSULTAS_VER, CUENTA_PROPIA));
+                    ESTADISTICAS_VER, USUARIOS_VER, CLIENTES_VER, CLIENTES_VER_TODOS, CLIENTES_ASIGNAR, CUENTA_PROPIA),
+            VENDEDOR, EnumSet.of(PROPIEDADES_VER, PROPIEDADES_EDITAR, CONSULTAS_VER, CLIENTES_VER, CUENTA_PROPIA));
 
     /** Roles que pueden usar el panel, en orden de mayor a menor alcance. */
     public static final List<String> ROLES = List.of(ADMIN, GERENTE, VENDEDOR);

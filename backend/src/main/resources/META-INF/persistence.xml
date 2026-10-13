@@ -26,6 +26,7 @@
         <class>py.sn.inmobiliaria.model.Imagen</class>
         <class>py.sn.inmobiliaria.model.OperacionPropiedad</class>
         <class>py.sn.inmobiliaria.model.Consulta</class>
+        <class>py.sn.inmobiliaria.model.ClientePotencial</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
 
         <properties>

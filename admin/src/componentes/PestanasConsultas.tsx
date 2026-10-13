@@ -13,6 +13,7 @@ export default function PestanasConsultas() {
         <NavLink to="/consultas" end className={clase}>Historial</NavLink>
         {puede('CONSULTAS_VER_TODAS') && <NavLink to="/consultas/analisis" className={clase}>Análisis técnico</NavLink>}
         {puede('CONSULTAS_VER_TODAS') && <NavLink to="/consultas/calidad" className={clase}>Calidad de respuestas</NavLink>}
+        {puede('CLIENTES_VER') && <NavLink to="/consultas/clientes" className={clase}>Clientes potenciales</NavLink>}
       </nav>
     </>
   )

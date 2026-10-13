@@ -265,6 +265,12 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
 .secundario { color: var(--gris); font-size: 12px; }
 
 /* ── Fichas del análisis ──────────────────────────────────────────── */
+.encabezadoSeccion { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.encabezadoSeccion .ayuda { margin: 0; }
+.estadoPendiente { display: inline-block; padding: 1px 8px; border-radius: var(--radio-chico); font-size: 12px; font-weight: 500;
+  background: var(--ambar-suave); color: #7a5b12; }
+.filaControl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.filaControl .input { max-width: 240px; }
 .pestanas { display: flex; gap: 4px; border-bottom: 1px solid var(--borde); margin: -8px 0 20px; overflow-x: auto; }
 .pestana { padding: 8px 14px; color: var(--texto-secundario); text-decoration: none; font-weight: 500; white-space: nowrap;
   border-bottom: 2px solid transparent; margin-bottom: -1px; }
@@ -316,9 +322,9 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
 .subida { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
 
 /* ── Mi cuenta: datos en formato etiqueta / valor ─────────────────── */
-.datos { display: grid; grid-template-columns: 180px 1fr; margin: 0; }
+.datos { display: grid; grid-template-columns: minmax(160px, 220px) 1fr; column-gap: 24px; margin: 0; }
 .datos dt, .datos dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--borde); }
-.datos dt { color: var(--texto-secundario); font-weight: 500; }
+.datos dt { color: var(--texto-secundario); font-weight: 500; overflow-wrap: anywhere; }
 .datos dt:last-of-type, .datos dd:last-of-type { border-bottom: none; }
 @media (max-width: 640px) {
   .datos { grid-template-columns: 1fr; }

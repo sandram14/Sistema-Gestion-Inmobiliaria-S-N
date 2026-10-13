@@ -23,7 +23,7 @@ class PermisoTest {
         Set<Permiso> g = Permiso.deRol(GERENTE);
         for (Permiso p : new Permiso[] {PROPIEDADES_VER, PROPIEDADES_EDITAR, PROPIEDADES_EDITAR_TODAS, PROPIEDADES_BAJA,
                 OFERTAS_GESTIONAR, CONTENIDO_EDITAR, CONFIGURACION_VER, CONSULTAS_VER, CONSULTAS_VER_TODAS,
-                ESTADISTICAS_VER, USUARIOS_VER, CUENTA_PROPIA}) {
+                ESTADISTICAS_VER, USUARIOS_VER, CLIENTES_VER, CLIENTES_VER_TODOS, CLIENTES_ASIGNAR, CUENTA_PROPIA}) {
             assertTrue(g.contains(p), p.name());
         }
         assertFalse(g.contains(USUARIOS_GESTIONAR));
@@ -32,7 +32,7 @@ class PermisoTest {
 
     @Test
     void elVendedorSoloVePropiedadesEditaLasSuyasYVeConsultas() {
-        assertEquals(EnumSet.of(PROPIEDADES_VER, PROPIEDADES_EDITAR, CONSULTAS_VER, CUENTA_PROPIA), Permiso.deRol(VENDEDOR));
+        assertEquals(EnumSet.of(PROPIEDADES_VER, PROPIEDADES_EDITAR, CONSULTAS_VER, CLIENTES_VER, CUENTA_PROPIA), Permiso.deRol(VENDEDOR));
     }
 
     @Test

@@ -26,3 +26,6 @@ CREATE INDEX ix_consulta_propiedad     ON consulta (id_propiedad);
 CREATE INDEX ix_consulta_fecha         ON consulta (fecha_hora);
 CREATE INDEX ix_consulta_revision      ON consulta (estado_revision);
 CREATE INDEX ix_consulta_recomendacion_propiedad ON consulta_recomendacion (id_propiedad);
+CREATE INDEX ix_cliente_responsable ON cliente_potencial (id_responsable);
+CREATE INDEX ix_cliente_estado ON cliente_potencial (estado);
+CREATE INDEX ix_cliente_creado ON cliente_potencial (creado_en);

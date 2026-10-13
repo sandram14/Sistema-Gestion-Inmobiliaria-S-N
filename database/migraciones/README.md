@@ -94,3 +94,17 @@ las consultas anteriores no se reclasifican y en el análisis figuran como "No r
 | `004_revertir_fuera_ambito.sql` | Restaura la restricción; se detiene si ya hay consultas FUERA_DE_AMBITO | Sí, todo o nada |
 
 Aplicarla antes de desplegar el backend 0.16.0.
+
+## 005 — Clientes potenciales (panel, etapa 3, entrega 2)
+
+Crea la tabla `cliente_potencial`. **No modifica ninguna tabla ni dato existente.** Datos personales mínimos:
+nombre, teléfono y/o email (al menos uno) y el detalle del interés; no se guarda la IP. Si el registro viene
+del chat, la base exige la fecha y la versión del texto de aceptación del tratamiento.
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `005_verificar_clientes.sql` | Comprueba que la tabla no exista y que la 004 esté aplicada | No |
+| `005_clientes_potenciales.sql` | Crea la tabla (requiere la 004) y comprueba que no cambie ningún dato | Sí, todo o nada |
+| `005_revertir_clientes.sql` | Elimina la tabla; se detiene si tiene registros (son datos personales reales) | Sí, todo o nada |
+
+Aplicarla antes de desplegar el backend 0.17.0.

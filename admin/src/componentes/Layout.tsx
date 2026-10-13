@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Building2, LogOut, Menu, MessagesSquare, Plus, UserRound, Users, X } from 'lucide-react'
 import { useSesion } from '../auth/Sesion'
@@ -100,7 +100,9 @@ export default function Layout() {
           <strong>S&N Inmobiliaria</strong>
         </header>
         <main className={ui.contenido}>
-          <Outlet />
+          <Suspense fallback={<p className={ui.cargando}>Cargando…</p>}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

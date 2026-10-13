@@ -282,7 +282,8 @@ class AsistenteServiceTest {
     @Test
     void lasInstruccionesPidenFrasesLegiblesSinSeparadores() {
         assertTrue(AsistenteService.INSTRUCCIONES.contains("no copies el formato interno de DATOS"));
-        assertTrue(AsistenteService.INSTRUCCIONES.contains("- prop-004: Departamento en San José"));
+        assertTrue(AsistenteService.INSTRUCCIONES.contains("- Departamento en San José"));   // el ejemplo ya no muestra códigos
+        assertFalse(AsistenteService.INSTRUCCIONES.contains("- prop-004:"));
     }
 
     @Test
@@ -325,5 +326,17 @@ class AsistenteServiceTest {
         assertFalse(r.sugerirWhatsApp());                       // nunca junto con el asesor
         assertEquals("FUERA_DE_AMBITO", guardadas.get(guardadas.size() - 1).getResultado());
         assertTrue(cliente.ultimasInstrucciones.contains("[[FUERA_DE_AMBITO]]"));
+    }
+
+    @Test
+    void lasPropiedadesSeLeenDeLaMarcaInternaYElTextoNoMuestraCodigos() {
+        cliente.respuesta = "Tenemos una casa en Area 1, Ciudad del Este. Venta: 45000 USD. [[PROPIEDADES: prop-001, prop-999]]";
+
+        AsistenteResponse r = servicio.responder(visitante, "¿Qué casas tienen?", null);
+
+        assertEquals("Tenemos una casa en Area 1, Ciudad del Este. Venta: 45000 USD.", r.respuesta());
+        assertFalse(r.respuesta().contains("prop-"));
+        assertEquals(List.of("prop-001"), r.propiedadesRelacionadas()); // prop-999 no existe: se descarta
+        assertTrue(cliente.ultimasInstrucciones.contains("SIN escribir su código"));
     }
 }

@@ -287,4 +287,19 @@ class AutenticacionTest {
         ServletFalso.ejecutar(servlet, loginComo("gerente@sn.local"));
         assertEquals(0, estado("GET", "/api/admin/consultas/analisis"));
     }
+
+    @Test
+    void elVendedorGestionaSusClientesPeroNoAsignaResponsables() throws Exception {
+        ServletFalso.ejecutar(servlet, loginComo("vendedor@sn.local"));
+        assertEquals(0, estado("GET", "/api/admin/clientes-potenciales"));
+        assertEquals(0, estado("POST", "/api/admin/clientes-potenciales"));
+        assertEquals(0, estado("PATCH", "/api/admin/clientes-potenciales/4/estado"));
+        assertEquals(403, estado("PATCH", "/api/admin/clientes-potenciales/4/responsable"));
+    }
+
+    @Test
+    void elGerenteAsignaResponsablesDeClientes() throws Exception {
+        ServletFalso.ejecutar(servlet, loginComo("gerente@sn.local"));
+        assertEquals(0, estado("PATCH", "/api/admin/clientes-potenciales/4/responsable"));
+    }
 }

@@ -72,4 +72,14 @@ class ReglasAccesoTest {
         assertEquals(Optional.of(Permiso.CONSULTAS_VER_TODAS), p("GET", "/api/admin/consultas/analisis"));
         assertTrue(p("DELETE", "/api/admin/consultas/12").isEmpty()); // las consultas no se borran desde el panel
     }
+
+    @Test
+    void clientesPotenciales() {
+        assertEquals(Optional.of(Permiso.CLIENTES_VER), p("GET", "/api/admin/clientes-potenciales"));
+        assertEquals(Optional.of(Permiso.CLIENTES_VER), p("GET", "/api/admin/clientes-potenciales/3"));
+        assertEquals(Optional.of(Permiso.CLIENTES_VER), p("POST", "/api/admin/clientes-potenciales"));
+        assertEquals(Optional.of(Permiso.CLIENTES_VER), p("PATCH", "/api/admin/clientes-potenciales/3/estado"));
+        assertEquals(Optional.of(Permiso.CLIENTES_ASIGNAR), p("PATCH", "/api/admin/clientes-potenciales/3/responsable"));
+        assertTrue(p("DELETE", "/api/admin/clientes-potenciales/3").isEmpty());
+    }
 }

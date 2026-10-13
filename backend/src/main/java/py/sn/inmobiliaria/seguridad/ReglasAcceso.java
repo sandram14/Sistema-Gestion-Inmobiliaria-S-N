@@ -53,6 +53,12 @@ public final class ReglasAcceso {
             r("GET", "/api/admin/consultas/analisis", Permiso.CONSULTAS_VER_TODAS),
             r("GET", "/api/admin/consultas/" + ID, Permiso.CONSULTAS_VER),
             r("PATCH", "/api/admin/consultas/" + ID + "/revision", Permiso.CONSULTAS_VER),
+            // Clientes potenciales (el vendedor solo los asignados a él: lo filtra el servicio)
+            r("GET", "/api/admin/clientes-potenciales", Permiso.CLIENTES_VER),
+            r("GET", "/api/admin/clientes-potenciales/" + ID, Permiso.CLIENTES_VER),
+            r("POST", "/api/admin/clientes-potenciales", Permiso.CLIENTES_VER),
+            r("PATCH", "/api/admin/clientes-potenciales/" + ID + "/estado", Permiso.CLIENTES_VER),
+            r("PATCH", "/api/admin/clientes-potenciales/" + ID + "/responsable", Permiso.CLIENTES_ASIGNAR),
             // Cuenta propia
             r("GET", "/api/admin/cuenta", Permiso.CUENTA_PROPIA),
             r("PUT", "/api/admin/cuenta", Permiso.CUENTA_PROPIA),

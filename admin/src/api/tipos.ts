@@ -10,7 +10,7 @@ export type Permiso =
   | 'PROPIEDADES_VER' | 'PROPIEDADES_EDITAR' | 'PROPIEDADES_EDITAR_TODAS' | 'PROPIEDADES_BAJA'
   | 'OFERTAS_GESTIONAR' | 'CONTENIDO_EDITAR' | 'CONFIGURACION_VER' | 'CONFIGURACION_EDITAR'
   | 'CONSULTAS_VER' | 'CONSULTAS_VER_TODAS' | 'ESTADISTICAS_VER' | 'USUARIOS_VER' | 'USUARIOS_GESTIONAR'
-  | 'CUENTA_PROPIA'
+  | 'CLIENTES_VER' | 'CLIENTES_VER_TODOS' | 'CLIENTES_ASIGNAR' | 'CUENTA_PROPIA'
 
 export interface UsuarioSesion {
   id: number
@@ -207,4 +207,22 @@ export interface AnalisisConsultas {
   }
   sinServicio: ConsultaResumen[]; derivadas: ConsultaResumen[]; sinInformacionInferida: ConsultaResumen[]
   sinInformacionUtil: ConsultaResumen[]; fueraDeAmbito: ConsultaResumen[]
+}
+
+// ---- Clientes potenciales ----
+export type EstadoCliente = 'PENDIENTE' | 'CONTACTADO' | 'DESCARTADO'
+export type OrigenCliente = 'CHAT' | 'WHATSAPP' | 'LLAMADA' | 'OTRO'
+export interface PersonaRef { id: number; nombre: string; activo: boolean }
+export interface ClienteResumen {
+  id: number; nombre: string; contacto: string; interes: string | null; propiedad: PropiedadRef | null
+  origen: OrigenCliente; estado: EstadoCliente; responsable: PersonaRef | null; creadoEn: string
+}
+export interface ClienteDetalle {
+  id: number; nombre: string; telefono: string | null; email: string | null; interes: string | null; propiedad: PropiedadRef | null
+  idConsulta: number | null; origen: OrigenCliente; estado: EstadoCliente; responsable: PersonaRef | null; registradoPor: PersonaRef | null
+  consentimientoEn: string | null; consentimientoVersion: string | null; creadoEn: string; actualizadoEn: string
+}
+export interface PaginaClientes {
+  elementos: ClienteResumen[]; total: number; pagina: number; tamano: number
+  conteos: { total: number; pendientes: number; contactados: number; descartados: number }
 }
