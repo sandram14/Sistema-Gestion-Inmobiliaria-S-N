@@ -177,3 +177,34 @@ export interface BarriosGeoJson {
     properties: { id: number; barrio: string; ciudad: string }
   }[]
 }
+
+// ---- Consultas del chat IA ----
+export interface PropiedadRef { id: number; codigo: string; titulo: string }
+export type ResultadoConsulta = 'RESPONDIDA' | 'DERIVADA_ASESOR' | 'SIN_SERVICIO' | 'BLOQUEADA' | 'FUERA_DE_AMBITO'
+export interface PaginaConsultas { elementos: ConsultaResumen[]; total: number; pagina: number; tamano: number }
+
+/** registroCompleto en false: consulta anterior al registro de resultados y recomendaciones */
+export interface ConsultaResumen {
+  id: number; fechaHora: string; pregunta: string; propiedad: PropiedadRef | null
+  resultado: ResultadoConsulta | null; estadoRevision: 'PENDIENTE' | 'REVISADA'; registroCompleto: boolean
+}
+export interface ConsultaDetalle {
+  id: number; fechaHora: string; pregunta: string; respuesta: string | null; propiedad: PropiedadRef | null
+  recomendadas: PropiedadRef[]; resultado: ResultadoConsulta | null; registroCompleto: boolean
+  estadoRevision: 'PENDIENTE' | 'REVISADA'; revisadaPor: string | null; revisadaEn: string | null
+  conversacion: { id: number; fechaHora: string; pregunta: string; actual: boolean }[]
+}
+export interface Conteo { nombre: string; cantidad: number }
+export interface ConteoPropiedad { propiedad: PropiedadRef; cantidad: number }
+export interface AnalisisConsultas {
+  indicadores: {
+    consultas: number; conversaciones: number; conPropiedad: number; sinServicio: number; conRegistroCompleto: number
+    preguntasRepetidas: Conteo[]; propiedadesConsultadas: ConteoPropiedad[]; tiposComprobados: Conteo[]; zonasComprobadas: Conteo[]
+    temasInferidos: Conteo[]; tiposInferidos: Conteo[]; zonasInferidas: Conteo[]; masRecomendadas: ConteoPropiedad[]
+    rangosPrecio: { operacion: string; moneda: string; rango: string; cantidad: number }[]
+    caracteristicasInferidas: Conteo[]
+    calidad: { fueraDeAmbitoNoRegistrado: number }
+  }
+  sinServicio: ConsultaResumen[]; derivadas: ConsultaResumen[]; sinInformacionInferida: ConsultaResumen[]
+  sinInformacionUtil: ConsultaResumen[]; fueraDeAmbito: ConsultaResumen[]
+}

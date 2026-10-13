@@ -263,6 +263,37 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
 .estadoInactivo { background: #eceeea; color: var(--gris); }
 .codigo { font-family: ui-monospace, Consolas, monospace; font-size: 13px; white-space: nowrap; }
 .secundario { color: var(--gris); font-size: 12px; }
+
+/* ── Fichas del análisis ──────────────────────────────────────────── */
+.pestanas { display: flex; gap: 4px; border-bottom: 1px solid var(--borde); margin: -8px 0 20px; overflow-x: auto; }
+.pestana { padding: 8px 14px; color: var(--texto-secundario); text-decoration: none; font-weight: 500; white-space: nowrap;
+  border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.pestana:hover { color: var(--verde); }
+.pestanaActiva, .pestanaActiva:hover { color: var(--verde); border-bottom-color: var(--verde); }
+.paginacion { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.gridNumeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.gridFichas { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; align-items: start; }
+.ficha { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 14px 16px 16px; }
+.fichaCabecera { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.fichaTitulo { margin: 0; font-size: 14px; font-weight: 600; }
+.fichaValor { margin-top: 8px; font-size: 28px; font-weight: 600; line-height: 1.2; color: var(--verde); }
+.fichaDetalle { margin: 4px 0 12px; font-size: 12px; color: var(--gris); }
+.gridNumeros .fichaDetalle { margin-bottom: 0; }
+.barras { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.barraTexto { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; margin-bottom: 4px; }
+.barraNumero { font-variant-numeric: tabular-nums; color: var(--texto-secundario); }
+.barraFondo { height: 6px; border-radius: 3px; background: #eceee9; overflow: hidden; }
+.barraRelleno { height: 100%; background: var(--verde-medio); border-radius: 3px; }
+.separadorFicha { height: 1px; background: var(--borde); margin: 12px 0; }
+.listaFicha { list-style: none; margin: 0; padding: 0; }
+.listaFicha li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--borde); font-size: 13px; }
+.listaFicha li:last-child { border-bottom: none; }
+.etiquetaComprobado, .etiquetaInferido {
+  display: inline-block; padding: 0 6px; border-radius: var(--radio-chico); border: 1px solid;
+  font-size: 11px; font-weight: 500; line-height: 18px;
+}
+.etiquetaComprobado { color: var(--verde); border-color: #b9d3be; background: var(--acento-suave); }
+.etiquetaInferido { color: #7a5b12; border-color: var(--ambar-borde); background: var(--ambar-suave); }
 .tabla .numero { text-align: right; font-variant-numeric: tabular-nums; }
 .pieTabla { margin-top: 8px; color: var(--gris); font-size: 12px; }
 

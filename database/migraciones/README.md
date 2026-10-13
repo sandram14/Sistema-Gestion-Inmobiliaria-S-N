@@ -60,3 +60,37 @@ Agrega, sin modificar ni borrar datos: los roles `GERENTE` y `VENDEDOR`, la colu
 
 **Orden obligatorio:** aplicar la migración **antes** de desplegar el backend 0.13.0, porque
 Hibernate valida al arrancar que exista la columna `debe_cambiar_password`.
+
+## 003 — Resultado, revisión interna y recomendaciones de las consultas del chat IA (panel, etapa 3)
+
+Agrega, sin modificar ni borrar datos: en `consulta`, `resultado` (RESPONDIDA, DERIVADA_ASESOR,
+SIN_SERVICIO o BLOQUEADA), `estado_revision` (PENDIENTE o REVISADA), `revisada_por` y `revisada_en`;
+y la tabla `consulta_recomendacion` (consulta ↔ propiedad recomendada).
+
+Las consultas existentes conservan exactamente su pregunta, respuesta, propiedad, sesión y fecha
+(la transacción lo comprueba). Quedan **sin resultado y sin recomendaciones**: en su momento no se
+registraban, y no se deducen ni se inventan. El panel las muestra como "No registrado".
+
+La revisión es **interna**: indica si alguien del equipo leyó la conversación, no si el cliente fue atendido.
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `003_verificar_consultas.sql` | Estructura real de `consulta`, columnas nuevas y cantidades | No |
+| `003_consultas_revision.sql` | La migración (requiere la 002), con comprobación consulta por consulta | Sí, todo o nada |
+| `003_revertir_consultas.sql` | Quita lo agregado; las consultas no se tocan (se pierden resultados, revisiones y recomendaciones registrados) | Sí, todo o nada |
+
+**Orden obligatorio:** aplicar la migración antes de desplegar el backend 0.15.0 (Hibernate valida las columnas al arrancar).
+
+## 004 — Resultado FUERA_DE_AMBITO (panel, etapa 3, entrega 1)
+
+Amplía la restricción `ck_consulta_resultado` con `FUERA_DE_AMBITO`, que el asistente registra desde
+ahora cuando la pregunta no trata sobre propiedades ni sobre la inmobiliaria. **No modifica datos**:
+las consultas anteriores no se reclasifican y en el análisis figuran como "No registrado".
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `004_verificar_fuera_ambito.sql` | Muestra la restricción actual y los conteos | No |
+| `004_resultado_fuera_ambito.sql` | La migración (requiere la 003), comprobando que ningún resultado cambie | Sí, todo o nada |
+| `004_revertir_fuera_ambito.sql` | Restaura la restricción; se detiene si ya hay consultas FUERA_DE_AMBITO | Sí, todo o nada |
+
+Aplicarla antes de desplegar el backend 0.16.0.

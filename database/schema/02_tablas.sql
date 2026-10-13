@@ -173,5 +173,17 @@ CREATE TABLE consulta (
     respuesta     text,
     id_propiedad  bigint      REFERENCES propiedad (id_propiedad) ON DELETE SET NULL,
     fecha_hora    timestamptz NOT NULL DEFAULT now(),
+    -- Migración 003: resultado registrado por el backend y revisión interna del equipo
+    resultado       varchar(20) CONSTRAINT ck_consulta_resultado CHECK (resultado IN ('RESPONDIDA', 'DERIVADA_ASESOR', 'SIN_SERVICIO', 'BLOQUEADA', 'FUERA_DE_AMBITO')),
+    estado_revision varchar(10) NOT NULL DEFAULT 'PENDIENTE' CONSTRAINT ck_consulta_revision CHECK (estado_revision IN ('PENDIENTE', 'REVISADA')),
+    revisada_por    integer REFERENCES usuario (id_usuario) ON DELETE SET NULL,
+    revisada_en     timestamptz,
     CONSTRAINT ck_consulta_texto CHECK (char_length(btrim(consulta)) BETWEEN 1 AND 2000)
+);
+
+-- Propiedades recomendadas por el asistente en cada consulta (migración 003)
+CREATE TABLE consulta_recomendacion (
+    id_consulta  bigint NOT NULL REFERENCES consulta (id_consulta) ON DELETE CASCADE,
+    id_propiedad bigint NOT NULL REFERENCES propiedad (id_propiedad) ON DELETE CASCADE,
+    PRIMARY KEY (id_consulta, id_propiedad)
 );

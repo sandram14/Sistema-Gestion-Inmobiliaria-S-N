@@ -24,3 +24,5 @@ CREATE INDEX ix_operacion_prop_oper    ON operacion_propiedad (id_operacion);
 CREATE INDEX ix_consulta_sesion        ON consulta (id_sesion);
 CREATE INDEX ix_consulta_propiedad     ON consulta (id_propiedad);
 CREATE INDEX ix_consulta_fecha         ON consulta (fecha_hora);
+CREATE INDEX ix_consulta_revision      ON consulta (estado_revision);
+CREATE INDEX ix_consulta_recomendacion_propiedad ON consulta_recomendacion (id_propiedad);

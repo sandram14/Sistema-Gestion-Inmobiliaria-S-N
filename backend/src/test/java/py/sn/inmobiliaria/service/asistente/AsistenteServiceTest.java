@@ -154,6 +154,9 @@ class AsistenteServiceTest {
         assertEquals("¿Tiene cochera?", c.getConsulta());
         assertEquals("No se indica cochera en prop-001.", c.getRespuesta());
         assertEquals("prop-001", c.getPropiedad().getCodigo());
+        assertEquals("DERIVADA_ASESOR", c.getResultado());                 // se registra el resultado
+        assertEquals(java.util.List.of("prop-001"),
+                c.getRecomendadas().stream().map(py.sn.inmobiliaria.model.Propiedad::getCodigo).toList());
     }
 
     @Test
@@ -215,6 +218,8 @@ class AsistenteServiceTest {
         assertEquals(503, e.estadoHttp());
         assertTrue(e.getMessage().contains("WhatsApp"));
         assertEquals(AsistenteService.RESPUESTA_RESPALDO, guardadas.get(0).getRespuesta());
+        assertEquals("SIN_SERVICIO", guardadas.get(0).getResultado());
+        assertTrue(guardadas.get(0).getRecomendadas().isEmpty());
     }
 
     @Test
@@ -308,5 +313,17 @@ class AsistenteServiceTest {
 
         String pregunta = cliente.ultimoContenido.substring(cliente.ultimoContenido.indexOf("PREGUNTA DEL VISITANTE"));
         assertEquals(2, pregunta.split("<<<|>>>", -1).length - 1); // solo los delimitadores propios
+    }
+
+    @Test
+    void unaPreguntaFueraDelAmbitoSeRegistraSinMostrarLaMarcaNiSugerirAsesor() {
+        cliente.respuesta = "Solo puedo ayudarle con consultas sobre propiedades. [[FUERA_DE_AMBITO]] [[AGENTE]]";
+
+        AsistenteResponse r = servicio.responder(visitante, "¿Quién ganó el mundial?", null);
+
+        assertEquals("Solo puedo ayudarle con consultas sobre propiedades.", r.respuesta()); // sin ninguna marca
+        assertFalse(r.sugerirWhatsApp());                       // nunca junto con el asesor
+        assertEquals("FUERA_DE_AMBITO", guardadas.get(guardadas.size() - 1).getResultado());
+        assertTrue(cliente.ultimasInstrucciones.contains("[[FUERA_DE_AMBITO]]"));
     }
 }

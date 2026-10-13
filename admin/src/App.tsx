@@ -8,6 +8,10 @@ import MiCuenta from './paginas/MiCuenta'
 import CambiarContrasena from './paginas/CambiarContrasena'
 import Usuarios from './paginas/Usuarios'
 import FormularioUsuario from './paginas/FormularioUsuario'
+import ConsultasHistorial from './paginas/ConsultasHistorial'
+import ConsultasAnalisis from './paginas/ConsultasAnalisis'
+import DetalleConsulta from './paginas/DetalleConsulta'
+import ConsultasCalidad from './paginas/ConsultasCalidad'
 
 // Rutas: /admin/login · /admin · /admin/propiedades · /admin/propiedades/nueva · /admin/propiedades/:id · /admin/cuenta
 export default function App() {
@@ -22,6 +26,10 @@ export default function App() {
           <Route path="/propiedades/:id" element={<FormularioConClave />} />
           <Route path="/cuenta" element={<MiCuenta />} />
           <Route path="/cuenta/contrasena" element={<CambiarContrasena />} />
+          <Route path="/consultas" element={<ConsultasHistorial />} />
+          <Route path="/consultas/analisis" element={<ConsultasAnalisis />} />
+          <Route path="/consultas/calidad" element={<ConsultasCalidad />} />
+          <Route path="/consultas/:id" element={<DetalleConsulta />} />
           <Route path="/usuarios" element={<Usuarios />} />
           <Route path="/usuarios/nuevo" element={<UsuarioConClave />} />
           <Route path="/usuarios/:id" element={<UsuarioConClave />} />

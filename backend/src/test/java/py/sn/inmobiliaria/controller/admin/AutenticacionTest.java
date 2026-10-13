@@ -273,4 +273,18 @@ class AutenticacionTest {
         assertEquals(403, estado("GET", "/api/admin/usuarios"));
         assertEquals(0, estado("GET", "/api/admin/cuenta"));
     }
+
+    @Test
+    void elVendedorVeElHistorialPeroNoElAnalisis() throws Exception {
+        ServletFalso.ejecutar(servlet, loginComo("vendedor@sn.local"));
+        assertEquals(0, estado("GET", "/api/admin/consultas"));
+        assertEquals(0, estado("PATCH", "/api/admin/consultas/4/revision"));
+        assertEquals(403, estado("GET", "/api/admin/consultas/analisis"));
+    }
+
+    @Test
+    void elGerenteVeElAnalisis() throws Exception {
+        ServletFalso.ejecutar(servlet, loginComo("gerente@sn.local"));
+        assertEquals(0, estado("GET", "/api/admin/consultas/analisis"));
+    }
 }

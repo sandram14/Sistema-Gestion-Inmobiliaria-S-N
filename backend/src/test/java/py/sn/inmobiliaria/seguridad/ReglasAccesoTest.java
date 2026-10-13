@@ -63,4 +63,13 @@ class ReglasAccesoTest {
         assertFalse(ReglasAcceso.permitidaConContrasenaTemporal("GET", "/api/admin/propiedades"));
         assertFalse(ReglasAcceso.permitidaConContrasenaTemporal("PUT", "/api/admin/cuenta/email"));
     }
+
+    @Test
+    void consultasDelChat() {
+        assertEquals(Optional.of(Permiso.CONSULTAS_VER), p("GET", "/api/admin/consultas"));
+        assertEquals(Optional.of(Permiso.CONSULTAS_VER), p("GET", "/api/admin/consultas/12"));
+        assertEquals(Optional.of(Permiso.CONSULTAS_VER), p("PATCH", "/api/admin/consultas/12/revision"));
+        assertEquals(Optional.of(Permiso.CONSULTAS_VER_TODAS), p("GET", "/api/admin/consultas/analisis"));
+        assertTrue(p("DELETE", "/api/admin/consultas/12").isEmpty()); // las consultas no se borran desde el panel
+    }
 }

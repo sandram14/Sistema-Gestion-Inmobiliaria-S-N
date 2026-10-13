@@ -105,6 +105,11 @@ public class AppContextListener implements ServletContextListener {
             registrar(contexto, PropiedadAdminService.class,
                     new PropiedadAdminService(tx, propiedadDao, catalogoDao, imagenDao, ubicacionDao));
             registrar(contexto, CatalogoService.class, new CatalogoService(tx, catalogoDao, ubicacionService));
+            registrar(contexto, py.sn.inmobiliaria.service.consultas.ConsultaAdminService.class,
+                    new py.sn.inmobiliaria.service.consultas.ConsultaAdminService(tx,
+                            new py.sn.inmobiliaria.repository.impl.JpaConsultaAdminDao(),
+                            () -> ubicacionService.listarJerarquia().stream()
+                                    .flatMap(f -> java.util.stream.Stream.of(f.ciudad(), f.barrio())).distinct().toList()));
             registrar(contexto, UsuarioService.class,
                     new UsuarioService(tx, new JpaUsuarioDao(), catalogoDao, new ContrasenaHasher()));
 

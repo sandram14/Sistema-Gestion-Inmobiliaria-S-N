@@ -48,6 +48,11 @@ public final class ReglasAcceso {
             r("PUT", "/api/admin/usuarios/" + ID, Permiso.USUARIOS_GESTIONAR),
             r("PATCH", "/api/admin/usuarios/" + ID + "/estado", Permiso.USUARIOS_GESTIONAR),
             r("POST", "/api/admin/usuarios/" + ID + "/contrasena-temporal", Permiso.USUARIOS_GESTIONAR),
+            // Consultas del chat IA: historial (el vendedor ve solo las suyas) y análisis de todo el sitio
+            r("GET", "/api/admin/consultas", Permiso.CONSULTAS_VER),
+            r("GET", "/api/admin/consultas/analisis", Permiso.CONSULTAS_VER_TODAS),
+            r("GET", "/api/admin/consultas/" + ID, Permiso.CONSULTAS_VER),
+            r("PATCH", "/api/admin/consultas/" + ID + "/revision", Permiso.CONSULTAS_VER),
             // Cuenta propia
             r("GET", "/api/admin/cuenta", Permiso.CUENTA_PROPIA),
             r("PUT", "/api/admin/cuenta", Permiso.CUENTA_PROPIA),
