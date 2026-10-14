@@ -226,3 +226,14 @@ export interface PaginaClientes {
   elementos: ClienteResumen[]; total: number; pagina: number; tamano: number
   conteos: { total: number; pendientes: number; contactados: number; descartados: number }
 }
+
+// ---- Gestión del sitio web ----
+export interface ContenidoInicio {
+  imagenPortada: string | null; etiqueta: string; titulo: string; subtitulo: string
+  nosotrosTitulo: string; nosotrosTexto: string; nosotrosImagen: string | null
+}
+export interface ContenidoContacto {
+  nombreEmpresa: string; descripcion: string; direccion: string; ciudad: string
+  email: string; telefono: string; whatsapp: string; horario: string
+}
+export interface Destacada { idPropiedad: number; codigo: string; titulo: string; estado: string; orden: number }

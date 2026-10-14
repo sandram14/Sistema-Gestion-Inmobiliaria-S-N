@@ -82,4 +82,13 @@ class ReglasAccesoTest {
         assertEquals(Optional.of(Permiso.CLIENTES_ASIGNAR), p("PATCH", "/api/admin/clientes-potenciales/3/responsable"));
         assertTrue(p("DELETE", "/api/admin/clientes-potenciales/3").isEmpty());
     }
+
+    @Test
+    void gestionDelSitio() {
+        assertEquals(Optional.of(Permiso.CONTENIDO_EDITAR), p("GET", "/api/admin/sitio/secciones/inicio"));
+        assertEquals(Optional.of(Permiso.CONTENIDO_EDITAR), p("PUT", "/api/admin/sitio/secciones/contacto"));
+        assertEquals(Optional.of(Permiso.CONTENIDO_EDITAR), p("POST", "/api/admin/sitio/imagenes"));
+        assertEquals(Optional.of(Permiso.OFERTAS_GESTIONAR), p("PUT", "/api/admin/sitio/ofertas"));
+        assertTrue(p("PUT", "/api/admin/sitio/secciones/precios").isEmpty()); // sección inexistente: bloqueada
+    }
 }

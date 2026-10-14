@@ -108,3 +108,19 @@ del chat, la base exige la fecha y la versión del texto de aceptación del trat
 | `005_revertir_clientes.sql` | Elimina la tabla; se detiene si tiene registros (son datos personales reales) | Sí, todo o nada |
 
 Aplicarla antes de desplegar el backend 0.17.0.
+
+## 006 — Gestión del sitio web (contenido editable y propiedades destacadas)
+
+Crea `seccion_sitio` (contenido JSON de Inicio, Servicios, Nosotros y Contacto, validado por la base con
+`IS JSON OBJECT`) y `propiedad_destacada` (selección y orden de la portada; solo referencia propiedades).
+**No modifica ninguna tabla ni dato existente.** El contenido inicial es el que el sitio muestra hoy;
+Contacto arranca con valores provisionales (dominio `.example` y `+595 000 000 000`). Sin destacadas: la
+portada sigue mostrando 6 al azar. Es la única migración de todo el módulo (también para Servicios y Nosotros).
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `006_verificar_sitio.sql` | Comprueba que las tablas no existan y que la 005 esté aplicada | No |
+| `006_gestion_sitio.sql` | Crea las tablas con el contenido actual y comprueba que no cambien otros datos | Sí, todo o nada |
+| `006_revertir_sitio.sql` | Elimina ambas tablas (se pierden los textos editados desde el panel) | Sí, todo o nada |
+
+Aplicarla antes de desplegar el backend 0.18.0.

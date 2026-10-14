@@ -271,6 +271,9 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
   background: var(--ambar-suave); color: #7a5b12; }
 .filaControl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .filaControl .input { max-width: 240px; }
+.imagenSitio { width: 100%; max-width: 360px; aspect-ratio: 16 / 9; object-fit: cover; border: 1px solid var(--borde); border-radius: var(--radio); }
+.imagenVacia { width: 100%; max-width: 360px; aspect-ratio: 16 / 9; display: grid; place-items: center; border: 1px dashed var(--borde-fuerte);
+  border-radius: var(--radio); color: var(--gris); font-size: 12px; background: var(--fila-alterna); }
 .pestanas { display: flex; gap: 4px; border-bottom: 1px solid var(--borde); margin: -8px 0 20px; overflow-x: auto; }
 .pestana { padding: 8px 14px; color: var(--texto-secundario); text-decoration: none; font-weight: 500; white-space: nowrap;
   border-bottom: 2px solid transparent; margin-bottom: -1px; }

@@ -8,7 +8,7 @@ que se crea el contenedor (ver `docker/README.md`).
 | Carpeta | Contenido |
 |---|---|
 | `schema/` | `01_extensiones` · `02_tablas` · `03_indices` · `04_triggers` |
-| `seed/` | `01_catalogos` · `02_ubicacion` (desde los GeoJSON del frontend) · `03_propiedades_demo` (28 propiedades) · `04_admin_dev.sh` (administrador inicial) |
+| `seed/` | `01_catalogos` · `02_ubicacion` (desde los GeoJSON del frontend) · `03_propiedades_demo` (28 propiedades) · `04_admin_dev.sh` (administrador inicial) · `05_contenido_sitio` (contenido editable del sitio) |
 | `pruebas/` | `verificar.sql`: comprueba los datos y que cada regla rechace lo inválido (todo con ROLLBACK) |
 
 ## Modelo entidad-relación

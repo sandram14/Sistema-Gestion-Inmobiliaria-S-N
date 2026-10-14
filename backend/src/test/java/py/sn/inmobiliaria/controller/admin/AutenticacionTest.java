@@ -302,4 +302,14 @@ class AutenticacionTest {
         ServletFalso.ejecutar(servlet, loginComo("gerente@sn.local"));
         assertEquals(0, estado("PATCH", "/api/admin/clientes-potenciales/4/responsable"));
     }
+
+    @Test
+    void elVendedorNoAccedeALaGestionDelSitioYElGerenteSi() throws Exception {
+        ServletFalso.ejecutar(servlet, loginComo("vendedor@sn.local"));
+        assertEquals(403, estado("GET", "/api/admin/sitio/secciones/inicio"));
+        assertEquals(403, estado("PUT", "/api/admin/sitio/ofertas"));
+        ServletFalso.ejecutar(servlet, loginComo("gerente@sn.local"));
+        assertEquals(0, estado("PUT", "/api/admin/sitio/secciones/contacto"));
+        assertEquals(0, estado("PUT", "/api/admin/sitio/ofertas"));
+    }
 }

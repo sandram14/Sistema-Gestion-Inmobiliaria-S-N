@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Building2, LogOut, Menu, MessagesSquare, Plus, UserRound, Users, X } from 'lucide-react'
+import { Building2, Globe, LogOut, Menu, MessagesSquare, Plus, UserRound, Users, X } from 'lucide-react'
 import { useSesion } from '../auth/Sesion'
 import { nombreDelRol } from './formato'
 import ui from '../ui.module.css'
@@ -50,6 +50,14 @@ export default function Layout() {
               </NavLink>
             )}
           </div>
+          {puede('CONTENIDO_EDITAR') && (
+            <div className={ui.menuGrupo}>
+              <div className={ui.menuTitulo}>Sitio web</div>
+              <NavLink to="/sitio" className={enlace}>
+                <Globe size={18} aria-hidden="true" /> Gestión del sitio web
+              </NavLink>
+            </div>
+          )}
           {puede('CONSULTAS_VER') && (
             <div className={ui.menuGrupo}>
               <div className={ui.menuTitulo}>Clientes</div>

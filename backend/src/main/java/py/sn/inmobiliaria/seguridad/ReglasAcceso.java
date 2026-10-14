@@ -59,6 +59,12 @@ public final class ReglasAcceso {
             r("POST", "/api/admin/clientes-potenciales", Permiso.CLIENTES_VER),
             r("PATCH", "/api/admin/clientes-potenciales/" + ID + "/estado", Permiso.CLIENTES_VER),
             r("PATCH", "/api/admin/clientes-potenciales/" + ID + "/responsable", Permiso.CLIENTES_ASIGNAR),
+            // Gestión del sitio web (ADMIN y GERENTE)
+            r("GET", "/api/admin/sitio/secciones/(inicio|servicios|nosotros|contacto)", Permiso.CONTENIDO_EDITAR),
+            r("PUT", "/api/admin/sitio/secciones/(inicio|servicios|nosotros|contacto)", Permiso.CONTENIDO_EDITAR),
+            r("POST", "/api/admin/sitio/imagenes", Permiso.CONTENIDO_EDITAR),
+            r("GET", "/api/admin/sitio/ofertas", Permiso.OFERTAS_GESTIONAR),
+            r("PUT", "/api/admin/sitio/ofertas", Permiso.OFERTAS_GESTIONAR),
             // Cuenta propia
             r("GET", "/api/admin/cuenta", Permiso.CUENTA_PROPIA),
             r("PUT", "/api/admin/cuenta", Permiso.CUENTA_PROPIA),

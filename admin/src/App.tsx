@@ -19,6 +19,9 @@ const ConsultasCalidad = lazy(() => import('./paginas/ConsultasCalidad'))
 const ClientesPotenciales = lazy(() => import('./paginas/ClientesPotenciales'))
 const DetalleClientePotencial = lazy(() => import('./paginas/DetalleClientePotencial'))
 const NuevoClientePotencial = lazy(() => import('./paginas/NuevoClientePotencial'))
+const SitioInicio = lazy(() => import('./paginas/sitio/SitioInicio'))
+const SitioOfertas = lazy(() => import('./paginas/sitio/SitioOfertas'))
+const SitioContacto = lazy(() => import('./paginas/sitio/SitioContacto'))
 
 // Rutas: /admin/login · /admin · /admin/propiedades · /admin/propiedades/nueva · /admin/propiedades/:id · /admin/cuenta
 export default function App() {
@@ -40,6 +43,10 @@ export default function App() {
           <Route path="/consultas/clientes/nuevo" element={<NuevoClientePotencial />} />
           <Route path="/consultas/clientes/:id" element={<DetalleClientePotencial />} />
           <Route path="/consultas/:id" element={<DetalleConsulta />} />
+          <Route path="/sitio" element={<Navigate to="/sitio/inicio" replace />} />
+          <Route path="/sitio/inicio" element={<SitioInicio />} />
+          <Route path="/sitio/ofertas" element={<SitioOfertas />} />
+          <Route path="/sitio/contacto" element={<SitioContacto />} />
           <Route path="/usuarios" element={<Usuarios />} />
           <Route path="/usuarios/nuevo" element={<UsuarioConClave />} />
           <Route path="/usuarios/:id" element={<UsuarioConClave />} />

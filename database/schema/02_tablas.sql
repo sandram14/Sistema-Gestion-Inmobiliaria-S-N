@@ -213,3 +213,18 @@ CREATE TABLE cliente_potencial (
     CONSTRAINT ck_cliente_estado CHECK (estado IN ('PENDIENTE', 'CONTACTADO', 'DESCARTADO')),
     CONSTRAINT ck_cliente_consentimiento CHECK (origen <> 'CHAT' OR (consentimiento_en IS NOT NULL AND consentimiento_version IS NOT NULL))
 );
+
+-- Gestión del sitio web (migración 006)
+CREATE TABLE seccion_sitio (
+    seccion        varchar(12) PRIMARY KEY CONSTRAINT ck_seccion_sitio CHECK (seccion IN ('INICIO', 'SERVICIOS', 'NOSOTROS', 'CONTACTO')),
+    contenido      text NOT NULL CONSTRAINT ck_seccion_contenido CHECK (contenido IS JSON OBJECT),
+    actualizado_en timestamptz NOT NULL DEFAULT now(),
+    actualizado_por integer REFERENCES usuario (id_usuario) ON DELETE SET NULL
+);
+
+-- Propiedades destacadas en la portada (sin duplicar propiedades: solo las referencia)
+CREATE TABLE propiedad_destacada (
+    id_propiedad bigint PRIMARY KEY REFERENCES propiedad (id_propiedad) ON DELETE CASCADE,
+    orden        smallint NOT NULL CONSTRAINT ck_destacada_orden CHECK (orden BETWEEN 1 AND 99),
+    CONSTRAINT uq_destacada_orden UNIQUE (orden) DEFERRABLE INITIALLY DEFERRED
+);
