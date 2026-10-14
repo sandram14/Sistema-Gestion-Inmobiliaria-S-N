@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
 import { api } from '../api/cliente'
+import BotonVolver from '../componentes/BotonVolver'
 import type { ClienteDetalle, UsuarioDto } from '../api/tipos'
 import { useSesion } from '../auth/Sesion'
 import { EstadoCli, NOMBRE_ORIGEN } from '../componentes/clientes'
@@ -27,12 +27,12 @@ export default function DetalleClientePotencial() {
     try { setC(await api.patch<ClienteDetalle>(`/api/admin/clientes-potenciales/${id}/${ruta}`, cuerpo)); setMensaje(texto) } catch (e) { setError(erroresDe(e).general) }
   }
 
-  const volver = <Link to="/consultas/clientes" className={ui.botonSecundario}><ChevronLeft size={16} aria-hidden="true" /> Volver a clientes potenciales</Link>
-  if (!c) return <><div className={ui.tituloPagina}><h1>Cliente potencial</h1>{volver}</div>{error ? <div className={ui.avisoError}>{error}</div> : <p className={ui.cargando}>Cargando…</p>}</>
+  const volver = <BotonVolver alternativa="/consultas/clientes" />
+  if (!c) return <><div className={ui.tituloPagina}><div className={ui.tituloConVolver}>{volver}<h1>Cliente potencial</h1></div></div>{error ? <div className={ui.avisoError}>{error}</div> : <p className={ui.cargando}>Cargando…</p>}</>
 
   return (
     <>
-      <div className={ui.tituloPagina}><h1>{c.nombre}</h1>{volver}</div>
+      <div className={ui.tituloPagina}><div className={ui.tituloConVolver}>{volver}<h1>{c.nombre}</h1></div></div>
       {mensaje && <div className={ui.avisoExito}>{mensaje}</div>}
       {error && <div className={ui.avisoError} role="alert">{error}</div>}
 

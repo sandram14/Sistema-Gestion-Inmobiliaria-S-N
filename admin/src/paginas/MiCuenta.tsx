@@ -1,92 +1,135 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Monitor, Moon, Pencil, Sun } from 'lucide-react'
 import { api } from '../api/cliente'
 import type { UsuarioDto } from '../api/tipos'
 import { useSesion } from '../auth/Sesion'
 import { erroresDe } from '../componentes/errores'
 import { nombreDelRol } from '../componentes/formato'
+import { useTema, type Tema } from '../componentes/tema'
 import ui from '../ui.module.css'
 
-/** Cuenta propia: datos personales, email (con la contraseña actual) y acceso al cambio de contraseña. */
+type CampoDatos = 'nombre' | 'apellido' | 'cedula' | 'telefono'
+
+/** Cuenta propia en filas horizontales: cada dato se edita en su lugar. */
 export default function MiCuenta() {
   const { recargar } = useSesion()
+  const navegar = useNavigate()
   const [cuenta, setCuenta] = useState<UsuarioDto | null>(null)
-  const [datos, setDatos] = useState({ nombre: '', apellido: '', cedula: '', telefono: '' })
-  const [email, setEmail] = useState({ email: '', passwordActual: '' })
+  const [editando, setEditando] = useState<CampoDatos | 'email' | null>(null)
+  const [valor, setValor] = useState('')
+  const [passwordActual, setPasswordActual] = useState('')
   const [campos, setCampos] = useState<Record<string, string>>({})
   const [general, setGeneral] = useState<string | null>(null)
   const [mensaje, setMensaje] = useState<string | null>((useLocation().state as { mensaje?: string } | null)?.mensaje ?? null)
+  const [tema, setTema] = useTema()
 
-  function cargar(u: UsuarioDto) {
-    setCuenta(u)
-    setDatos({ nombre: u.nombre, apellido: u.apellido, cedula: u.cedula ?? '', telefono: u.telefono ?? '' })
-    setEmail({ email: u.email, passwordActual: '' })
+  useEffect(() => { api.get<UsuarioDto>('/api/admin/cuenta').then(setCuenta).catch((e) => setGeneral(erroresDe(e).general)) }, [])
+
+  function editar(campo: CampoDatos | 'email') {
+    if (!cuenta) return
+    setEditando(campo); setValor((cuenta[campo] as string | null) ?? ''); setPasswordActual(''); setCampos({}); setGeneral(null); setMensaje(null)
   }
 
-  useEffect(() => {
-    api.get<UsuarioDto>('/api/admin/cuenta').then(cargar).catch((e) => setGeneral(erroresDe(e).general))
-  }, [])
-
-  async function enviar(e: FormEvent, accion: () => Promise<UsuarioDto>, texto: string) {
+  async function guardar(e: FormEvent) {
     e.preventDefault()
-    setCampos({})
-    setGeneral(null)
-    setMensaje(null)
+    if (!cuenta || !editando) return
+    setCampos({}); setGeneral(null)
     try {
-      cargar(await accion())
-      await recargar()
-      setMensaje(texto)
-    } catch (err) {
-      const r = erroresDe(err)
-      setCampos(r.campos)
-      setGeneral(r.general)
-    }
+      const actualizada = editando === 'email'
+        ? await api.put<UsuarioDto>('/api/admin/cuenta/email', { email: valor, passwordActual })
+        : await api.put<UsuarioDto>('/api/admin/cuenta', {
+          nombre: cuenta.nombre, apellido: cuenta.apellido, cedula: cuenta.cedula ?? '', telefono: cuenta.telefono ?? '', [editando]: valor,
+        })
+      setCuenta(actualizada); setEditando(null); await recargar()
+      setMensaje(editando === 'email' ? 'Email actualizado. Úselo para iniciar sesión.' : 'Cambios guardados.')
+    } catch (err) { const r = erroresDe(err); setCampos(r.campos); setGeneral(r.general) }
   }
 
-  const err = (c: string) => campos[c] && <span className={ui.errorCampo}>{campos[c]}</span>
   if (!cuenta) return general ? <div className={ui.avisoError}>{general}</div> : <p className={ui.cargando}>Cargando…</p>
+
+  const ETIQUETAS: Record<CampoDatos | 'email', string> = { nombre: 'Nombre', apellido: 'Apellido', cedula: 'Cédula', telefono: 'Teléfono', email: 'Email' }
+  const MAXIMO: Record<CampoDatos | 'email', number> = { nombre: 60, apellido: 60, cedula: 20, telefono: 30, email: 120 }
+
+  /** Una fila: etiqueta, valor y botón de edición; al editar, el formulario aparece en la misma fila. */
+  const fila = (campo: CampoDatos | 'email', vacio = 'No indicado') => (
+    <div className={ui.filaCuenta} key={campo}>
+      {editando === campo ? (
+        <form onSubmit={guardar} className={ui.filaEdicion} noValidate>
+          <label className={ui.campo}><span className={ui.etiqueta}>{ETIQUETAS[campo]}</span>
+            <input className={ui.input} autoFocus type={campo === 'email' ? 'email' : 'text'} maxLength={MAXIMO[campo]} value={valor} onChange={(e) => setValor(e.target.value)} />
+            {campos[campo] && <span className={ui.errorCampo}>{campos[campo]}</span>}</label>
+          {campo === 'email' && (
+            <label className={ui.campo}><span className={ui.etiqueta}>Contraseña actual (para confirmar)</span>
+              <input className={ui.input} type="password" autoComplete="current-password" value={passwordActual} onChange={(e) => setPasswordActual(e.target.value)} />
+              {campos.passwordActual && <span className={ui.errorCampo}>{campos.passwordActual}</span>}</label>
+          )}
+          <div className={ui.acciones}>
+            <button type="button" className={`${ui.botonSecundario} ${ui.botonChico}`} onClick={() => setEditando(null)}>Cancelar</button>
+            <button type="submit" className={`${ui.boton} ${ui.botonChico}`}>Guardar</button>
+          </div>
+        </form>
+      ) : (
+        <>
+          <span className={ui.filaEtiqueta}>{ETIQUETAS[campo]}:</span>
+          <span className={ui.filaValor}>{(cuenta[campo] as string | null) || <span className={ui.secundario}>{vacio}</span>}</span>
+          <button type="button" className={ui.botonIcono} onClick={() => editar(campo)} aria-label={`Editar ${ETIQUETAS[campo].toLowerCase()}`} title="Editar">
+            <Pencil size={16} aria-hidden="true" />
+          </button>
+        </>
+      )}
+    </div>
+  )
+
+  const opcionTema = (t: Tema, icono: ReactNode, texto: string) => (
+    <button type="button" role="radio" aria-checked={tema === t} className={`${ui.opcionTema} ${tema === t ? ui.opcionTemaActiva : ''}`} onClick={() => setTema(t)}>
+      {icono} {texto}
+    </button>
+  )
 
   return (
     <>
-      <div className={ui.tituloPagina}>
-        <h1>Mi cuenta</h1>
-        <Link to="/cuenta/contrasena" className={ui.botonSecundario}>Cambiar contraseña</Link>
-      </div>
+      <div className={ui.tituloPagina}><h1>Mi cuenta</h1></div>
       {mensaje && <div className={ui.avisoExito}>{mensaje}</div>}
       {general && <div className={ui.avisoError} role="alert">{general}</div>}
 
-      <form onSubmit={(e) => enviar(e, () => api.put<UsuarioDto>('/api/admin/cuenta', datos), 'Datos guardados.')} noValidate>
-        <section className={ui.tarjeta}>
-          <h2>Datos personales</h2>
-          <div className={ui.grilla}>
-            <label className={ui.campo}><span className={ui.etiqueta}>Nombre</span>
-              <input className={ui.input} maxLength={60} value={datos.nombre} onChange={(e) => setDatos({ ...datos, nombre: e.target.value })} />{err('nombre')}</label>
-            <label className={ui.campo}><span className={ui.etiqueta}>Apellido</span>
-              <input className={ui.input} maxLength={60} value={datos.apellido} onChange={(e) => setDatos({ ...datos, apellido: e.target.value })} />{err('apellido')}</label>
-            <label className={ui.campo}><span className={ui.etiqueta}>Cédula (opcional)</span>
-              <input className={ui.input} maxLength={20} value={datos.cedula} onChange={(e) => setDatos({ ...datos, cedula: e.target.value })} />{err('cedula')}</label>
-            <label className={ui.campo}><span className={ui.etiqueta}>Teléfono (opcional)</span>
-              <input className={ui.input} maxLength={30} value={datos.telefono} onChange={(e) => setDatos({ ...datos, telefono: e.target.value })} />{err('telefono')}</label>
-          </div>
-          <dl className={ui.datos} style={{ marginTop: 16 }}>
-            <dt>Rol</dt><dd>{nombreDelRol(cuenta.rol)}</dd>
-          </dl>
-          <div className={ui.acciones}><button type="submit" className={ui.boton}>Guardar datos</button></div>
-        </section>
-      </form>
+      <section className={ui.tarjeta}>
+        <h2>Información de la cuenta</h2>
+        <div className={ui.filaCuenta}>
+          <span className={ui.filaEtiqueta}>Rol:</span>
+          <span className={ui.filaValor}><span className={ui.estado}>{nombreDelRol(cuenta.rol)}</span></span>
+          <span className={ui.secundario}>Lo asigna un administrador</span>
+        </div>
+        {fila('nombre')}
+        {fila('apellido')}
+        {fila('email')}
+        <div className={ui.filaCuenta}>
+          <span className={ui.filaEtiqueta}>Contraseña:</span>
+          <span className={ui.filaValor}>••••••••</span>
+          <button type="button" className={ui.botonIcono} onClick={() => navegar('/cuenta/contrasena')} aria-label="Cambiar contraseña" title="Cambiar contraseña">
+            <Pencil size={16} aria-hidden="true" />
+          </button>
+        </div>
+      </section>
 
-      <form onSubmit={(e) => enviar(e, () => api.put<UsuarioDto>('/api/admin/cuenta/email', email), 'Email actualizado. Úselo para iniciar sesión.')} noValidate>
-        <section className={ui.tarjeta}>
-          <h2>Email de acceso</h2>
-          <div className={ui.grilla}>
-            <label className={ui.campo}><span className={ui.etiqueta}>Email</span>
-              <input className={ui.input} type="email" maxLength={120} value={email.email} onChange={(e) => setEmail({ ...email, email: e.target.value })} />{err('email')}</label>
-            <label className={ui.campo}><span className={ui.etiqueta}>Contraseña actual (para confirmar)</span>
-              <input className={ui.input} type="password" autoComplete="current-password" value={email.passwordActual} onChange={(e) => setEmail({ ...email, passwordActual: e.target.value })} />{err('passwordActual')}</label>
+      <section className={ui.tarjeta}>
+        <h2>Datos personales</h2>
+        {fila('cedula')}
+        {fila('telefono')}
+      </section>
+
+      <section className={ui.tarjeta}>
+        <h2>Preferencias</h2>
+        <div className={ui.filaCuenta}>
+          <span className={ui.filaEtiqueta}>Tema del sistema:</span>
+          <div className={ui.selectorTema} role="radiogroup" aria-label="Tema del sistema">
+            {opcionTema('claro', <Sun size={16} aria-hidden="true" />, 'Claro')}
+            {opcionTema('oscuro', <Moon size={16} aria-hidden="true" />, 'Oscuro')}
+            {opcionTema('sistema', <Monitor size={16} aria-hidden="true" />, 'Según el sistema')}
           </div>
-          <div className={ui.acciones}><button type="submit" className={ui.botonSecundario}>Cambiar email</button></div>
-        </section>
-      </form>
+        </div>
+        <p className={ui.ayuda}>Se aplica de inmediato y se recuerda en este navegador.</p>
+      </section>
     </>
   )
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import BotonVolver from '../componentes/BotonVolver'
 import { api } from '../api/cliente'
 import type { UsuarioConContrasena, UsuarioDto } from '../api/tipos'
 import { useSesion } from '../auth/Sesion'
@@ -79,8 +79,7 @@ export default function FormularioUsuario() {
   return (
     <>
       <div className={ui.tituloPagina}>
-        <h1>{esEdicion ? `${usuario?.nombre ?? ''} ${usuario?.apellido ?? ''}` : 'Nuevo usuario'}</h1>
-        <Link to="/usuarios" className={ui.botonSecundario}><ChevronLeft size={16} aria-hidden="true" /> Volver a usuarios</Link>
+        <div className={ui.tituloConVolver}><BotonVolver alternativa="/usuarios" /><h1>{esEdicion ? `${usuario?.nombre ?? ''} ${usuario?.apellido ?? ''}` : 'Nuevo usuario'}</h1></div>
       </div>
 
       {temporal && (

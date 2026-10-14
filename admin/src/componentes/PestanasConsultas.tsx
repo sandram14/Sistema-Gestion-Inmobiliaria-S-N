@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useSesion } from '../auth/Sesion'
+import BotonVolver from './BotonVolver'
 import ui from '../ui.module.css'
 
 /** Barra de pestañas de "Consultas IA". El vendedor solo ve Historial (el backend también lo restringe). */
@@ -8,7 +9,7 @@ export default function PestanasConsultas() {
   const clase = ({ isActive }: { isActive: boolean }) => `${ui.pestana} ${isActive ? ui.pestanaActiva : ''}`
   return (
     <>
-      <div className={ui.tituloPagina}><h1>Consultas IA</h1></div>
+      <div className={ui.tituloPagina}><div className={ui.tituloConVolver}><BotonVolver alternativa="/propiedades" /><h1>Consultas IA</h1></div></div>
       <nav className={ui.pestanas} aria-label="Secciones de Consultas IA">
         <NavLink to="/consultas" end className={clase}>Historial</NavLink>
         {puede('CONSULTAS_VER_TODAS') && <NavLink to="/consultas/analisis" className={clase}>Análisis técnico</NavLink>}

@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import BotonVolver from '../componentes/BotonVolver'
 import { api } from '../api/cliente'
 import type { ClienteDetalle, UsuarioDto } from '../api/tipos'
 import { useSesion } from '../auth/Sesion'
@@ -34,8 +34,7 @@ export default function NuevoClientePotencial() {
 
   return (
     <>
-      <div className={ui.tituloPagina}><h1>Registrar cliente potencial</h1>
-        <Link to="/consultas/clientes" className={ui.botonSecundario}><ChevronLeft size={16} aria-hidden="true" /> Volver</Link></div>
+      <div className={ui.tituloPagina}><div className={ui.tituloConVolver}><BotonVolver alternativa="/consultas/clientes" /><h1>Registrar cliente potencial</h1></div></div>
       <p className={ui.ayuda}>Para personas que contactaron directamente a la inmobiliaria. Registre solo los datos necesarios para el seguimiento.</p>
       {general && <div className={ui.avisoError} role="alert">{general}</div>}
       <form onSubmit={guardar} noValidate>

@@ -17,6 +17,17 @@
   --superficie: #ffffff;
   --fila-alterna: #f9faf7;
 
+  --verde-texto: #23412a;      /* verde para textos (títulos, valores, estados) */
+  --enlace: #3a6b46;
+  --encabezado-tabla: #f3f5f0;
+  --barra-fondo: #eceee9;
+  --inactivo-fondo: #eceeea;
+  --rojo-borde: #efc2bd;
+  --exito-borde: #cddcb8;
+  --comprobado-borde: #b9d3be;
+  --ambar-texto: #7a5b12;
+  color-scheme: light;
+
   --rojo: #b42318;
   --rojo-suave: #fdf0ee;
   --ambar-suave: #fff7e6;
@@ -26,6 +37,60 @@
   --radio: 6px;
   --radio-chico: 4px;
   --ancho-menu: 232px;
+}
+
+/* Tema oscuro: elegido en Mi cuenta, o el del sistema operativo si no se eligió ninguno */
+:root[data-tema='oscuro'] {
+  --verde-texto: #a8d66f;
+  --enlace: #a8d66f;
+  --acento-suave: #24301f;
+  --texto: #e6e9e4;
+  --texto-secundario: #b3bbb1;
+  --gris: #8d968b;
+  --borde: #2f3832;
+  --borde-fuerte: #435047;
+  --fondo: #121614;
+  --superficie: #1a201c;
+  --fila-alterna: #1f2621;
+  --encabezado-tabla: #222a24;
+  --barra-fondo: #2a332d;
+  --inactivo-fondo: #2a302c;
+  --rojo: #f0857a;
+  --rojo-suave: #3a1f1c;
+  --rojo-borde: #6e3a33;
+  --exito-borde: #3d5233;
+  --comprobado-borde: #3d5233;
+  --ambar-suave: #352d1d;
+  --ambar-borde: #6b5a2c;
+  --ambar-texto: #e7c879;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema]) {
+  --verde-texto: #a8d66f;
+  --enlace: #a8d66f;
+  --acento-suave: #24301f;
+  --texto: #e6e9e4;
+  --texto-secundario: #b3bbb1;
+  --gris: #8d968b;
+  --borde: #2f3832;
+  --borde-fuerte: #435047;
+  --fondo: #121614;
+  --superficie: #1a201c;
+  --fila-alterna: #1f2621;
+  --encabezado-tabla: #222a24;
+  --barra-fondo: #2a332d;
+  --inactivo-fondo: #2a302c;
+  --rojo: #f0857a;
+  --rojo-suave: #3a1f1c;
+  --rojo-borde: #6e3a33;
+  --exito-borde: #3d5233;
+  --comprobado-borde: #3d5233;
+  --ambar-suave: #352d1d;
+  --ambar-borde: #6b5a2c;
+  --ambar-texto: #e7c879;
+  color-scheme: dark;
+  }
 }
 
 * { box-sizing: border-box; }
@@ -40,7 +105,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-a { color: var(--verde-medio); }
+a { color: var(--enlace); }
 button, input, select, textarea { font: inherit; color: inherit; }
 
 /* Foco visible al navegar con teclado */

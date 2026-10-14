@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import BotonVolver from '../componentes/BotonVolver'
 import { api } from '../api/cliente'
 import { useSesion } from '../auth/Sesion'
 import { erroresDe } from '../componentes/errores'
@@ -44,8 +45,7 @@ export default function CambiarContrasena() {
   return (
     <>
       <div className={ui.tituloPagina}>
-        <h1>Cambiar contraseña</h1>
-        {!obligatorio && <Link to="/cuenta" className={ui.botonSecundario}>Volver a Mi cuenta</Link>}
+        <div className={ui.tituloConVolver}>{!obligatorio && <BotonVolver alternativa="/cuenta" />}<h1>Cambiar contraseña</h1></div>
       </div>
       {obligatorio && (
         <div className={ui.aviso}>Su cuenta tiene una contraseña temporal. Debe cambiarla para continuar usando el panel.</div>

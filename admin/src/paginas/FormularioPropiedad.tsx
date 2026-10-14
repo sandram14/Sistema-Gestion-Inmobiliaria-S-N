@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
+import BotonVolver from '../componentes/BotonVolver'
 import { useSesion } from '../auth/Sesion'
 import { api, ApiError } from '../api/cliente'
 import type { Catalogos, PropiedadDetalle, PropiedadRequest, TipoPropiedad, UsuarioDto } from '../api/tipos'
@@ -203,8 +203,8 @@ export default function FormularioPropiedad() {
   return (
     <>
       <div className={ui.tituloPagina}>
-        <h1>{esEdicion ? `${soloLectura ? 'Propiedad' : 'Editar'} ${detalle?.codigo ?? ''}` : 'Nueva propiedad'}</h1>
-        <Link to="/propiedades" className={ui.botonSecundario}><ChevronLeft size={16} aria-hidden="true" /> Volver al listado</Link>
+        <div className={ui.tituloConVolver}><BotonVolver alternativa="/propiedades" /><h1>{esEdicion ? `${soloLectura ? 'Propiedad' : 'Editar'} ${detalle?.codigo ?? ''}` : 'Nueva propiedad'}</h1></div>
+        
       </div>
 
       {mensaje && <div className={ui.avisoExito}>{mensaje}</div>}

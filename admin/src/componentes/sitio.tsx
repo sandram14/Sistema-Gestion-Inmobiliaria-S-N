@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { api } from '../api/cliente'
 import { erroresDe } from './errores'
+import BotonVolver from './BotonVolver'
 import ui from '../ui.module.css'
 
 /** Barra de pestañas de "Gestión del sitio web" (ADMIN y GERENTE). */
@@ -9,7 +10,7 @@ export function PestanasSitio() {
   const clase = ({ isActive }: { isActive: boolean }) => `${ui.pestana} ${isActive ? ui.pestanaActiva : ''}`
   return (
     <>
-      <div className={ui.tituloPagina}><h1>Gestión del sitio web</h1></div>
+      <div className={ui.tituloPagina}><div className={ui.tituloConVolver}><BotonVolver alternativa="/propiedades" /><h1>Gestión del sitio web</h1></div></div>
       <nav className={ui.pestanas} aria-label="Secciones del sitio web">
         <NavLink to="/sitio/inicio" className={clase}>Inicio</NavLink>
         <NavLink to="/sitio/servicios" className={clase}>Servicios</NavLink>
