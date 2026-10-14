@@ -24,11 +24,11 @@ class ContenidoSitioServiceTest {
 
     @Test
     void inicio_TituloObligatorio_LongitudesYSoloImagenesDelPanel() {
-        var e = errores(() -> ContenidoSitioService.validarInicio(new Inicio("https://otro-sitio.com/a.jpg", null, " ", "x".repeat(301))));
+        var e = errores(() -> ContenidoSitioService.validarInicio(new Inicio("https://otro-sitio.com/a.jpg", " ", "x".repeat(301))));
         assertTrue(e.keySet().containsAll(List.of("imagenPortada", "titulo", "subtitulo")));
-        var ok = ContenidoSitioService.validarInicio(new Inicio(IMG, "", "  Bienvenidos  ", null));
+        var ok = ContenidoSitioService.validarInicio(new Inicio(IMG, "  Bienvenidos  ", null));
         assertEquals("Bienvenidos", ok.titulo());
-        assertNull(ContenidoSitioService.validarInicio(new Inicio("", "", "T", "")).imagenPortada()); // vacío: imagen del diseño
+        assertNull(ContenidoSitioService.validarInicio(new Inicio("", "T", "")).imagenPortada()); // vacío: imagen del diseño
     }
 
     @Test

@@ -211,7 +211,7 @@ export interface AnalisisConsultas {
 
 // ---- Clientes potenciales ----
 export type EstadoCliente = 'PENDIENTE' | 'CONTACTADO' | 'DESCARTADO'
-export type OrigenCliente = 'CHAT' | 'WHATSAPP' | 'LLAMADA' | 'OTRO'
+export type OrigenCliente = 'CHAT' | 'CONTACTO' | 'WHATSAPP' | 'LLAMADA' | 'OTRO'
 export interface PersonaRef { id: number; nombre: string; activo: boolean }
 export interface ClienteResumen {
   id: number; nombre: string; contacto: string; interes: string | null; propiedad: PropiedadRef | null
@@ -228,7 +228,7 @@ export interface PaginaClientes {
 }
 
 // ---- Gestión del sitio web ----
-export interface ContenidoInicio { imagenPortada: string | null; etiqueta: string; titulo: string; subtitulo: string }
+export interface ContenidoInicio { imagenPortada: string | null; titulo: string; subtitulo: string }
 export interface ItemTexto { titulo: string; texto: string }
 export interface ContenidoServicios { titulo: string; subtitulo: string; servicios: ItemTexto[]; bloqueTitulo: string; bloqueTexto: string }
 export interface ContenidoNosotros {

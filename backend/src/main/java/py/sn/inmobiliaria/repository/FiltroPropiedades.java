@@ -22,7 +22,14 @@ public record FiltroPropiedades(
         String operacion,
         BigDecimal presupuestoMax,
         Moneda moneda,
-        Integer departamentoId) {
+        Integer departamentoId,
+        BigDecimal presupuestoMin) {
+
+    /** Sin presupuesto mínimo (forma anterior). */
+    public FiltroPropiedades(Integer ciudadId, Integer barrioId, String tipo, String operacion,
+                             BigDecimal presupuestoMax, Moneda moneda, Integer departamentoId) {
+        this(ciudadId, barrioId, tipo, operacion, presupuestoMax, moneda, departamentoId, null);
+    }
 
     /** Sin filtro de departamento (constructor anterior a la Fase 12). */
     public FiltroPropiedades(Integer ciudadId, Integer barrioId, String tipo, String operacion,
@@ -32,10 +39,10 @@ public record FiltroPropiedades(
 
     /** Filtro vacío: todas las propiedades disponibles. */
     public static FiltroPropiedades sinFiltros() {
-        return new FiltroPropiedades(null, null, null, null, null, null, null);
+        return new FiltroPropiedades(null, null, null, null, null, null, null, null);
     }
 
     public boolean tienePresupuesto() {
-        return presupuestoMax != null;
+        return presupuestoMax != null || presupuestoMin != null;
     }
 }

@@ -18,7 +18,7 @@ public class ClientePotencial {
     @Column(length = 1000) private String interes;
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "id_propiedad") private Propiedad propiedad;
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "id_consulta") private Consulta consulta;
-    /** CHAT, WHATSAPP, LLAMADA u OTRO */
+    /** CHAT, CONTACTO (formulario de la página Contacto), WHATSAPP, LLAMADA u OTRO */
     @Column(nullable = false, length = 10) private String origen;
     /** PENDIENTE, CONTACTADO o DESCARTADO */
     @Column(nullable = false, length = 12) private String estado = "PENDIENTE";

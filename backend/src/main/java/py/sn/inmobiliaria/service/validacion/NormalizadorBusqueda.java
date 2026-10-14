@@ -56,9 +56,16 @@ public final class NormalizadorBusqueda {
         }
 
         BigDecimal presupuesto = req.presupuestoMax();
+        BigDecimal minimo = req.presupuestoMin();
         Moneda moneda = null;
-        if (presupuesto != null) {
-            if (presupuesto.signum() <= 0) {
+        if (minimo != null && minimo.signum() <= 0) {
+            errores.agregar("presupuestoMin", "Debe ser mayor a 0");
+        }
+        if (minimo != null && presupuesto != null && minimo.compareTo(presupuesto) > 0) {
+            errores.agregar("presupuestoMin", "No puede ser mayor que el presupuesto máximo");
+        }
+        if (presupuesto != null || minimo != null) {
+            if (presupuesto != null && presupuesto.signum() <= 0) {
                 errores.agregar("presupuestoMax", "Debe ser mayor a 0");
             }
             if (vacio(req.moneda())) {
@@ -73,7 +80,7 @@ public final class NormalizadorBusqueda {
 
         errores.lanzarSiHay();
         return new FiltroPropiedades(req.ciudadId(), req.barrioId(), tipo, operacion, presupuesto, moneda,
-                req.departamentoId());
+                req.departamentoId(), minimo);
     }
 
     private static boolean vacio(String s) {

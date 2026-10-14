@@ -30,8 +30,8 @@ public class ContenidoSitioService {
     private static final Pattern TELEFONO = Pattern.compile("^\\+?[0-9 ()-]{6,30}$");
     private static final Pattern WHATSAPP = Pattern.compile("^[0-9]{8,15}$");
 
-    /** Portada. El bloque "Sobre nosotros" de la portada se retiró: sus campos ya no se editan ni se aceptan. */
-    public record Inicio(String imagenPortada, String etiqueta, String titulo, String subtitulo) {
+    /** Portada. Se retiraron el bloque "Sobre nosotros" y el texto pequeño sobre el título: ya no se editan ni se aceptan. */
+    public record Inicio(String imagenPortada, String titulo, String subtitulo) {
     }
 
     public record Item(String titulo, String texto) {
@@ -91,7 +91,7 @@ public class ContenidoSitioService {
 
     static Inicio validarInicio(Inicio i) {
         Errores e = new Errores();
-        Inicio n = new Inicio(imagen(i.imagenPortada(), "imagenPortada", e), opcional(i.etiqueta(), "etiqueta", 80, e),
+        Inicio n = new Inicio(imagen(i.imagenPortada(), "imagenPortada", e),
                 obligatorio(i.titulo(), "titulo", 120, e), opcional(i.subtitulo(), "subtitulo", 300, e));
         e.lanzarSiHay();
         return n;

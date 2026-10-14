@@ -72,7 +72,7 @@ public class ClientePotencialService {
 
     // ---- Registro público desde el chat ----
 
-    /** Registra al interesado. Vincula su última consulta (misma sesión anónima, últimas 2 horas) si existe. */
+    /** Registra al interesado (chat o formulario de Contacto). Desde el chat, vincula su última consulta (misma sesión, últimas 2 horas). */
     public void registrarDesdeChat(ClienteDtos.Solicitud s, UUID sesion) {
         Errores e = new Errores();
         Datos d = validar(s == null ? null : s.nombre(), s == null ? null : s.telefono(), s == null ? null : s.email(),
@@ -82,14 +82,18 @@ public class ClientePotencialService {
         } else if (!VERSION_CONSENTIMIENTO.equals(s.versionConsentimiento())) {
             e.agregar("versionConsentimiento", "La versión del texto de aceptación no es la vigente");
         }
+        String canal = s == null || s.canal() == null || s.canal().isBlank() ? "CHAT" : s.canal().strip().toUpperCase(Locale.ROOT);
+        if (!Set.of("CHAT", "CONTACTO").contains(canal)) {
+            e.agregar("canal", "Use CHAT o CONTACTO");
+        }
         e.lanzarSiHay();
         tx.enTransaccion(em -> {
-            ClientePotencial c = new ClientePotencial(d.nombre(), d.telefono(), d.email(), d.interes(), "CHAT");
+            ClientePotencial c = new ClientePotencial(d.nombre(), d.telefono(), d.email(), d.interes(), canal);
             c.registrarConsentimiento(OffsetDateTime.now(), VERSION_CONSENTIMIENTO);
             Propiedad p = propiedad(em, s.codigoPropiedad());
             c.setPropiedad(p);
             c.setResponsable(responsableDe(p));
-            if (sesion != null) {
+            if (sesion != null && "CHAT".equals(canal)) { // solo el chat tiene una consulta previa que vincular
                 em.createQuery("select c from Consulta c where c.idSesion = :s and c.fechaHora >= :desde order by c.fechaHora desc", Consulta.class)
                         .setParameter("s", sesion).setParameter("desde", OffsetDateTime.now().minusHours(2))
                         .setMaxResults(1).getResultStream().findFirst().ifPresent(c::setConsulta);
@@ -110,7 +114,7 @@ public class ClientePotencialService {
             throw ValidacionException.deCampo("pagina", "Debe ser 1 o mayor");
         }
         String est = opcionEn(estado, ESTADOS, "estado");
-        String ori = opcionEn(origen, Set.of("CHAT", "WHATSAPP", "LLAMADA", "OTRO"), "origen");
+        String ori = opcionEn(origen, Set.of("CHAT", "CONTACTO", "WHATSAPP", "LLAMADA", "OTRO"), "origen");
         Integer vendedor = alcance(actor);
         return tx.soloLectura(em -> {
             Map<String, Object> params = new HashMap<>();

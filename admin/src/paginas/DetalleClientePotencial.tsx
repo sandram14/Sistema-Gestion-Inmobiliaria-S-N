@@ -71,7 +71,7 @@ export default function DetalleClientePotencial() {
         <dl className={ui.datos}>
           <dt>Origen</dt><dd>{NOMBRE_ORIGEN[c.origen]}</dd>
           <dt>Fecha de registro</dt><dd>{textoFecha(c.creadoEn)}</dd>
-          <dt>Registrado por</dt><dd>{c.registradoPor ? c.registradoPor.nombre : 'El propio cliente, desde el chat'}</dd>
+          <dt>Registrado por</dt><dd>{c.registradoPor ? c.registradoPor.nombre : c.origen === 'CONTACTO' ? 'El propio cliente, desde el formulario de contacto' : 'El propio cliente, desde el chat'}</dd>
           <dt>Aceptación del tratamiento</dt>
           <dd>{c.consentimientoEn ? `Aceptó el ${textoFecha(c.consentimientoEn)} (texto versión ${c.consentimientoVersion})` : <span className={ui.secundario}>No aplica: registrado por el equipo a partir de un contacto directo</span>}</dd>
         </dl>

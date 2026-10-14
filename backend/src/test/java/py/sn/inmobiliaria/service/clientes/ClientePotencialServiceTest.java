@@ -91,4 +91,10 @@ class ClientePotencialServiceTest {
         reloj.ahora = reloj.ahora.plusSeconds(3601);
         assertTrue(l.permitir("a"));                                // pasada la hora, vuelve a permitir
     }
+
+    @Test
+    void elCanalPuedeSerChatOContacto() {
+        var otro = new ClienteDtos.Solicitud("Ana", "0981123456", null, null, null, true, ClientePotencialService.VERSION_CONSENTIMIENTO, "FACEBOOK");
+        assertTrue(errores(() -> servicio.registrarDesdeChat(otro, null)).containsKey("canal"));
+    }
 }

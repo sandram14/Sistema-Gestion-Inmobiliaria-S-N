@@ -20,7 +20,14 @@ public record BusquedaRequest(
         String operacion,
         BigDecimal presupuestoMax,
         String moneda,
-        Integer departamentoId) {
+        Integer departamentoId,
+        BigDecimal presupuestoMin) {
+
+    /** Sin presupuesto mínimo (forma anterior). */
+    public BusquedaRequest(Integer ciudadId, Integer barrioId, String categoria, String operacion,
+                           BigDecimal presupuestoMax, String moneda, Integer departamentoId) {
+        this(ciudadId, barrioId, categoria, operacion, presupuestoMax, moneda, departamentoId, null);
+    }
 
     /** Sin filtro de departamento (constructor anterior a la Fase 12). */
     public BusquedaRequest(Integer ciudadId, Integer barrioId, String categoria, String operacion,
@@ -29,6 +36,6 @@ public record BusquedaRequest(
     }
 
     public static BusquedaRequest vacia() {
-        return new BusquedaRequest(null, null, null, null, null, null, null);
+        return new BusquedaRequest(null, null, null, null, null, null, null, null);
     }
 }

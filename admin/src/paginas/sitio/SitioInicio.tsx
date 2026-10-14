@@ -17,8 +17,8 @@ export default function SitioInicio() {
   async function guardar(e: FormEvent) {
     e.preventDefault(); setCampos({}); setGeneral(null); setMensaje(null)
     if (!c) return
-    // Solo los campos editables de la portada (el bloque "Sobre nosotros" se retiró)
-    const cuerpo = { imagenPortada: c.imagenPortada, etiqueta: c.etiqueta, titulo: c.titulo, subtitulo: c.subtitulo }
+    // Solo los campos editables de la portada (se retiraron el bloque "Sobre nosotros" y el texto pequeño sobre el título)
+    const cuerpo = { imagenPortada: c.imagenPortada, titulo: c.titulo, subtitulo: c.subtitulo }
     try { setC(await api.put<ContenidoInicio>('/api/admin/sitio/secciones/inicio', cuerpo)); setMensaje('Portada publicada.') }
     catch (err) { const r = erroresDe(err); setCampos(r.campos); setGeneral(r.general) }
   }
@@ -43,10 +43,7 @@ export default function SitioInicio() {
             {general && <div className={ui.avisoError} role="alert">{general}</div>}
             <div className={ui.grilla}>
               <ImagenSitio etiqueta="Imagen de fondo" valor={c.imagenPortada} onCambio={(u) => cambiar('imagenPortada', u)} />
-              <div className={ui.campo}>
-                {texto('etiqueta', 'Texto pequeño sobre el título (opcional)', 80)}
-                {texto('titulo', 'Título de la portada', 120)}
-              </div>
+              <div className={ui.campo}>{texto('titulo', 'Título de la portada', 120)}</div>
               {texto('subtitulo', 'Texto introductorio', 300, true)}
             </div>
             {err('imagenPortada')}

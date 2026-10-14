@@ -17,7 +17,7 @@ portada, las ofertas destacadas, Servicios, Nosotros y Contacto. Para que esos c
 
 | Componente | Hoy (escrito en el código) | Usar |
 |---|---|---|
-| `home/HeroSection.tsx` | Imagen de fondo en `HeroSection.module.css`; etiqueta "Más de 12.000…", título y subtítulo | `inicio.imagenPortada` (si no es `null`, como `background-image` en línea; si es `null`, la del CSS), `inicio.etiqueta` (no mostrarla si está vacía), `inicio.titulo`, `inicio.subtitulo` |
+| `home/HeroSection.tsx` | Imagen de fondo en `HeroSection.module.css`; texto "Más de 12.000 propiedades disponibles", título y subtítulo | `inicio.imagenPortada` (si no es `null`, como `background-image` en línea; si es `null`, la del CSS), `inicio.titulo`, `inicio.subtitulo`. **Quitar** el texto "Más de 12.000 propiedades disponibles" con su resaltado: se retiró del diseño |
 | `home/OffersSection.tsx` | 6 propiedades al azar (`slice` sobre una copia mezclada) | `elegirOfertas(features, contenido.ofertas)` |
 | `home/OffersSection.tsx`, bloque "Sobre nosotros" | Título, texto e imagen | **Quitar el bloque** de la portada: se retiró del diseño y ya no se edita desde el panel |
 | `contacto/Contacto.tsx` | Tres agentes de ejemplo con datos inventados | Sección institucional: el mensaje **"Tu consulta nos interesa, ponte en contacto con nosotros"** y los canales `contacto.email` (`mailto:`), `contacto.telefono` (`tel:`, solo dígitos y `+`), `contacto.whatsapp` (`https://wa.me/{whatsapp}`), más `direccion`, `ciudad` y `horario` si no están vacíos |
@@ -36,7 +36,7 @@ Conviene mostrar, por ejemplo, "Datos de contacto en actualización" en lugar de
 
 ```json
 {
-  "inicio":   { "imagenPortada": "/uploads/sitio-001/….png", "etiqueta": "…", "titulo": "…", "subtitulo": "…" },
+  "inicio":   { "imagenPortada": "/uploads/sitio-001/….png", "titulo": "…", "subtitulo": "…" },
   "servicios": { "titulo": "…", "subtitulo": "…", "servicios": [{ "titulo": "…", "texto": "…" }], "bloqueTitulo": "…", "bloqueTexto": "…" },
   "nosotros": { "introduccion": "…", "historiaTitulo": "…", "historiaTexto": "…", "imagen": null,
                 "cifras": [{ "valor": "+150", "etiqueta": "Propiedades" }], "valores": [{ "titulo": "…", "texto": "…" }], "razones": [ … ] },
@@ -48,12 +48,12 @@ Conviene mostrar, por ejemplo, "Datos de contacto en actualización" en lugar de
 ```
 
 - Las imágenes son rutas `/uploads/…` del mismo sitio (nginx las sirve desde el backend).
-- Hasta que alguien guarde la portada desde el panel, `inicio` puede traer también `nosotrosTitulo`, `nosotrosTexto` y `nosotrosImagen` (del contenido inicial): ignorarlos.
+- Hasta que alguien guarde la portada desde el panel, `inicio` puede traer también `etiqueta`, `nosotrosTitulo`, `nosotrosTexto` y `nosotrosImagen` (del contenido inicial): ignorarlos.
 - `ofertas` contiene **solo propiedades disponibles**: si una destacada se vende o se da de baja, desaparece sola.
 - Los textos son texto plano: mostrarlos como texto (no como HTML).
 
 ## Revisar antes de publicar
 
-El contenido inicial incluye afirmaciones que estaban escritas en el sitio y que conviene verificar desde el panel:
-"Más de 12.000 propiedades disponibles" (portada) y las cifras de Nosotros (+150 propiedades, +12 barrios, +6 años).
+El contenido inicial incluye cifras que estaban escritas en el sitio y que conviene verificar desde el panel:
+las de Nosotros (+150 propiedades, +12 barrios, +6 años).
 La imagen de portada actual se carga desde un sitio externo (`turismoitaipu.com.br`): se recomienda subir una propia desde el panel.

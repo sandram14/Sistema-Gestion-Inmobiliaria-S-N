@@ -55,7 +55,7 @@ class SitioIntegracionTest {
     void lasSeccionesTienenElContenidoInicialYSeGuardanValidadas() throws Exception {
         assertFalse(servicio.leer("inicio").path("titulo").asText().isBlank());
         assertEquals(4, servicio.leer("servicios").path("servicios").size());
-        JsonNode nuevo = new ObjectMapper().readTree("{\"imagenPortada\":null,\"etiqueta\":\"\",\"titulo\":\"Título " + marca
+        JsonNode nuevo = new ObjectMapper().readTree("{\"imagenPortada\":null,\"titulo\":\"Título " + marca
                 + "\",\"subtitulo\":\"\"}");
         int admin = (int) DatosPrueba.numero(ds, "SELECT min(id_usuario) FROM usuario");
         servicio.guardar("inicio", nuevo, admin);

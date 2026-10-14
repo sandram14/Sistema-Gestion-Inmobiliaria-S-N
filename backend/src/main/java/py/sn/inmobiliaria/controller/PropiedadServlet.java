@@ -58,12 +58,13 @@ public class PropiedadServlet extends ApiServlet {
         Integer ciudadId = Parametros.entero(req, "ciudadId", errores);
         Integer barrioId = Parametros.entero(req, "barrioId", errores);
         var presupuesto = Parametros.decimal(req, "presupuestoMax", errores);
+        var presupuestoMin = Parametros.decimal(req, "presupuestoMin", errores);
         errores.lanzarSiHay();
 
         String operacion = Parametros.texto(req, "operacion", "tipoOperacion");
         BusquedaRequest criterios = new BusquedaRequest(ciudadId, barrioId,
                 Parametros.texto(req, "categoria"), operacion, presupuesto, Parametros.texto(req, "moneda"),
-                departamentoId);
+                departamentoId, presupuestoMin);
 
         // Si se filtra por Alquiler, cada propiedad muestra su precio de alquiler
         String operacionPreferida = ReglasNegocio.normalizarOperacion(operacion).orElse(null);

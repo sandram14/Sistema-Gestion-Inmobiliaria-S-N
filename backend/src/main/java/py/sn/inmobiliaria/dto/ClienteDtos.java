@@ -9,9 +9,18 @@ public final class ClienteDtos {
     private ClienteDtos() {
     }
 
-    /** Formulario público del chat. aceptaTratamiento debe ser true y versionConsentimiento la vigente. */
+    /**
+     * Formulario público (chat o página Contacto). aceptaTratamiento debe ser true y versionConsentimiento la vigente.
+     * canal: "CHAT" (por defecto) o "CONTACTO".
+     */
     public record Solicitud(String nombre, String telefono, String email, String mensaje, String codigoPropiedad,
-                            Boolean aceptaTratamiento, String versionConsentimiento) {
+                            Boolean aceptaTratamiento, String versionConsentimiento, String canal) {
+
+        /** Sin canal: chat (forma anterior). */
+        public Solicitud(String nombre, String telefono, String email, String mensaje, String codigoPropiedad,
+                         Boolean aceptaTratamiento, String versionConsentimiento) {
+            this(nombre, telefono, email, mensaje, codigoPropiedad, aceptaTratamiento, versionConsentimiento, null);
+        }
     }
 
     /** Alta manual desde el panel. origen: WHATSAPP, LLAMADA u OTRO. */

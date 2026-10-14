@@ -88,4 +88,14 @@ class ClientesIntegracionTest {
         assertEquals(2, conteos.total());
         assertEquals(1, conteos.contactados());
     }
+
+    @Test
+    void desdeElFormularioDeContacto_OrigenContactoConAceptacionYSinVincularConsultas() {
+        UUID sesion = UUID.randomUUID();
+        n("INSERT INTO consulta (id_sesion, consulta, respuesta) VALUES (?, ?, 'r') RETURNING id_consulta", sesion, "Pregunta " + marca);
+        servicio.registrarDesdeChat(new ClienteDtos.Solicitud("Luis " + marca, null, "luis@prueba.test", "Busco terreno", null, true,
+                ClientePotencialService.VERSION_CONSENTIMIENTO, "CONTACTO"), sesion);
+        assertEquals(1, n("SELECT count(*) FROM cliente_potencial WHERE nombre = ? AND origen = 'CONTACTO' AND id_consulta IS NULL "
+                + "AND consentimiento_en IS NOT NULL", "Luis " + marca));
+    }
 }

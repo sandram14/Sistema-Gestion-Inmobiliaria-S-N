@@ -1,4 +1,4 @@
-# Integración: formulario de clientes potenciales en el chat público
+# Integración: formulario de clientes potenciales (chat y página Contacto)
 
 Contrato del endpoint para el sitio público (`frontend/`). El backend ya está implementado (versión 0.17.0).
 
@@ -6,13 +6,18 @@ Contrato del endpoint para el sitio público (`frontend/`). El backend ya está 
 
 - Cuando la respuesta de `POST /api/asistente/consultas` trae `sugerirWhatsApp: true`, junto al botón de WhatsApp.
 - Cuando el visitante lo pide (por ejemplo, un botón "Quiero que me contacten" en el chat).
+- **En la página Contacto**, como formulario fijo junto a los canales institucionales (con `"canal": "CONTACTO"`).
 
 No se debe pedir datos en ningún otro momento ni hacer obligatorio el formulario para usar el chat.
 
 ## Endpoint
 
 `POST /api/clientes-potenciales` · `Content-Type: application/json` · enviar con `credentials: 'include'`
-(la cookie anónima `sn_sesion` permite vincular la última consulta del visitante; no es obligatoria).
+(desde el chat, la cookie anónima `sn_sesion` permite vincular la última consulta del visitante; no es obligatoria).
+
+**Formulario de la página Contacto:** los mismos campos (nombre, teléfono y/o email, mensaje y la casilla de aceptación),
+más `"canal": "CONTACTO"`. No pedir cédula ni otros datos: solo lo necesario para contactar. `codigoPropiedad` se omite
+salvo que el formulario se abra desde una propiedad.
 
 | Campo | Tipo | Obligatorio | Reglas |
 |---|---|---|---|
@@ -22,6 +27,7 @@ No se debe pedir datos en ningún otro momento ni hacer obligatorio el formulari
 | `mensaje` | string | No | Máximo 1000 caracteres ("¿Qué le interesa?") |
 | `codigoPropiedad` | string | No | Código de la propiedad que se está consultando (`propiedadEnConsulta.codigo`) |
 | `aceptaTratamiento` | boolean | Sí | Debe ser `true` (casilla marcada por el visitante, nunca premarcada) |
+| `canal` | string | No | `"CHAT"` (por defecto) o `"CONTACTO"` (formulario de la página Contacto). En el panel se ve como "Chat del sitio" o "Formulario de contacto" |
 | `versionConsentimiento` | string | Sí | Exactamente `"2026-10"` (versión del texto de abajo) |
 
 Ejemplo:

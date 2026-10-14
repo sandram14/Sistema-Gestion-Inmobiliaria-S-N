@@ -124,3 +124,16 @@ portada sigue mostrando 6 al azar. Es la única migración de todo el módulo (t
 | `006_revertir_sitio.sql` | Elimina ambas tablas (se pierden los textos editados desde el panel) | Sí, todo o nada |
 
 Aplicarla antes de desplegar el backend 0.18.0.
+
+## 007 — Origen CONTACTO para clientes potenciales (formulario de la página Contacto)
+
+Amplía `ck_cliente_origen` con `CONTACTO` y exige la aceptación del tratamiento también para ese origen,
+igual que en el chat (el propio visitante deja sus datos). **No modifica ningún registro.**
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `007_verificar_origen_contacto.sql` | Muestra las restricciones actuales y la cantidad de registros | No |
+| `007_origen_contacto.sql` | La migración (requiere la 005), comprobando que ningún registro cambie | Sí, todo o nada |
+| `007_revertir_origen_contacto.sql` | Restaura las restricciones; se detiene si ya hay registros con origen CONTACTO | Sí, todo o nada |
+
+Aplicarla antes de desplegar el backend 0.20.0.

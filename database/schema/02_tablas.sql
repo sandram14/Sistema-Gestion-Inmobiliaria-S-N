@@ -209,9 +209,9 @@ CREATE TABLE cliente_potencial (
     CONSTRAINT ck_cliente_nombre CHECK (char_length(btrim(nombre)) BETWEEN 2 AND 120),
     CONSTRAINT ck_cliente_contacto CHECK (telefono IS NOT NULL OR email IS NOT NULL),
     CONSTRAINT ck_cliente_email CHECK (email IS NULL OR email ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
-    CONSTRAINT ck_cliente_origen CHECK (origen IN ('CHAT', 'WHATSAPP', 'LLAMADA', 'OTRO')),
+    CONSTRAINT ck_cliente_origen CHECK (origen IN ('CHAT', 'CONTACTO', 'WHATSAPP', 'LLAMADA', 'OTRO')),
     CONSTRAINT ck_cliente_estado CHECK (estado IN ('PENDIENTE', 'CONTACTADO', 'DESCARTADO')),
-    CONSTRAINT ck_cliente_consentimiento CHECK (origen <> 'CHAT' OR (consentimiento_en IS NOT NULL AND consentimiento_version IS NOT NULL))
+    CONSTRAINT ck_cliente_consentimiento CHECK (origen NOT IN ('CHAT', 'CONTACTO') OR (consentimiento_en IS NOT NULL AND consentimiento_version IS NOT NULL))
 );
 
 -- Gestión del sitio web (migración 006)

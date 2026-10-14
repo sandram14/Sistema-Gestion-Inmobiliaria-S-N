@@ -69,9 +69,17 @@ public class JpaPropiedadDao implements PropiedadDao {
                 parametros.put("operacion", filtro.operacion());
             }
             if (filtro.tienePresupuesto()) {
-                jpql.append(" and op.moneda = :moneda and op.precio <= :presupuestoMax");
+                // Sin conversión: se comparan solo los precios publicados en la moneda elegida
+                jpql.append(" and op.moneda = :moneda");
                 parametros.put("moneda", filtro.moneda());
-                parametros.put("presupuestoMax", filtro.presupuestoMax());
+                if (filtro.presupuestoMax() != null) {
+                    jpql.append(" and op.precio <= :presupuestoMax");
+                    parametros.put("presupuestoMax", filtro.presupuestoMax());
+                }
+                if (filtro.presupuestoMin() != null) {
+                    jpql.append(" and op.precio >= :presupuestoMin");
+                    parametros.put("presupuestoMin", filtro.presupuestoMin());
+                }
             }
             jpql.append(")");
         }

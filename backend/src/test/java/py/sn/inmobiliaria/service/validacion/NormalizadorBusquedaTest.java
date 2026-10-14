@@ -86,4 +86,24 @@ class NormalizadorBusquedaTest {
         assertTrue(e.campos().containsKey("ciudadId"));
         assertTrue(e.campos().containsKey("barrioId"));
     }
+
+    @Test
+    void presupuestoMinimoYMaximoEnLaMismaMoneda() {
+        var f = NormalizadorBusqueda.normalizar(new BusquedaRequest(null, null, null, null,
+                new java.math.BigDecimal("900000000"), "PYG", null, new java.math.BigDecimal("300000000")));
+        assertEquals(new java.math.BigDecimal("300000000"), f.presupuestoMin());
+        assertEquals(py.sn.inmobiliaria.model.Moneda.PYG, f.moneda());
+        assertTrue(f.tienePresupuesto());
+        var soloMinimo = NormalizadorBusqueda.normalizar(new BusquedaRequest(null, null, null, null, null, null, null, new java.math.BigDecimal("50000")));
+        assertEquals(py.sn.inmobiliaria.model.Moneda.USD, soloMinimo.moneda());   // USD por defecto, como con el máximo
+    }
+
+    @Test
+    void elMinimoNoPuedeSuperarAlMaximoNiSerCero() {
+        var invertido = assertThrows(py.sn.inmobiliaria.exception.ValidacionException.class, () -> NormalizadorBusqueda.normalizar(
+                new BusquedaRequest(null, null, null, null, new java.math.BigDecimal("100"), "USD", null, new java.math.BigDecimal("200"))));
+        assertTrue(invertido.campos().containsKey("presupuestoMin"));
+        assertThrows(py.sn.inmobiliaria.exception.ValidacionException.class, () -> NormalizadorBusqueda.normalizar(
+                new BusquedaRequest(null, null, null, null, null, "USD", null, java.math.BigDecimal.ZERO)));
+    }
 }

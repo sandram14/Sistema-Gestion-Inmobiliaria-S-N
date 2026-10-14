@@ -18,7 +18,6 @@ export interface ContenidoSitio {
   inicio: {
     /** null: usar la imagen de fondo del diseño */
     imagenPortada: string | null
-    etiqueta: string
     titulo: string
     subtitulo: string
   }
@@ -44,7 +43,6 @@ export interface ContenidoSitio {
 export const CONTENIDO_RESPALDO: ContenidoSitio = {
   inicio: {
     imagenPortada: null,
-    etiqueta: 'Más de 12.000 propiedades disponibles',
     titulo: 'Encuentra el lugar donde comenzará tu próxima historia.',
     subtitulo: 'S&N Inmobiliaria conecta compradores e inversores con las mejores propiedades, con tecnología que simplifica cada decisión.',
   },
