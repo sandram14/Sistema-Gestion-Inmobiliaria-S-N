@@ -24,11 +24,11 @@ class ContenidoSitioServiceTest {
 
     @Test
     void inicio_TituloObligatorio_LongitudesYSoloImagenesDelPanel() {
-        var e = errores(() -> ContenidoSitioService.validarInicio(new Inicio("https://otro-sitio.com/a.jpg", null, " ", "x".repeat(301), null, null, null)));
+        var e = errores(() -> ContenidoSitioService.validarInicio(new Inicio("https://otro-sitio.com/a.jpg", null, " ", "x".repeat(301))));
         assertTrue(e.keySet().containsAll(List.of("imagenPortada", "titulo", "subtitulo")));
-        var ok = ContenidoSitioService.validarInicio(new Inicio(IMG, "", "  Bienvenidos  ", null, null, null, ""));
+        var ok = ContenidoSitioService.validarInicio(new Inicio(IMG, "", "  Bienvenidos  ", null));
         assertEquals("Bienvenidos", ok.titulo());
-        assertNull(ok.nosotrosImagen());                         // vacío: se usa la imagen del diseño
+        assertNull(ContenidoSitioService.validarInicio(new Inicio("", "", "T", "")).imagenPortada()); // vacío: imagen del diseño
     }
 
     @Test
@@ -51,7 +51,32 @@ class ContenidoSitioServiceTest {
     @Test
     void seccionesInexistentesOTodaviaNoEditables() {
         assertThrows(NoEncontradoException.class, () -> servicio.leer("precios"));
-        assertThrows(NoEncontradoException.class, () -> servicio.guardar("servicios", null, 1)); // entrega B
+        assertThrows(NoEncontradoException.class, () -> servicio.guardar("precios", null, 1));
+    }
+
+    @Test
+    void servicios_EntreUnoYOchoConTituloYTexto() {
+        var item = new ContenidoSitioService.Item("Tasaciones", "Valuamos su propiedad.");
+        var ok = ContenidoSitioService.validarServicios(new ContenidoSitioService.Servicios(" Nuestros servicios ", "", List.of(item), "", ""));
+        assertEquals("Nuestros servicios", ok.titulo());
+        var vacios = errores(() -> ContenidoSitioService.validarServicios(new ContenidoSitioService.Servicios("T", "", List.of(), "", "")));
+        assertTrue(vacios.containsKey("servicios"));
+        var nueve = java.util.Collections.nCopies(9, item);
+        assertTrue(errores(() -> ContenidoSitioService.validarServicios(new ContenidoSitioService.Servicios("T", "", nueve, "", ""))).containsKey("servicios"));
+        var sinTexto = errores(() -> ContenidoSitioService.validarServicios(new ContenidoSitioService.Servicios("T", "",
+                List.of(new ContenidoSitioService.Item("Alquileres", " ")), "", "")));
+        assertTrue(sinTexto.containsKey("servicios[0].texto"));      // el error indica qué elemento corregir
+    }
+
+    @Test
+    void nosotros_CifrasValoresYRazones() {
+        var item = new ContenidoSitioService.Item("Confianza", "Información real.");
+        var cifra = new ContenidoSitioService.Cifra("+150", "Propiedades");
+        var ok = ContenidoSitioService.validarNosotros(new ContenidoSitioService.Nosotros("", "", "", null, List.of(cifra), List.of(item), List.of(item)));
+        assertEquals("+150", ok.cifras().get(0).valor());
+        var e = errores(() -> ContenidoSitioService.validarNosotros(new ContenidoSitioService.Nosotros("", "", "", "https://x.com/a.jpg",
+                java.util.Collections.nCopies(5, cifra), List.of(), List.of(item))));
+        assertTrue(e.keySet().containsAll(List.of("imagen", "cifras", "valores")));
     }
 
     @Test

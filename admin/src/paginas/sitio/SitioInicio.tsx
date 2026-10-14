@@ -3,6 +3,7 @@ import { api } from '../../api/cliente'
 import type { ContenidoInicio } from '../../api/tipos'
 import { erroresDe } from '../../componentes/errores'
 import { ImagenSitio, PestanasSitio } from '../../componentes/sitio'
+import OfertasDestacadas from '../../componentes/OfertasDestacadas'
 import ui from '../../ui.module.css'
 
 export default function SitioInicio() {
@@ -15,7 +16,10 @@ export default function SitioInicio() {
 
   async function guardar(e: FormEvent) {
     e.preventDefault(); setCampos({}); setGeneral(null); setMensaje(null)
-    try { setC(await api.put<ContenidoInicio>('/api/admin/sitio/secciones/inicio', c)); setMensaje('Cambios publicados.') }
+    if (!c) return
+    // Solo los campos editables de la portada (el bloque "Sobre nosotros" se retiró)
+    const cuerpo = { imagenPortada: c.imagenPortada, etiqueta: c.etiqueta, titulo: c.titulo, subtitulo: c.subtitulo }
+    try { setC(await api.put<ContenidoInicio>('/api/admin/sitio/secciones/inicio', cuerpo)); setMensaje('Portada publicada.') }
     catch (err) { const r = erroresDe(err); setCampos(r.campos); setGeneral(r.general) }
   }
 
@@ -31,12 +35,12 @@ export default function SitioInicio() {
   return (
     <>
       <PestanasSitio />
-      {mensaje && <div className={ui.avisoExito}>{mensaje}</div>}
-      {general && <div className={ui.avisoError} role="alert">{general}</div>}
       {!c ? (!general && <p className={ui.cargando}>Cargando…</p>) : (
         <form onSubmit={guardar} noValidate>
           <section className={ui.tarjeta}>
             <h2>Portada</h2>
+            {mensaje && <div className={ui.avisoExito}>{mensaje}</div>}
+            {general && <div className={ui.avisoError} role="alert">{general}</div>}
             <div className={ui.grilla}>
               <ImagenSitio etiqueta="Imagen de fondo" valor={c.imagenPortada} onCambio={(u) => cambiar('imagenPortada', u)} />
               <div className={ui.campo}>
@@ -46,18 +50,11 @@ export default function SitioInicio() {
               {texto('subtitulo', 'Texto introductorio', 300, true)}
             </div>
             {err('imagenPortada')}
+            <div className={ui.acciones}><button type="submit" className={ui.boton}>Guardar y publicar la portada</button></div>
           </section>
-          <section className={ui.tarjeta}>
-            <h2>Bloque "Sobre nosotros" de la portada</h2>
-            <div className={ui.grilla}>
-              <ImagenSitio etiqueta="Imagen" valor={c.nosotrosImagen} onCambio={(u) => cambiar('nosotrosImagen', u)} />
-              <div className={ui.campo}>{texto('nosotrosTitulo', 'Título del bloque', 120)}</div>
-              {texto('nosotrosTexto', 'Texto del bloque', 1200, true)}
-            </div>
-          </section>
-          <div className={ui.acciones}><button type="submit" className={ui.boton}>Guardar y publicar</button></div>
         </form>
       )}
+      <OfertasDestacadas />
     </>
   )
 }

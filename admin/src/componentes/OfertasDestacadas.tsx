@@ -1,16 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowDown, ArrowUp } from 'lucide-react'
-import { api } from '../../api/cliente'
-import type { Destacada, PropiedadResumen } from '../../api/tipos'
-import { erroresDe } from '../../componentes/errores'
-import { PestanasSitio } from '../../componentes/sitio'
-import ui from '../../ui.module.css'
+import { api } from '../api/cliente'
+import type { Destacada, PropiedadResumen } from '../api/tipos'
+import { erroresDe } from './errores'
+import ui from '../ui.module.css'
 
 const MAXIMO = 12
 
-/** Propiedades destacadas en la portada: elegir entre las disponibles y ordenar. El inventario se gestiona en Propiedades. */
-export default function SitioOfertas() {
+/** Ofertas destacadas de la portada (dentro de la pestaña Inicio): elegir entre las disponibles y ordenar. El inventario se gestiona en Propiedades. */
+export default function OfertasDestacadas() {
   const [lista, setLista] = useState<Destacada[] | null>(null)
   const [propiedades, setPropiedades] = useState<PropiedadResumen[]>([])
   const [elegida, setElegida] = useState('')
@@ -45,11 +44,10 @@ export default function SitioOfertas() {
 
   return (
     <>
-      <PestanasSitio />
-      {mensaje && <div className={ui.avisoExito}>{mensaje}</div>}
-      {error && <div className={ui.avisoError} role="alert">{error}</div>}
       <section className={ui.tarjeta}>
-        <h2>Propiedades destacadas en la portada</h2>
+        <h2>Ofertas destacadas</h2>
+        {mensaje && <div className={ui.avisoExito}>{mensaje}</div>}
+        {error && <div className={ui.avisoError} role="alert">{error}</div>}
         {lista && lista.length === 0 && (
           <div className={ui.aviso}>No hay propiedades seleccionadas: la portada muestra seis propiedades disponibles elegidas al azar.</div>
         )}

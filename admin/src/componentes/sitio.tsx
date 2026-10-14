@@ -12,7 +12,8 @@ export function PestanasSitio() {
       <div className={ui.tituloPagina}><h1>Gestión del sitio web</h1></div>
       <nav className={ui.pestanas} aria-label="Secciones del sitio web">
         <NavLink to="/sitio/inicio" className={clase}>Inicio</NavLink>
-        <NavLink to="/sitio/ofertas" className={clase}>Ofertas</NavLink>
+        <NavLink to="/sitio/servicios" className={clase}>Servicios</NavLink>
+        <NavLink to="/sitio/nosotros" className={clase}>Nosotros</NavLink>
         <NavLink to="/sitio/contacto" className={clase}>Contacto</NavLink>
       </nav>
       <p className={ui.ayuda}>Los cambios se publican en la web al guardar (pueden tardar hasta un minuto en verse).</p>
@@ -53,6 +54,41 @@ export function ImagenSitio({ etiqueta, valor, onCambio }: { etiqueta: string; v
       </div>
       <span className={ui.ayuda}>JPEG, PNG o WebP; máximo 5 MB. Se aplica al guardar.</span>
       {error && <span className={ui.errorCampo}>{error}</span>}
+    </div>
+  )
+}
+
+/** Editor de una lista de elementos con título y texto: editar, agregar, quitar y ordenar. */
+export function ListaItems({ items, onCambio, min, max, prefijo, errores, nombre }: {
+  items: { titulo: string; texto: string }[]; onCambio: (l: { titulo: string; texto: string }[]) => void
+  min: number; max: number; prefijo: string; errores: Record<string, string>; nombre: string
+}) {
+  const cambiar = (i: number, k: 'titulo' | 'texto', v: string) => onCambio(items.map((x, j) => (j === i ? { ...x, [k]: v } : x)))
+  const mover = (i: number, d: number) => { const n = [...items]; const [x] = n.splice(i, 1); n.splice(i + d, 0, x); onCambio(n) }
+  return (
+    <div className={ui.listaItems}>
+      {items.map((it, i) => (
+        <div key={i} className={ui.itemEditable}>
+          <div className={ui.grilla}>
+            <label className={ui.campo}><span className={ui.etiqueta}>{nombre} {i + 1}: título</span>
+              <input className={ui.input} maxLength={60} value={it.titulo} onChange={(e) => cambiar(i, 'titulo', e.target.value)} />
+              {errores[`${prefijo}[${i}].titulo`] && <span className={ui.errorCampo}>{errores[`${prefijo}[${i}].titulo`]}</span>}</label>
+            <label className={`${ui.campo} ${ui.campoAncho}`}><span className={ui.etiqueta}>{nombre} {i + 1}: texto</span>
+              <textarea className={ui.input} rows={2} maxLength={300} value={it.texto} onChange={(e) => cambiar(i, 'texto', e.target.value)} />
+              {errores[`${prefijo}[${i}].texto`] && <span className={ui.errorCampo}>{errores[`${prefijo}[${i}].texto`]}</span>}</label>
+          </div>
+          <div className={ui.acciones}>
+            <button type="button" className={`${ui.botonSecundario} ${ui.botonChico}`} disabled={i === 0} onClick={() => mover(i, -1)}>Subir</button>
+            <button type="button" className={`${ui.botonSecundario} ${ui.botonChico}`} disabled={i === items.length - 1} onClick={() => mover(i, 1)}>Bajar</button>
+            <button type="button" className={`${ui.botonPeligro} ${ui.botonChico}`} disabled={items.length <= min} onClick={() => onCambio(items.filter((_, j) => j !== i))}>Quitar</button>
+          </div>
+        </div>
+      ))}
+      {errores[prefijo] && <span className={ui.errorCampo}>{errores[prefijo]}</span>}
+      <div className={ui.filaControl}>
+        <button type="button" className={ui.botonSecundario} disabled={items.length >= max} onClick={() => onCambio([...items, { titulo: '', texto: '' }])}>Agregar {nombre.toLowerCase()}</button>
+        <span className={ui.secundario}>{items.length} de {max} como máximo</span>
+      </div>
     </div>
   )
 }

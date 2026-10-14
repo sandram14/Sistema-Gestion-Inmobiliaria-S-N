@@ -56,7 +56,7 @@ class SitioIntegracionTest {
         assertFalse(servicio.leer("inicio").path("titulo").asText().isBlank());
         assertEquals(4, servicio.leer("servicios").path("servicios").size());
         JsonNode nuevo = new ObjectMapper().readTree("{\"imagenPortada\":null,\"etiqueta\":\"\",\"titulo\":\"Título " + marca
-                + "\",\"subtitulo\":\"\",\"nosotrosTitulo\":\"\",\"nosotrosTexto\":\"\",\"nosotrosImagen\":null}");
+                + "\",\"subtitulo\":\"\"}");
         int admin = (int) DatosPrueba.numero(ds, "SELECT min(id_usuario) FROM usuario");
         servicio.guardar("inicio", nuevo, admin);
         assertEquals(1, DatosPrueba.numero(ds, "SELECT count(*) FROM seccion_sitio WHERE seccion = 'INICIO' AND actualizado_por = ?", admin));

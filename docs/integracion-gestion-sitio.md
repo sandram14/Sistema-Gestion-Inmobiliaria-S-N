@@ -1,7 +1,7 @@
 # Integración: contenido del sitio editable desde el panel
 
-El panel (Gestión del sitio web) guarda el contenido de Inicio, Ofertas y Contacto (y, en la próxima entrega,
-Servicios y Nosotros). Para que esos cambios se vean en la web, los componentes del sitio deben leerlo de
+El panel (Gestión del sitio web, pestañas Inicio, Servicios, Nosotros y Contacto) guarda el contenido de la
+portada, las ofertas destacadas, Servicios, Nosotros y Contacto. Para que esos cambios se vean en la web, los componentes del sitio deben leerlo de
 `GET /api/sitio` en lugar de tenerlo escrito en el código. Backend: versión 0.18.0 (migración 006).
 
 ## Archivo listo para usar
@@ -19,11 +19,12 @@ Servicios y Nosotros). Para que esos cambios se vean en la web, los componentes 
 |---|---|---|
 | `home/HeroSection.tsx` | Imagen de fondo en `HeroSection.module.css`; etiqueta "Más de 12.000…", título y subtítulo | `inicio.imagenPortada` (si no es `null`, como `background-image` en línea; si es `null`, la del CSS), `inicio.etiqueta` (no mostrarla si está vacía), `inicio.titulo`, `inicio.subtitulo` |
 | `home/OffersSection.tsx` | 6 propiedades al azar (`slice` sobre una copia mezclada) | `elegirOfertas(features, contenido.ofertas)` |
-| `home/OffersSection.tsx`, bloque "Sobre nosotros" | Título, texto e imagen `/images/stock/inicio_sobre_nosotros.jpg` | `inicio.nosotrosTitulo`, `inicio.nosotrosTexto`, `inicio.nosotrosImagen ?? '/images/stock/inicio_sobre_nosotros.jpg'` |
+| `home/OffersSection.tsx`, bloque "Sobre nosotros" | Título, texto e imagen | **Quitar el bloque** de la portada: se retiró del diseño y ya no se edita desde el panel |
 | `contacto/Contacto.tsx` | Tres agentes de ejemplo con datos inventados | Sección institucional: el mensaje **"Tu consulta nos interesa, ponte en contacto con nosotros"** y los canales `contacto.email` (`mailto:`), `contacto.telefono` (`tel:`, solo dígitos y `+`), `contacto.whatsapp` (`https://wa.me/{whatsapp}`), más `direccion`, `ciudad` y `horario` si no están vacíos |
 | `layout/Footer.tsx` | Descripción de la empresa y "Ciudad del Este, Paraguay" | `contacto.descripcion`, `contacto.ciudad` |
 | `chat/AssistantWidget.tsx` | Constante `AGENTE_WHATSAPP = '595981123456'` | `contacto.whatsapp` (con `obtenerContenidoSitio()`, al armar el enlace) |
-| Servicios y Nosotros | Textos escritos en el código | `servicios.*` y `nosotros.*` (los campos ya vienen en la respuesta; se podrán editar en la próxima entrega del panel) |
+| `servicios/Servicios.tsx` | Título, subtítulo, el arreglo `SERVICIOS` y el bloque inferior | `servicios.titulo`, `servicios.subtitulo`, `servicios.servicios` (1 a 8 elementos `{titulo, texto}`), `servicios.bloqueTitulo`, `servicios.bloqueTexto` |
+| `nosotros/Nosotros.tsx` | Introducción, historia, cifras, `VALORES` y `RAZONES` | `nosotros.introduccion`, `historiaTitulo`, `historiaTexto`, `imagen` (si no es `null`), `cifras` (0 a 4), `valores` y `razones` (1 a 6 cada uno). Los íconos no se editan: asignarlos por posición (por ejemplo, `ICONOS[i % ICONOS.length]`), porque la cantidad de elementos puede cambiar |
 
 **Datos provisionales:** mientras `contactoProvisional` sea `true`, el email, el teléfono o el WhatsApp son los de prueba
 (`contacto@sn-inmobiliaria.example`, `+595 000 000 000`): el dominio `.example` no llega a nadie y el número no existe.
@@ -35,8 +36,7 @@ Conviene mostrar, por ejemplo, "Datos de contacto en actualización" en lugar de
 
 ```json
 {
-  "inicio":   { "imagenPortada": null, "etiqueta": "…", "titulo": "…", "subtitulo": "…",
-                "nosotrosTitulo": "…", "nosotrosTexto": "…", "nosotrosImagen": "/uploads/sitio-001/….png" },
+  "inicio":   { "imagenPortada": "/uploads/sitio-001/….png", "etiqueta": "…", "titulo": "…", "subtitulo": "…" },
   "servicios": { "titulo": "…", "subtitulo": "…", "servicios": [{ "titulo": "…", "texto": "…" }], "bloqueTitulo": "…", "bloqueTexto": "…" },
   "nosotros": { "introduccion": "…", "historiaTitulo": "…", "historiaTexto": "…", "imagen": null,
                 "cifras": [{ "valor": "+150", "etiqueta": "Propiedades" }], "valores": [{ "titulo": "…", "texto": "…" }], "razones": [ … ] },
@@ -48,6 +48,7 @@ Conviene mostrar, por ejemplo, "Datos de contacto en actualización" en lugar de
 ```
 
 - Las imágenes son rutas `/uploads/…` del mismo sitio (nginx las sirve desde el backend).
+- Hasta que alguien guarde la portada desde el panel, `inicio` puede traer también `nosotrosTitulo`, `nosotrosTexto` y `nosotrosImagen` (del contenido inicial): ignorarlos.
 - `ofertas` contiene **solo propiedades disponibles**: si una destacada se vende o se da de baja, desaparece sola.
 - Los textos son texto plano: mostrarlos como texto (no como HTML).
 

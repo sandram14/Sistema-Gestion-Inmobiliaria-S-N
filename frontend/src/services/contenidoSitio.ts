@@ -21,10 +21,6 @@ export interface ContenidoSitio {
     etiqueta: string
     titulo: string
     subtitulo: string
-    nosotrosTitulo: string
-    nosotrosTexto: string
-    /** null: usar la imagen del diseño */
-    nosotrosImagen: string | null
   }
   servicios: { titulo: string; subtitulo: string; servicios: ItemTexto[]; bloqueTitulo: string; bloqueTexto: string }
   nosotros: {
@@ -51,9 +47,6 @@ export const CONTENIDO_RESPALDO: ContenidoSitio = {
     etiqueta: 'Más de 12.000 propiedades disponibles',
     titulo: 'Encuentra el lugar donde comenzará tu próxima historia.',
     subtitulo: 'S&N Inmobiliaria conecta compradores e inversores con las mejores propiedades, con tecnología que simplifica cada decisión.',
-    nosotrosTitulo: 'Por qué elegirnos como inmobiliaria.',
-    nosotrosTexto: 'Conocemos cada barrio de Alto Paraná casa por casa. Acompañamos todo el proceso —de la primera visita a la entrega de llaves— con información real, transparente y actualizada.',
-    nosotrosImagen: null,
   },
   servicios: {
     titulo: 'Nuestros Servicios',

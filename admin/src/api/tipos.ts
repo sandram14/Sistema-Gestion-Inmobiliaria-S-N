@@ -228,9 +228,12 @@ export interface PaginaClientes {
 }
 
 // ---- Gestión del sitio web ----
-export interface ContenidoInicio {
-  imagenPortada: string | null; etiqueta: string; titulo: string; subtitulo: string
-  nosotrosTitulo: string; nosotrosTexto: string; nosotrosImagen: string | null
+export interface ContenidoInicio { imagenPortada: string | null; etiqueta: string; titulo: string; subtitulo: string }
+export interface ItemTexto { titulo: string; texto: string }
+export interface ContenidoServicios { titulo: string; subtitulo: string; servicios: ItemTexto[]; bloqueTitulo: string; bloqueTexto: string }
+export interface ContenidoNosotros {
+  introduccion: string; historiaTitulo: string; historiaTexto: string; imagen: string | null
+  cifras: { valor: string; etiqueta: string }[]; valores: ItemTexto[]; razones: ItemTexto[]
 }
 export interface ContenidoContacto {
   nombreEmpresa: string; descripcion: string; direccion: string; ciudad: string

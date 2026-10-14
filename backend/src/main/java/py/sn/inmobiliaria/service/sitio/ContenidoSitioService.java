@@ -23,15 +23,28 @@ public class ContenidoSitioService {
     /** Carpeta de las imágenes del sitio dentro de /uploads (cumple la regla de carpetas de AlmacenImagenes). */
     public static final String CARPETA_IMAGENES = "sitio-001";
     public static final int MAXIMO_DESTACADAS = 12;
-    public static final List<String> EDITABLES = List.of("INICIO", "CONTACTO"); // SERVICIOS y NOSOTROS: entrega B
+    public static final List<String> EDITABLES = List.of("INICIO", "SERVICIOS", "NOSOTROS", "CONTACTO");
     private static final List<String> SECCIONES = List.of("INICIO", "SERVICIOS", "NOSOTROS", "CONTACTO");
     private static final Pattern IMAGEN = Pattern.compile("^/uploads/" + CARPETA_IMAGENES + "/[0-9a-f-]{36}\\.(jpg|png|webp)$");
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
     private static final Pattern TELEFONO = Pattern.compile("^\\+?[0-9 ()-]{6,30}$");
     private static final Pattern WHATSAPP = Pattern.compile("^[0-9]{8,15}$");
 
-    public record Inicio(String imagenPortada, String etiqueta, String titulo, String subtitulo, String nosotrosTitulo,
-                         String nosotrosTexto, String nosotrosImagen) {
+    /** Portada. El bloque "Sobre nosotros" de la portada se retiró: sus campos ya no se editan ni se aceptan. */
+    public record Inicio(String imagenPortada, String etiqueta, String titulo, String subtitulo) {
+    }
+
+    public record Item(String titulo, String texto) {
+    }
+
+    public record Servicios(String titulo, String subtitulo, List<Item> servicios, String bloqueTitulo, String bloqueTexto) {
+    }
+
+    public record Cifra(String valor, String etiqueta) {
+    }
+
+    public record Nosotros(String introduccion, String historiaTitulo, String historiaTexto, String imagen,
+                           List<Cifra> cifras, List<Item> valores, List<Item> razones) {
     }
 
     public record Contacto(String nombreEmpresa, String descripcion, String direccion, String ciudad, String email,
@@ -66,6 +79,8 @@ public class ContenidoSitioService {
         }
         Object normalizado = switch (s) {
             case "INICIO" -> validarInicio(convertir(cuerpo, Inicio.class));
+            case "SERVICIOS" -> validarServicios(convertir(cuerpo, Servicios.class));
+            case "NOSOTROS" -> validarNosotros(convertir(cuerpo, Nosotros.class));
             case "CONTACTO" -> validarContacto(convertir(cuerpo, Contacto.class));
             default -> throw new IllegalStateException(s);
         };
@@ -77,10 +92,47 @@ public class ContenidoSitioService {
     static Inicio validarInicio(Inicio i) {
         Errores e = new Errores();
         Inicio n = new Inicio(imagen(i.imagenPortada(), "imagenPortada", e), opcional(i.etiqueta(), "etiqueta", 80, e),
-                obligatorio(i.titulo(), "titulo", 120, e), opcional(i.subtitulo(), "subtitulo", 300, e),
-                opcional(i.nosotrosTitulo(), "nosotrosTitulo", 120, e), opcional(i.nosotrosTexto(), "nosotrosTexto", 1200, e),
-                imagen(i.nosotrosImagen(), "nosotrosImagen", e));
+                obligatorio(i.titulo(), "titulo", 120, e), opcional(i.subtitulo(), "subtitulo", 300, e));
         e.lanzarSiHay();
+        return n;
+    }
+
+    static Servicios validarServicios(Servicios s) {
+        Errores e = new Errores();
+        Servicios n = new Servicios(obligatorio(s.titulo(), "titulo", 80, e), opcional(s.subtitulo(), "subtitulo", 200, e),
+                items(s.servicios(), "servicios", 1, 8, e), opcional(s.bloqueTitulo(), "bloqueTitulo", 120, e),
+                opcional(s.bloqueTexto(), "bloqueTexto", 600, e));
+        e.lanzarSiHay();
+        return n;
+    }
+
+    static Nosotros validarNosotros(Nosotros x) {
+        Errores e = new Errores();
+        List<Cifra> cifras = x.cifras() == null ? List.of() : x.cifras();
+        if (cifras.size() > 4) e.agregar("cifras", "Como máximo 4 cifras");
+        List<Cifra> cifrasN = new java.util.ArrayList<>();
+        for (int i = 0; i < Math.min(cifras.size(), 4); i++) {
+            Cifra c = cifras.get(i) == null ? new Cifra(null, null) : cifras.get(i);
+            cifrasN.add(new Cifra(obligatorio(c.valor(), "cifras[" + i + "].valor", 12, e), obligatorio(c.etiqueta(), "cifras[" + i + "].etiqueta", 40, e)));
+        }
+        Nosotros n = new Nosotros(opcional(x.introduccion(), "introduccion", 600, e), opcional(x.historiaTitulo(), "historiaTitulo", 120, e),
+                opcional(x.historiaTexto(), "historiaTexto", 1500, e), imagen(x.imagen(), "imagen", e), cifrasN,
+                items(x.valores(), "valores", 1, 6, e), items(x.razones(), "razones", 1, 6, e));
+        e.lanzarSiHay();
+        return n;
+    }
+
+    /** Lista de elementos con título y texto obligatorios, entre min y max (para no romper el diseño). */
+    private static List<Item> items(List<Item> lista, String campo, int min, int max, Errores e) {
+        List<Item> l = lista == null ? List.of() : lista;
+        if (l.size() < min || l.size() > max) {
+            e.agregar(campo, "Debe haber entre " + min + " y " + max + " elementos");
+        }
+        List<Item> n = new java.util.ArrayList<>();
+        for (int i = 0; i < Math.min(l.size(), max); i++) {
+            Item it = l.get(i) == null ? new Item(null, null) : l.get(i);
+            n.add(new Item(obligatorio(it.titulo(), campo + "[" + i + "].titulo", 60, e), obligatorio(it.texto(), campo + "[" + i + "].texto", 300, e)));
+        }
         return n;
     }
 
