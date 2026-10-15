@@ -7,7 +7,7 @@
  *   <h1>{contenido.inicio.titulo}</h1>
  *
  * Si el backend no responde, se usan los textos que el sitio mostraba antes (CONTENIDO_RESPALDO),
- * así ninguna sección queda vacía.
+ * así ninguna sección queda vacía. Lo escrito entre asteriscos (*así*) se muestra destacado (ver components/comun/destacar.tsx).
  */
 import { useEffect, useState } from 'react'
 import { apiGet } from './api'
@@ -43,7 +43,7 @@ export interface ContenidoSitio {
 export const CONTENIDO_RESPALDO: ContenidoSitio = {
   inicio: {
     imagenPortada: null,
-    titulo: 'Encuentra el lugar donde comenzará tu próxima historia.',
+    titulo: 'Encuentra el lugar donde comenzará *tu próxima historia.*',
     subtitulo: 'S&N Inmobiliaria conecta compradores e inversores con las mejores propiedades, con tecnología que simplifica cada decisión.',
   },
   servicios: {
@@ -55,12 +55,12 @@ export const CONTENIDO_RESPALDO: ContenidoSitio = {
       { titulo: 'Terrenos', texto: 'Encontrá terrenos para construir, invertir o desarrollar tu próximo proyecto.' },
       { titulo: 'Asesoría Inmobiliaria', texto: 'Te acompañamos para tomar decisiones seguras y encontrar la mejor opción según tus necesidades.' },
     ],
-    bloqueTitulo: 'Encontrá el terreno o la propiedad ideal para tu proyecto.',
+    bloqueTitulo: 'Encontrá el terreno o la propiedad *ideal para tu proyecto.*',
     bloqueTexto: 'Contamos con terrenos y propiedades ubicados en diferentes zonas de Alto Paraná, ideales para vivienda, inversión o desarrollo comercial.',
   },
   nosotros: {
     introduccion: 'Somos una plataforma enfocada en conectar a las personas con las mejores oportunidades inmobiliarias, brindando un servicio transparente, moderno y adaptado a tus necesidades.',
-    historiaTitulo: 'Un equipo que conoce Alto Paraná de cerca.',
+    historiaTitulo: 'Un equipo que conoce *Alto Paraná de cerca.*',
     historiaTexto: 'Nacimos en Ciudad del Este con un objetivo simple: que comprar, vender o alquilar una propiedad sea un proceso claro, sin sorpresas. Hoy acompañamos a familias e inversores en toda la región, barrio por barrio.',
     imagen: null,
     cifras: [{ valor: '+150', etiqueta: 'Propiedades' }, { valor: '+12', etiqueta: 'Barrios cubiertos' }, { valor: '+6', etiqueta: 'Años de experiencia' }],
@@ -105,6 +105,11 @@ export function obtenerContenidoSitio(): Promise<ContenidoSitio> {
       })
   }
   return cache
+}
+
+/** Olvida el contenido leído: la próxima lectura vuelve a pedirlo al backend (lo usan las pruebas). */
+export function reiniciarContenidoSitio() {
+  cache = null
 }
 
 /** Hook para componentes: devuelve el respaldo de inmediato y el contenido real apenas llega. */

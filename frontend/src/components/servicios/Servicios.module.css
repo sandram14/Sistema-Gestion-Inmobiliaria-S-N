@@ -54,6 +54,12 @@
   margin: 0 0 18px;
 }
 
+.titleAccent {
+  /* Palabras destacadas del título de la página (fondo oscuro): verde claro, como en la portada */
+  font-style: italic;
+  color: var(--color-acento);
+}
+
 .h2Accent {
   font-style: italic;
   color: var(--color-verde-medio);

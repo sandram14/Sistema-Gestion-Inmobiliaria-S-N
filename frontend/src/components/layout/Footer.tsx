@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useContenidoSitio } from '../../services/contenidoSitio'
 import styles from './Footer.module.css'
 
 const COLUMNAS: { title: string; links: { label: string; to?: string }[] }[] = [
@@ -28,6 +29,7 @@ const COLUMNAS: { title: string; links: { label: string; to?: string }[] }[] = [
 ]
 
 export default function Footer() {
+  const { contenido } = useContenidoSitio()
   const navigate = useNavigate()
 
   return (
@@ -43,10 +45,7 @@ export default function Footer() {
               {/* La insignia ya dice "S&N": el texto completa la marca, "S&N Inmobiliaria" */}
               <span className={`${styles.brandName} ${styles.brandAccent}`}>Inmobiliaria</span>
             </div>
-            <p className={styles.brandText}>
-              La plataforma inmobiliaria más avanzada de Alto Paraná para comprar, alquilar e
-              invertir con confianza.
-            </p>
+            {contenido.contacto.descripcion && <p className={styles.brandText}>{contenido.contacto.descripcion}</p>}
           </div>
 
           {/* Columnas de links */}
@@ -76,7 +75,7 @@ export default function Footer() {
         {/* Barra inferior */}
         <div className={styles.bottomBar}>
           <span className={styles.bottomText}>© 2026 S&N Inmobiliaria. Todos los derechos reservados.</span>
-          <span className={styles.bottomText}>Ciudad del Este, Paraguay</span>
+          <span className={styles.bottomText}>{contenido.contacto.ciudad ? `${contenido.contacto.ciudad}, Paraguay` : 'Paraguay'}</span>
         </div>
       </div>
     </footer>

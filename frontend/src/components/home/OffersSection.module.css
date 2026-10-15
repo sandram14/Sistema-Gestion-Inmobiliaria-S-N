@@ -7,7 +7,7 @@
   max-width: 1400px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr); /* el bloque "Sobre nosotros" se retiró: las ofertas ocupan todo el ancho */
   gap: 32px;
   align-items: stretch;
 }
@@ -50,7 +50,7 @@
 
 .cardsGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
 }
 
@@ -150,74 +150,13 @@
 }
 
 /* ── Panel "Sobre nosotros" ───────────────────────────────────────────── */
-.nosotrosPanel {
-  background: var(--color-verde-oscuro);
-  border-radius: 28px;
-  padding: 52px 44px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
 
-.eyebrowLight {
-  color: color-mix(in srgb, var(--color-acento) 65%, transparent);
-  font-size: var(--texto-xs);
-  font-family: var(--fuente-texto);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-}
 
-.subtitle {
-  font-family: var(--fuente-titulos);
-  font-size: var(--titulo-bloque);
-  font-weight: 300;
-  color: var(--color-blanco);
-  line-height: 1.2;
-  margin-bottom: 18px;
-  letter-spacing: -0.02em;
-}
 
-.subtitleAccent {
-  font-style: italic;
-  color: var(--color-acento);
-}
 
-.nosotrosText {
-  color: color-mix(in srgb, var(--color-blanco) 60%, transparent);
-  font-size: var(--texto-md);
-  font-family: var(--fuente-texto);
-  line-height: 1.75;
-  margin-bottom: 20px;
-}
 
-.nosotrosImg {
-  width: 100%;
-  height: 190px;
-  object-fit: cover;
-  border-radius: 28px;
-  margin-bottom: 20px;
-}
 
-.nosotrosBtn {
-  align-self: flex-start;
-  padding: 13px 26px;
-  background: var(--color-acento);
-  border: none;
-  border-radius: 10px;
-  color: var(--color-verde);
-  font-size: var(--texto-md);
-  font-weight: 700;
-  font-family: var(--fuente-texto);
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-bottom: 8px;
-}
 
-.nosotrosBtn:hover {
-  background: var(--color-acento-claro);
-}
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 960px) {
@@ -230,8 +169,7 @@
   .section {
     padding: 56px 1.25rem;
   }
-  .ofertasPanel,
-  .nosotrosPanel {
+  .ofertasPanel {
     padding: 32px 24px;
     border-radius: 20px;
   }

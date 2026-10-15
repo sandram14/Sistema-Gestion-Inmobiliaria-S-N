@@ -137,3 +137,10 @@ igual que en el chat (el propio visitante deja sus datos). **No modifica ningún
 | `007_revertir_origen_contacto.sql` | Restaura las restricciones; se detiene si ya hay registros con origen CONTACTO | Sí, todo o nada |
 
 Aplicarla antes de desplegar el backend 0.20.0.
+
+## 008 — Palabras destacadas en tres títulos del sitio (solo datos)
+
+El sitio muestra en verde e itálica lo que está entre asteriscos (`*así*`). `008_titulos_destacados.sql`
+marca las mismas palabras que el diseño destacaba antes en el título de la portada, el bloque de Servicios
+y la historia de Nosotros, **solo si esos títulos conservan su texto original** (si ya se editaron desde el
+panel, no se tocan). No cambia la estructura y se puede ejecutar más de una vez sin efecto adicional.

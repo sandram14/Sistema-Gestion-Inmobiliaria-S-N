@@ -1,31 +1,23 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, Bath, BedDouble, Ruler } from 'lucide-react'
+import { Bath, BedDouble, Ruler } from 'lucide-react'
 import { iconoCategoria, fotosPara } from '../busqueda/SearchFilter'
 import { useGeoData } from '../PropertyMap/useGeoData'
 import type { PropiedadFeature } from '../PropertyMap/types'
+import { elegirOfertas, useContenidoSitio } from '../../services/contenidoSitio'
 import styles from './OffersSection.module.css'
-
-// Toma propiedades y terrenos reales (los mismos de /buscar), elegidos al
-// azar en cada carga, y al hacer clic te lleva directo al detalle de esa
-// propiedad dentro de la búsqueda (ubicación exacta + especificaciones).
-function useOfertasAleatorias(propiedades: PropiedadFeature[], cantidad = 6) {
-  return useMemo(() => {
-    if (propiedades.length === 0) return []
-    const copia = [...propiedades]
-    for (let i = copia.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[copia[i], copia[j]] = [copia[j], copia[i]]
-    }
-    return copia.slice(0, Math.min(cantidad, copia.length))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [propiedades.length])
-}
 
 export default function OffersSection() {
   const navigate = useNavigate()
   const { propiedades, loading } = useGeoData()
-  const ofertas = useOfertasAleatorias(propiedades, 6)
+  const { contenido } = useContenidoSitio()
+  const seleccion = contenido.ofertas.join(',')
+  // Las elegidas en el panel, en su orden; sin selección, 6 al azar (se eligen una sola vez por carga)
+  const ofertas = useMemo(
+    () => elegirOfertas(propiedades, contenido.ofertas, 6),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [propiedades.length, seleccion],
+  )
 
   return (
     <section className={styles.section}>
@@ -41,7 +33,7 @@ export default function OffersSection() {
             <p className={styles.loading}>Cargando ofertas…</p>
           ) : (
             <div className={styles.cardsGrid}>
-              {ofertas.map((p) => (
+              {ofertas.map((p: PropiedadFeature) => (
                 <OfferCard
                   key={p.properties.id}
                   propiedad={p}
@@ -52,28 +44,6 @@ export default function OffersSection() {
           )}
         </div>
 
-        {/* Sobre nosotros */}
-        <div className={styles.nosotrosPanel}>
-          <span className={styles.eyebrowLight}>Sobre nosotros</span>
-          <h3 className={styles.subtitle}>
-            Por qué elegirnos <em className={styles.subtitleAccent}>como inmobiliaria.</em>
-          </h3>
-          <p className={styles.nosotrosText}>
-            Conocemos cada barrio de Alto Paraná casa por casa. Acompañamos todo el proceso —de
-            la primera visita a la entrega de llaves— con información real, transparente y
-            actualizada.
-          </p>
-
-          <img
-            src="/images/stock/inicio_sobre_nosotros.jpg"
-            alt="Entrega de llaves"
-            className={styles.nosotrosImg}
-          />
-
-          <button className={styles.nosotrosBtn} onClick={() => navigate('/nosotros')}>
-            Conocé más sobre nosotros <ArrowRight size={16} aria-hidden="true" />
-          </button>
-        </div>
       </div>
     </section>
   )

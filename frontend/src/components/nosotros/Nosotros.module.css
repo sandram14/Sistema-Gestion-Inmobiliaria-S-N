@@ -98,7 +98,8 @@
 
 .quienesStats {
   display: flex;
-  gap: 36px;
+  flex-wrap: wrap; /* con varias cifras o descripciones largas, pasan a otra línea en lugar de salirse */
+  gap: 20px 36px;
   border-top: 1px solid var(--color-superficie);
   padding-top: 28px;
 }
@@ -106,6 +107,8 @@
 .quienesStat {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .quienesStatValue {
@@ -296,3 +299,8 @@
   }
 }
 
+/* Las columnas de las grillas no se ensanchan por su contenido (textos largos cargados desde el panel) */
+.quienesGrid > *,
+.combinadoGrid > * {
+  min-width: 0;
+}

@@ -46,35 +46,11 @@
   width: 100%;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: color-mix(in srgb, var(--color-acento) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-acento) 30%, transparent);
-  border-radius: 100px;
-  padding: 6px 18px;
-  margin-bottom: 32px;
-}
 
-.badgeDot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-acento);
-}
 
-.badgeText {
-  color: var(--color-acento);
-  font-size: var(--texto-xs);
-  font-family: var(--fuente-texto);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
 
 .headline {
+  overflow-wrap: break-word; /* títulos largos del panel nunca se salen de la pantalla */
   font-family: var(--fuente-titulos);
   font-size: var(--titulo-portada);
   font-weight: 300;

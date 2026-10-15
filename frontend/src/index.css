@@ -28,6 +28,8 @@
   --color-whatsapp: #25D366;
   --color-whatsapp-hover: #1FB959;
   --color-error-suave: #E0A0A0;
+  --color-error: #B42318;          /* mensajes de error de formularios */
+  --color-error-fondo: #FDF0EE;
 
   /* Tipografía: una para títulos y una para todo lo demás */
   --fuente-titulos: 'Fraunces', Georgia, serif;

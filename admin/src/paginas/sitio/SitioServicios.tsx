@@ -29,6 +29,7 @@ export default function SitioServicios() {
   return (
     <>
       <PestanasSitio />
+      <p className={ui.ayuda}>Para destacar palabras de un título en verde e itálica, escribilas entre asteriscos. Ejemplo: <code>comenzará *tu próxima historia.*</code></p>
       {mensaje && <div className={ui.avisoExito}>{mensaje}</div>}
       {general && <div className={ui.avisoError} role="alert">{general}</div>}
       {!c ? (!general && <p className={ui.cargando}>Cargando…</p>) : (

@@ -4,29 +4,16 @@ import { useNavigate } from 'react-router-dom'
 import { ImageCarousel } from '../busqueda/SearchFilter'
 import { apiGet } from '../../services/api'
 import type { GeoFeatureCollection, PropiedadFeature } from '../PropertyMap/types'
+import { destacar } from '../comun/destacar'
+import { useContenidoSitio } from '../../services/contenidoSitio'
 import styles from './Servicios.module.css'
 
-const SERVICIOS = [
-  {
-    img: '/images/stock/compra-venta.jpg',
-    title: 'Compra y Venta',
-    text: 'Te asesoramos durante todo el proceso de adquisición o venta de inmuebles.',
-  },
-  {
-    img: '/images/stock/alquiler.jpg',
-    title: 'Alquileres',
-    text: 'Encontrá la propiedad ideal para alquilar de forma rápida y confiable.',
-  },
-  {
-    img: '/images/stock/terreno.jpg',
-    title: 'Terrenos',
-    text: 'Encontrá terrenos para construir, invertir o desarrollar tu próximo proyecto.',
-  },
-  {
-    img: '/images/stock/asesoria.jpg',
-    title: 'Asesoría Inmobiliaria',
-    text: 'Te acompañamos para tomar decisiones seguras y encontrar la mejor opción según tus necesidades.',
-  },
+/** Fotos de fondo de las tarjetas de servicios, asignadas por posición. */
+const IMAGENES_SERVICIOS = [
+  '/images/stock/compra-venta.jpg',
+  '/images/stock/alquiler.jpg',
+  '/images/stock/terreno.jpg',
+  '/images/stock/asesoria.jpg',
 ]
 
 // Fotos destacadas: la foto principal de propiedades disponibles, obtenidas de la API
@@ -74,6 +61,7 @@ function useFotosDestacadas(): string[] {
 }
 
 export default function Servicios() {
+  const servicios = useContenidoSitio().contenido.servicios
   const navigate = useNavigate()
   const fotosDestacadas = useFotosDestacadas()
 
@@ -82,22 +70,22 @@ export default function Servicios() {
       {/* 1. Intro */}
       <section className={styles.intro}>
         <span className={styles.eyebrow}>Servicios</span>
-        <h1 className={styles.title}>Nuestros Servicios</h1>
-        <p className={styles.introText}>Una solución para cada necesidad.</p>
+        <h1 className={styles.title}>{destacar(servicios.titulo, styles.titleAccent)}</h1>
+        {servicios.subtitulo && <p className={styles.introText}>{servicios.subtitulo}</p>}
       </section>
 
-      {/* 2. Los 4 servicios */}
+      {/* 2. Servicios (de 1 a 8, desde el panel); las fotos de fondo se asignan por posición */}
       <section className={styles.servicios}>
         <div className={styles.serviciosGrid}>
-          {SERVICIOS.map((s) => (
+          {servicios.servicios.map((s, i) => (
             <div
-           key={s.title}
-           className={styles.servicioCard}
-           style={{ backgroundImage: `url(${s.img})` }}
-           >
-            <h3 className={styles.servicioTitle}>{s.title}</h3>
-            <p className={styles.servicioText}>{s.text}</p>
-          </div>
+              key={`${i}-${s.titulo}`}
+              className={styles.servicioCard}
+              style={{ backgroundImage: `url(${IMAGENES_SERVICIOS[i % IMAGENES_SERVICIOS.length]})` }}
+            >
+              <h3 className={styles.servicioTitle}>{s.titulo}</h3>
+              <p className={styles.servicioText}>{s.texto}</p>
+            </div>
           ))}
         </div>
       </section>
@@ -107,13 +95,8 @@ export default function Servicios() {
         <div className={styles.destacadoGrid}>
           <div>
             <span className={styles.eyebrowDark}>Lo que tenemos para vos</span>
-            <h2 className={styles.h2}>
-              Encontrá el terreno o la propiedad <em className={styles.h2Accent}>ideal para tu proyecto.</em>
-            </h2>
-            <p className={styles.body}>
-              Contamos con terrenos y propiedades ubicados en diferentes zonas de Alto Paraná,
-              ideales para vivienda, inversión o desarrollo comercial.
-            </p>
+            {servicios.bloqueTitulo && <h2 className={styles.h2}>{destacar(servicios.bloqueTitulo, styles.h2Accent)}</h2>}
+            {servicios.bloqueTexto && <p className={styles.body}>{servicios.bloqueTexto}</p>}
           </div>
           <div className={styles.destacadoCarousel}>
             {/* key: al llegar las fotos de la API, el carrusel vuelve a la primera */}
