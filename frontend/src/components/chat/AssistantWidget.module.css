@@ -309,3 +309,56 @@
     font-size: var(--texto-base);
   }
 }
+
+/* ── Dejar mis datos (formulario dentro del chat) ───────────────────── */
+.contactoAbrir {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-verde-medio);
+  border-radius: 12px;
+  background: var(--color-blanco);
+  color: var(--color-verde);
+  font-family: var(--fuente-texto);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.contactoAbrir:hover { background: var(--color-acento-suave); }
+.contactoForm {
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: 12px;
+  background: var(--color-blanco);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.contactoCampo { display: flex; flex-direction: column; gap: 4px; font-size: var(--texto-xs); font-weight: 600; color: var(--color-texto); min-width: 0; }
+.contactoCampo .input { width: 100%; }
+.contactoCampo textarea.input { resize: vertical; }
+.contactoAcepta { display: flex; gap: 8px; align-items: flex-start; font-size: var(--texto-xs); color: var(--color-gris); line-height: 1.45; }
+.contactoAcepta input { margin-top: 2px; flex-shrink: 0; accent-color: var(--color-verde); }
+.contactoEnviar {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-verde);
+  color: var(--color-blanco);
+  font-family: var(--fuente-texto);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.contactoEnviar:disabled { opacity: 0.6; cursor: not-allowed; }
+.contactoError { color: var(--color-error); font-size: var(--texto-xs); }
+.contactoExito {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--color-acento-suave);
+  color: var(--color-verde);
+  font-size: var(--texto-sm);
+}

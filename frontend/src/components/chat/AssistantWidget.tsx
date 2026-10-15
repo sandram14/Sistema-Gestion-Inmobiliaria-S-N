@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import styles from './AssistantWidget.module.css'
 import { ArrowRight, MessageCircle } from 'lucide-react'
 import { ApiError, apiPost } from '../../services/api'
+import { useContenidoSitio } from '../../services/contenidoSitio'
+import FormularioContactoChat from './FormularioContactoChat'
 
 // Número del agente que recibe las consultas generadas por el asistente
 // (mismo formato/agente que ya se usa en la página de Contacto).
 // PENDIENTE: reemplazar por el número real de la inmobiliaria (formato internacional sin "+").
-const AGENTE_WHATSAPP = '595981123456'
 
 /** Máximo de caracteres por pregunta (el backend rechaza más de 500). */
 const MAX_PREGUNTA = 500
@@ -40,7 +41,8 @@ const PRESUPUESTOS = ['Hasta USD 40.000', 'Hasta USD 70.000', 'Hasta USD 100.000
 type Step = 'inicio' | 'tipoVivienda' | 'zona' | 'presupuesto' | 'contacto' | 'resumen'
 
 // whatsapp: mensaje para el enlace de WhatsApp cuando el asistente sugiere hablar con un asesor
-type ChatMessage = { from: 'bot' | 'user'; text: string; whatsapp?: string }
+/** contacto: el asistente sugirió un asesor; se ofrecen WhatsApp (si hay número real) y el formulario, con este mensaje inicial */
+type ChatMessage = { from: 'bot' | 'user'; text: string; whatsapp?: string; contacto?: { mensaje: string; codigo: string | null } }
 
 interface Respuestas {
   operacion?: string
@@ -54,10 +56,15 @@ interface Respuestas {
 
 const SALUDO_INICIAL: ChatMessage = {
   from: 'bot',
-  text: '¡Hola! Soy el asistente virtual de S&N Inmobiliaria. Contame qué estás buscando y te ayudo a conectarte con un agente.',
+  text: '¡Hola! Soy tu asistente virtual. ¿Con qué puedo ayudarte?',
 }
 
 export default function AssistantWidget() {
+  const { contenido } = useContenidoSitio()
+  // Número del panel (Gestión del sitio web → Contacto). Con datos provisionales no se ofrece WhatsApp:
+  // llevaría a un número inexistente; queda el formulario.
+  const whatsappAgente = contenido.contactoProvisional ? null : contenido.contacto.whatsapp || null
+  const [formularioAbierto, setFormularioAbierto] = useState<number | 'resumen' | null>(null)
   const [open, setOpen] = useState(false)
   const [minimized, setMinimized] = useState(false)
   const [step, setStep] = useState<Step>('inicio')
@@ -76,7 +83,7 @@ export default function AssistantWidget() {
       setPropiedadEnConsulta(propiedad)
       setOpen(true)
       setMinimized(false)
-      decir(`Escribí tu consulta sobre "${propiedad.titulo}" (${propiedad.codigo}) y te respondo con los datos que tenemos.`)
+      decir(`Escribí tu consulta sobre "${propiedad.titulo}" y te respondo con los datos que tenemos.`)
     }
     window.addEventListener(EVENTO_CONSULTAR, alConsultar)
     return () => window.removeEventListener(EVENTO_CONSULTAR, alConsultar)
@@ -143,7 +150,16 @@ export default function AssistantWidget() {
     responder(`${nombreInput} — ${telefonoInput}`)
     setRespuestas((r) => ({ ...r, nombre: nombreInput.trim(), telefono: telefonoInput.trim() }))
     setStep('resumen')
-    decir('¡Listo! Este es el resumen que le vamos a compartir a nuestro equipo. Tocá "Enviar por WhatsApp" para que un agente te contacte.')
+    decir('¡Listo! Este es el resumen de tu búsqueda. Podés dejarnos tus datos para que un asesor te contacte.')
+  }
+
+  /** Resumen del flujo guiado: mensaje inicial del formulario y texto para WhatsApp. */
+  function resumenTexto(r: Respuestas): string {
+    return [
+      `• Operación: ${r.operacion === 'Terreno' ? 'Comprar terreno' : `${r.operacion} ${r.categoria ?? ''}`.trim()}`,
+      `• Zona: ${r.zona}`,
+      `• Presupuesto: ${r.presupuesto}`,
+    ].join('\n')
   }
 
   function mensajeWhatsApp(r: Respuestas): string {
@@ -158,6 +174,7 @@ export default function AssistantWidget() {
   }
 
   function reiniciar() {
+    setFormularioAbierto(null)
     setMessages([SALUDO_INICIAL])
     setRespuestas({})
     setNombreInput('')
@@ -179,7 +196,8 @@ export default function AssistantWidget() {
         pregunta: texto,
         codigoPropiedad: propiedadEnConsulta?.codigo ?? null,
       })
-      const contexto = propiedadEnConsulta ? ` sobre la propiedad ${propiedadEnConsulta.codigo}` : ''
+      // El mensaje de WhatsApp va al equipo: conserva el código para identificar la propiedad (no se muestra en el chat)
+      const contexto = propiedadEnConsulta ? ` sobre "${propiedadEnConsulta.titulo}" (${propiedadEnConsulta.codigo})` : ''
       setMessages((m) => [
         ...m,
         {
@@ -188,6 +206,7 @@ export default function AssistantWidget() {
           whatsapp: r.sugerirWhatsApp
             ? encodeURIComponent(`Hola, quisiera hacer una consulta${contexto} desde la web de S&N Inmobiliaria: ${texto}`)
             : undefined,
+          contacto: r.sugerirWhatsApp ? { mensaje: texto, codigo: propiedadEnConsulta?.codigo ?? null } : undefined,
         },
       ])
     } catch (e) {
@@ -200,6 +219,8 @@ export default function AssistantWidget() {
           from: 'bot',
           text: mensaje,
           whatsapp: encodeURIComponent('Hola, quisiera hacer una consulta desde la web de S&N Inmobiliaria.'),
+          // Si el asistente no puede responder, el visitante igual puede dejar sus datos con su pregunta
+          contacto: { mensaje: texto, codigo: propiedadEnConsulta?.codigo ?? null },
         },
       ])
     } finally {
@@ -261,16 +282,23 @@ export default function AssistantWidget() {
                     <div className={m.from === 'bot' ? styles.bubbleBot : styles.bubbleUser} style={{ whiteSpace: 'pre-line' }}>
                       {m.text}
                     </div>
-                    {m.whatsapp && (
+                    {m.whatsapp && whatsappAgente && (
                       <a
                         className={styles.whatsappBtn}
-                        href={`https://wa.me/${AGENTE_WHATSAPP}?text=${m.whatsapp}`}
+                        href={`https://wa.me/${whatsappAgente}?text=${m.whatsapp}`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         Hablar con un asesor por WhatsApp <ArrowRight size={15} aria-hidden="true" />
                       </a>
                     )}
+                    {m.contacto && (formularioAbierto === i ? (
+                      <FormularioContactoChat mensajeInicial={m.contacto.mensaje} codigoPropiedad={m.contacto.codigo} />
+                    ) : (
+                      <button type="button" className={styles.contactoAbrir} onClick={() => setFormularioAbierto(i)}>
+                        Dejar mis datos para que me contacten
+                      </button>
+                    ))}
                   </div>
                 ))}
 
@@ -380,7 +408,7 @@ export default function AssistantWidget() {
                     <input
                       className={styles.input}
                       placeholder={
-                        propiedadEnConsulta ? `Preguntá sobre ${propiedadEnConsulta.codigo}…` : 'Escribí tu pregunta…'
+                        propiedadEnConsulta ? 'Preguntá sobre esta propiedad…' : 'Escribí tu pregunta…'
                       }
                       value={pregunta}
                       maxLength={MAX_PREGUNTA}
@@ -401,14 +429,23 @@ export default function AssistantWidget() {
 
                 {step === 'resumen' && (
                   <>
-                    <a
-                      className={styles.whatsappBtn}
-                      href={`https://wa.me/${AGENTE_WHATSAPP}?text=${mensajeWhatsApp(respuestas)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Enviar por WhatsApp <ArrowRight size={15} aria-hidden="true" />
-                    </a>
+                    {formularioAbierto === 'resumen' ? (
+                      <FormularioContactoChat mensajeInicial={resumenTexto(respuestas)} nombreInicial={respuestas.nombre} telefonoInicial={respuestas.telefono} />
+                    ) : (
+                      <button type="button" className={styles.contactoAbrir} onClick={() => setFormularioAbierto('resumen')}>
+                        Dejar mis datos para que me contacten
+                      </button>
+                    )}
+                    {whatsappAgente && (
+                      <a
+                        className={styles.whatsappBtn}
+                        href={`https://wa.me/${whatsappAgente}?text=${mensajeWhatsApp(respuestas)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Enviar por WhatsApp <ArrowRight size={15} aria-hidden="true" />
+                      </a>
+                    )}
                     <button className={styles.restartBtn} onClick={reiniciar}>
                       Empezar de nuevo
                     </button>
