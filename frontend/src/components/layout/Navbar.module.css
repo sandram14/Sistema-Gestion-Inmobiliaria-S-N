@@ -10,9 +10,9 @@
 }
 
 .navScrolled {
-  background-color: rgba(26, 48, 32, 0.97);
+  background-color: color-mix(in srgb, var(--color-verde-oscuro) 97%, transparent);
   backdrop-filter: blur(24px);
-  box-shadow: 0 1px 0 rgba(168, 214, 111, 0.12);
+  box-shadow: var(--sombra-linea);
 }
 
 .inner {
@@ -33,9 +33,11 @@
 }
 
 .logoBadge {
-  width: 36px;
+  /* Ancho adaptable al texto "S&N" (con un ancho fijo, las letras se salían de la insignia) */
+  min-width: 36px;
+  padding: 0 7px;
   height: 36px;
-  background: #A8D66F;
+  background: var(--color-acento);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -44,24 +46,24 @@
 }
 
 .logoBadgeText {
-  color: #23412A;
-  font-size: 18px;
+  color: var(--color-verde);
+  font-size: var(--texto-base);
   font-weight: 700;
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: var(--fuente-titulos);
   line-height: 1;
 }
 
 .logoText {
-  color: white;
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 20px;
+  color: var(--color-blanco);
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-xl);
   font-weight: 600;
   letter-spacing: -0.02em;
   white-space: nowrap;
 }
 
 .logoAccent {
-  color: #A8D66F;
+  color: var(--color-acento);
 }
 
 /* ── Links (desktop) ──────────────────────────────────────────────────── */
@@ -73,20 +75,20 @@
 }
 
 .link {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 14px;
-  font-family: 'Outfit', sans-serif;
+  color: color-mix(in srgb, var(--color-blanco) 80%, transparent);
+  font-size: var(--texto-md);
+  font-family: var(--fuente-texto);
   font-weight: 400;
   letter-spacing: 0.01em;
   transition: color 0.2s;
 }
 
 .link:hover {
-  color: #A8D66F;
+  color: var(--color-acento);
 }
 
 .linkActive {
-  color: #A8D66F;
+  color: var(--color-acento);
   font-weight: 600;
 }
 
@@ -109,7 +111,7 @@
 .hamburgerBar {
   width: 22px;
   height: 2px;
-  background: white;
+  background: var(--color-blanco);
   border-radius: 2px;
   transition: transform 0.25s ease, opacity 0.2s ease;
 }
@@ -132,12 +134,12 @@
 }
 
 .mobileLink {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 16px;
-  font-family: 'Outfit', sans-serif;
+  color: color-mix(in srgb, var(--color-blanco) 85%, transparent);
+  font-size: var(--texto-base);
+  font-family: var(--fuente-texto);
   font-weight: 400;
   padding: 14px 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid color-mix(in srgb, var(--color-blanco) 8%, transparent);
 }
 
 .mobileLink:first-child {
@@ -163,7 +165,7 @@
     flex-direction: column;
     max-height: 0;
     overflow: hidden;
-    background: rgba(26, 48, 32, 0.98);
+    background: color-mix(in srgb, var(--color-verde-oscuro) 98%, transparent);
     backdrop-filter: blur(24px);
     transition: max-height 0.3s ease;
   }

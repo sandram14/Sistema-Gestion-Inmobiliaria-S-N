@@ -3,6 +3,7 @@ import type { LatLngBounds } from 'leaflet'
 import { useSearchParams } from 'react-router-dom'
 import styles from './SearchFilter.module.css'
 import MapCanvas from '../PropertyMap/MapCanvas'
+import { Bath, BedDouble, Building2, ChevronLeft, ChevronRight, Home, LandPlot, MapPin, MessageCircle, Ruler, X } from 'lucide-react'
 import { useGeoData } from '../PropertyMap/useGeoData'
 import { apiGet, esCancelacion } from '../../services/api'
 import { abrirAsistenteConPropiedad } from '../chat/AssistantWidget'
@@ -33,9 +34,9 @@ const PRESUPUESTOS = [
 ]
 
 export function iconoCategoria(categoria: PropiedadFeature['properties']['categoria']) {
-  if (categoria === 'Casa') return '🏠'
-  if (categoria === 'Departamento') return '🏢'
-  return '🪨'
+  if (categoria === 'Casa') return <Home size={40} strokeWidth={1.5} aria-hidden="true" />
+  if (categoria === 'Departamento') return <Building2 size={40} strokeWidth={1.5} aria-hidden="true" />
+  return <LandPlot size={40} strokeWidth={1.5} aria-hidden="true" />
 }
 
 // ─── Fotos de las propiedades ────────────────────────────────────────────
@@ -136,14 +137,14 @@ export function ImageCarousel({ images }: { images: string[] }) {
             onClick={(e) => goTo(index - 1, e)}
             aria-label="Foto anterior"
           >
-            ‹
+            <ChevronLeft size={22} aria-hidden="true" />
           </button>
           <button
             className={`${styles.carouselArrow} ${styles.carouselArrowRight}`}
             onClick={(e) => goTo(index + 1, e)}
             aria-label="Foto siguiente"
           >
-            ›
+            <ChevronRight size={22} aria-hidden="true" />
           </button>
           <div className={styles.carouselDots}>
             {images.map((_, i) => (
@@ -271,8 +272,10 @@ export default function SearchFilter() {
     }
     if (filtros.barrioId) return boundsForBarrio(barrios, filtros.barrioId)
     if (filtros.ciudadId) return boundsForCiudad(barrios, filtros.ciudadId)
-    return extraBounds
-  }, [barrios, filtros.ciudadId, filtros.barrioId, extraBounds, propiedadSeleccionada])
+    if (extraBounds) return extraBounds
+    // Vista general: el mapa se encuadra en todas las propiedades (antes usaba un centro fijo, desplazado al oeste)
+    return propiedades.length > 0 ? boundsFromFeatures(propiedades) : null
+  }, [barrios, propiedades, filtros.ciudadId, filtros.barrioId, extraBounds, propiedadSeleccionada])
 
   function handleBuscar() {
     setPropiedadId(null)
@@ -513,7 +516,7 @@ function MapaGeneralView({
         {nivel === 'ciudad' && (
           <div className="pm-breadcrumb">
             <button className="pm-back-btn" onClick={onVolver}>
-              ← Volver
+              <ChevronLeft size={16} aria-hidden="true" /> Volver
             </button>
             <span>Alto Paraná › {ciudadSeleccionada?.properties.ciudad}</span>
           </div>
@@ -537,8 +540,8 @@ function MapaGeneralView({
         />
         <p className={styles.mapHint}>
           {nivel === 'departamento'
-            ? 'Hacé clic en una ciudad, o filtrá por zona, para ver sus barrios →'
-            : 'Hacé clic en un barrio pintado para ver sus propiedades →'}
+            ? 'Hacé clic en una ciudad, o filtrá por zona, para ver sus barrios'
+            : 'Hacé clic en un barrio pintado para ver sus propiedades'}
         </p>
       </div>
     </>
@@ -587,7 +590,7 @@ function BarrioView({
         <div className={styles.mapPane}>
           <div className="pm-breadcrumb">
             <button className="pm-back-btn" onClick={onVolver}>
-              ← Volver
+              <ChevronLeft size={16} aria-hidden="true" /> Volver
             </button>
             <span>
               Alto Paraná › {ciudadSeleccionada?.properties.ciudad} › {barrioSeleccionado.properties.barrio}
@@ -651,7 +654,6 @@ function BarrioView({
 function PropiedadCard({ p, onClick }: { p: PropiedadFeature; onClick: () => void }) {
   const props = p.properties
   const fotos = fotosPara(props)
-  const [favorito, setFavorito] = useState(false)
 
   return (
     <div className={styles.propCard}>
@@ -662,16 +664,6 @@ function PropiedadCard({ p, onClick }: { p: PropiedadFeature; onClick: () => voi
           <span className={styles.propCardIcon}>{iconoCategoria(props.categoria)}</span>
         )}
         <span className={styles.propBadge}>{props.categoria}</span>
-        <button
-          className={styles.propFav}
-          onClick={(e) => {
-            e.stopPropagation()
-            setFavorito((f) => !f)
-          }}
-          aria-label={favorito ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-        >
-          {favorito ? '❤️' : '🤍'}
-        </button>
       </div>
       <div
         className={styles.propBody}
@@ -690,11 +682,11 @@ function PropiedadCard({ p, onClick }: { p: PropiedadFeature; onClick: () => voi
         <div className={styles.propSpecs}>
           {props.categoria !== 'Terreno' && (
             <>
-              <span className={styles.propSpec}>🛏 {props.dormitorios}</span>
-              <span className={styles.propSpec}>🚿 {props.banos}</span>
+              <span className={styles.propSpec}><BedDouble size={15} aria-hidden="true" /> {props.dormitorios}</span>
+              <span className={styles.propSpec}><Bath size={15} aria-hidden="true" /> {props.banos}</span>
             </>
           )}
-          <span className={styles.propSpec}>📐 {props.m2} m²</span>
+          <span className={styles.propSpec}><Ruler size={15} aria-hidden="true" /> {props.m2} m²</span>
         </div>
       </div>
     </div>
@@ -725,7 +717,7 @@ function DetalleView({
       <div className={styles.mapPane}>
         <div className="pm-breadcrumb">
           <button className="pm-back-btn" onClick={onVolver}>
-            ← Volver al barrio
+            <ChevronLeft size={16} aria-hidden="true" /> Volver al barrio
           </button>
           <span>{props.direccion}</span>
         </div>
@@ -753,7 +745,7 @@ function DetalleView({
             <span className={styles.detailPhotosIcon}>{iconoCategoria(props.categoria)}</span>
           )}
           <button className={styles.detailCloseBtn} onClick={onVolver} aria-label="Volver al barrio">
-            ✕
+            <X size={20} aria-hidden="true" />
           </button>
           <span className={styles.detailPhotosTag}>
             {operaciones.map((o) => o.operacion.toUpperCase()).join(' · ')}
@@ -786,13 +778,13 @@ function DetalleView({
 
           {props.descripcion && <p className={styles.detailAddress}>{props.descripcion}</p>}
 
-          <p className={styles.detailAddress}>📍 {props.direccion}</p>
+          <p className={styles.detailAddress}><MapPin size={16} aria-hidden="true" /> {props.direccion}</p>
 
           <button
             className={styles.searchBtn}
             onClick={() => abrirAsistenteConPropiedad({ codigo: props.id, titulo: props.titulo })}
           >
-            💬 Consultar sobre esta propiedad
+            <MessageCircle size={18} aria-hidden="true" /> Consultar sobre esta propiedad
           </button>
         </div>
       </div>

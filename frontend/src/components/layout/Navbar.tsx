@@ -27,16 +27,17 @@ export default function Navbar() {
   }, [location.pathname])
 
   return (
-    <nav className={`${styles.nav} ${scrolled || mobileOpen ? styles.navScrolled : ''}`}>
+    // Transparente solo sobre la portada oscura del inicio; en las demás páginas (algunas empiezan con
+    // fondo claro, como Contacto) el encabezado tiene su fondo desde el principio para que se lea.
+    <nav className={`${styles.nav} ${scrolled || mobileOpen || location.pathname !== '/' ? styles.navScrolled : ''}`}>
       <div className={styles.inner}>
         {/* Logo */}
         <div className={styles.logo}>
           <div className={styles.logoBadge}>
             <span className={styles.logoBadgeText}>S&N</span>
           </div>
-          <span className={styles.logoText}>
-            S&N<span className={styles.logoAccent}>Inmobiliaria</span>
-          </span>
+          {/* La insignia ya dice "S&N": el texto completa la marca, "S&N Inmobiliaria" */}
+          <span className={`${styles.logoText} ${styles.logoAccent}`}>Inmobiliaria</span>
         </div>
 
         {/* Links (desktop) */}

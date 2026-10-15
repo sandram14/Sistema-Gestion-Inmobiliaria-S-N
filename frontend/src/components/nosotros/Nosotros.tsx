@@ -1,42 +1,43 @@
+import { ArrowRight, Handshake, HeartHandshake, Home, Lightbulb, MapPinned, MessageCircle, Search, type LucideIcon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import styles from './Nosotros.module.css'
 
-const VALORES = [
+const VALORES: { icon: LucideIcon; title: string; text: string }[] = [
   {
-    icon: '🤝',
+    icon: Handshake,
     title: 'Confianza',
     text: 'Construimos cada relación sobre información real y compromisos que cumplimos.',
   },
   {
-    icon: '🔎',
+    icon: Search,
     title: 'Transparencia',
     text: 'Sin letra chica: precios, estados y condiciones claras desde el primer contacto.',
   },
   {
-    icon: '💚',
+    icon: HeartHandshake,
     title: 'Compromiso',
     text: 'Acompañamos todo el proceso, de la primera visita a la entrega de llaves.',
   },
   {
-    icon: '✨',
+    icon: Lightbulb,
     title: 'Innovación',
     text: 'Herramientas como el mapa por barrios para que encuentres más rápido.',
   },
 ]
 
-const RAZONES = [
+const RAZONES: { icon: LucideIcon; title: string; text: string }[] = [
   {
-    icon: '🏠',
+    icon: Home,
     title: 'Conocemos cada barrio',
     text: 'Cubrimos Alto Paraná zona por zona, con información actualizada de cada barrio.',
   },
   {
-    icon: '🔍',
+    icon: MapPinned,
     title: 'Búsqueda inteligente',
     text: 'Filtrá por mapa, precio y tipo de propiedad hasta encontrar justo lo que buscás.',
   },
   {
-    icon: '💬',
+    icon: MessageCircle,
     title: 'Acompañamiento real',
     text: 'Un agente especializado te guía en cada paso, sin apuros ni letra chica.',
   },
@@ -100,7 +101,7 @@ export default function Nosotros() {
             <div className={styles.valoresGrid}>
               {VALORES.map((v) => (
                 <div key={v.title} className={styles.valorCard}>
-                  <span className={styles.valorIcon}>{v.icon}</span>
+                  <span className={styles.valorIcon}><v.icon size={24} aria-hidden="true" /></span>
                   <h3 className={styles.valorTitle}>{v.title}</h3>
                   <p className={styles.valorText}>{v.text}</p>
                 </div>
@@ -116,7 +117,7 @@ export default function Nosotros() {
             <div className={styles.razonesStack}>
               {RAZONES.map((r) => (
                 <div key={r.title} className={styles.razonRow}>
-                  <span className={styles.razonIcon}>{r.icon}</span>
+                  <span className={styles.razonIcon}><r.icon size={24} aria-hidden="true" /></span>
                   <div>
                     <h3 className={styles.razonTitle}>{r.title}</h3>
                     <p className={styles.razonText}>{r.text}</p>
@@ -137,7 +138,7 @@ export default function Nosotros() {
       <section className={styles.cta}>
         <h2 className={styles.ctaTitle}>¿Buscás tu próxima propiedad?</h2>
         <button className={styles.ctaBtn} onClick={() => navigate('/buscar')}>
-          Ver propiedades →
+          Ver propiedades <ArrowRight size={16} aria-hidden="true" />
         </button>
       </section>
     </>

@@ -6,13 +6,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #1A3020;
+  background-color: var(--color-verde-oscuro);
 }
 
 .bgImage {
   position: absolute;
   inset: 0;
-  background-image: url('https://turismoitaipu.com.br/wp-content/uploads/2025/02/ciudad-del-este-gazeta-do-povo.jpg');
+  /* Sin imagen externa: la imagen de portada se carga desde el panel (Gestión del sitio web → Inicio) */
   background-size: cover;
   background-position: center 30%;
 }
@@ -22,16 +22,16 @@
   inset: 0;
   background: linear-gradient(
     160deg,
-    rgba(26, 48, 32, 0.88) 0%,
-    rgba(35, 65, 42, 0.62) 45%,
-    rgba(20, 38, 26, 0.82) 100%
+    color-mix(in srgb, var(--color-verde-oscuro) 88%, transparent) 0%,
+    color-mix(in srgb, var(--color-verde) 62%, transparent) 45%,
+    color-mix(in srgb, var(--color-verde-oscuro) 82%, transparent) 100%
   );
 }
 
 .bgGlow {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 60% 50% at 20% 75%, rgba(168, 214, 111, 0.07) 0%, transparent 70%);
+  /* sin brillo decorativo */
 }
 
 .content {
@@ -50,8 +50,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(168, 214, 111, 0.12);
-  border: 1px solid rgba(168, 214, 111, 0.3);
+  background: color-mix(in srgb, var(--color-acento) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-acento) 30%, transparent);
   border-radius: 100px;
   padding: 6px 18px;
   margin-bottom: 32px;
@@ -62,24 +62,23 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #A8D66F;
-  animation: efPulse 2s infinite;
+  background: var(--color-acento);
 }
 
 .badgeText {
-  color: #A8D66F;
-  font-size: 12px;
-  font-family: 'Outfit', sans-serif;
+  color: var(--color-acento);
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .headline {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: clamp(38px, 6vw, 78px);
+  font-family: var(--fuente-titulos);
+  font-size: var(--titulo-portada);
   font-weight: 300;
-  color: white;
+  color: var(--color-blanco);
   line-height: 1.06;
   letter-spacing: -0.03em;
   margin-bottom: 22px;
@@ -88,13 +87,13 @@
 
 .headlineAccent {
   font-style: italic;
-  color: #A8D66F;
+  color: var(--color-acento);
 }
 
 .subtitle {
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 18px;
-  font-family: 'Outfit', sans-serif;
+  color: color-mix(in srgb, var(--color-blanco) 65%, transparent);
+  font-size: var(--texto-lg);
+  font-family: var(--fuente-texto);
   font-weight: 300;
   line-height: 1.65;
   max-width: 520px;
@@ -110,13 +109,13 @@
 
 .ctaBtn {
   padding: 16px 36px;
-  background: #A8D66F;
+  background: var(--color-acento);
   border: none;
   border-radius: 12px;
-  color: #23412A;
-  font-size: 15px;
+  color: var(--color-verde);
+  font-size: var(--texto-base);
   font-weight: 700;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--fuente-texto);
   cursor: pointer;
   transition: transform 0.2s, background 0.2s;
   letter-spacing: -0.01em;
@@ -124,7 +123,7 @@
 
 .ctaBtn:hover {
   transform: translateY(-2px);
-  background: #BDE688;
+  background: var(--color-acento-claro);
 }
 
 .scrollIndicator {
@@ -140,9 +139,9 @@
 }
 
 .scrollLabel {
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 11px;
-  font-family: 'Outfit', sans-serif;
+  color: color-mix(in srgb, var(--color-blanco) 35%, transparent);
+  font-size: var(--texto-2xs);
+  font-family: var(--fuente-texto);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -150,8 +149,7 @@
 .scrollLine {
   width: 1px;
   height: 40px;
-  background: linear-gradient(to bottom, rgba(168, 214, 111, 0.5), transparent);
-  animation: efScrollPulse 2s ease-in-out infinite;
+  background: color-mix(in srgb, var(--color-acento) 40%, transparent);
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
@@ -160,7 +158,7 @@
     padding: 100px 1.25rem 64px;
   }
   .subtitle {
-    font-size: 16px;
+    font-size: var(--texto-base);
     margin-bottom: 32px;
   }
   .ctaBtn {

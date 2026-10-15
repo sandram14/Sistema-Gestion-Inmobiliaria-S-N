@@ -3,7 +3,7 @@ import styles from './Footer.module.css'
 
 const COLUMNAS: { title: string; links: { label: string; to?: string }[] }[] = [
   {
-    title: 'Propiedades y',
+    title: 'Propiedades',
     links: [
       { label: 'Comprar', to: '/buscar?categoria=Vivienda&tipoOperacion=Venta' },
       { label: 'Alquilar', to: '/buscar?categoria=Vivienda&tipoOperacion=Alquiler' },
@@ -40,9 +40,8 @@ export default function Footer() {
               <div className={styles.brandBadge}>
                 <span className={styles.brandBadgeText}>S&N</span>
               </div>
-              <span className={styles.brandName}>
-                S&N<span className={styles.brandAccent}>Inmobiliaria</span>
-              </span>
+              {/* La insignia ya dice "S&N": el texto completa la marca, "S&N Inmobiliaria" */}
+              <span className={`${styles.brandName} ${styles.brandAccent}`}>Inmobiliaria</span>
             </div>
             <p className={styles.brandText}>
               La plataforma inmobiliaria más avanzada de Alto Paraná para comprar, alquilar e

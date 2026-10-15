@@ -1,12 +1,5 @@
 import { useMemo, useEffect } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  GeoJSON,
-  Marker,
-  Tooltip,
-  useMap,
-} from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, Marker, Tooltip, useMap, ZoomControl } from 'react-leaflet';
 import type { LatLngBounds, StyleFunction, PathOptions, Path } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { BarrioFeature, CiudadFeature, PropiedadFeature } from "./types";
@@ -74,7 +67,9 @@ export default function MapCanvas({
   const styleFn: StyleFunction<any> = (feature) => barrioStyle(feature as BarrioFeature, selectedBarrioId);
 
   return (
-    <MapContainer center={DEFAULT_CENTER} zoom={DEFAULT_ZOOM} scrollWheelZoom className="pm-map">
+    <MapContainer center={DEFAULT_CENTER} zoom={DEFAULT_ZOOM} scrollWheelZoom zoomControl={false} className="pm-map">
+      {/* Zoom a la derecha: la esquina izquierda la usan el botón Volver y las migas de pan */}
+      <ZoomControl position="topright" />
       <TileLayer
   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

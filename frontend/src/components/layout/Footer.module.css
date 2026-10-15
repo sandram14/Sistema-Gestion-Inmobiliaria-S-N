@@ -1,7 +1,7 @@
 .footer {
-  background: #1A3020;
+  background: var(--color-verde-oscuro);
   padding: 64px 2rem 36px;
-  border-top: 1px solid rgba(168, 214, 111, 0.08);
+  border-top: 1px solid color-mix(in srgb, var(--color-acento) 8%, transparent);
 }
 
 .inner {
@@ -24,9 +24,11 @@
 }
 
 .brandBadge {
-  width: 32px;
+  /* Ancho adaptable al texto "S&N" (con un ancho fijo, las letras se salían de la insignia) */
+  min-width: 32px;
+  padding: 0 7px;
   height: 32px;
-  background: #A8D66F;
+  background: var(--color-acento);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -35,36 +37,36 @@
 }
 
 .brandBadgeText {
-  color: #23412A;
-  font-size: 14px;
+  color: var(--color-verde);
+  font-size: var(--texto-md);
   font-weight: 700;
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: var(--fuente-titulos);
 }
 
 .brandName {
-  color: white;
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 18px;
+  color: var(--color-blanco);
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
   font-weight: 600;
 }
 
 .brandAccent {
-  color: #A8D66F;
+  color: var(--color-acento);
 }
 
 .brandText {
-  color: rgba(255, 255, 255, 0.42);
-  font-size: 14px;
-  font-family: 'Outfit', sans-serif;
+  color: color-mix(in srgb, var(--color-blanco) 42%, transparent);
+  font-size: var(--texto-md);
+  font-family: var(--fuente-texto);
   line-height: 1.75;
   max-width: 260px;
   margin: 0;
 }
 
 .colTitle {
-  color: #A8D66F;
-  font-size: 11px;
-  font-family: 'Outfit', sans-serif;
+  color: var(--color-acento);
+  font-size: var(--texto-2xs);
+  font-family: var(--fuente-texto);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -78,18 +80,18 @@
 }
 
 .link {
-  color: rgba(255, 255, 255, 0.42);
-  font-size: 14px;
-  font-family: 'Outfit', sans-serif;
+  color: color-mix(in srgb, var(--color-blanco) 42%, transparent);
+  font-size: var(--texto-md);
+  font-family: var(--fuente-texto);
   transition: color 0.2s;
 }
 
 .link:hover {
-  color: rgba(255, 255, 255, 0.8);
+  color: color-mix(in srgb, var(--color-blanco) 80%, transparent);
 }
 
 .bottomBar {
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 1px solid color-mix(in srgb, var(--color-blanco) 7%, transparent);
   padding-top: 24px;
   display: flex;
   justify-content: space-between;
@@ -99,9 +101,9 @@
 }
 
 .bottomText {
-  color: rgba(255, 255, 255, 0.25);
-  font-size: 13px;
-  font-family: 'Outfit', sans-serif;
+  color: color-mix(in srgb, var(--color-blanco) 25%, transparent);
+  font-size: var(--texto-sm);
+  font-family: var(--fuente-texto);
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */

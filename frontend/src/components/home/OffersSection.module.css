@@ -1,5 +1,5 @@
 .section {
-  background: #F4F5EE;
+  background: var(--color-fondo);
   padding: 90px 40px;
 }
 
@@ -14,38 +14,38 @@
 
 /* ── Panel de ofertas ─────────────────────────────────────────────────── */
 .ofertasPanel {
-  background: white;
+  background: var(--color-blanco);
   border-radius: 28px;
-  border: 1px solid #ECECE3;
+  border: 1px solid var(--color-superficie);
   padding: 52px 48px;
 }
 
 .eyebrow {
-  color: #3A6B46;
-  font-size: 12px;
-  font-family: 'Outfit', sans-serif;
+  color: var(--color-verde-medio);
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .title {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: clamp(28px, 3.4vw, 44px);
+  font-family: var(--fuente-titulos);
+  font-size: var(--titulo-seccion);
   font-weight: 300;
-  color: #1A1A1A;
+  color: var(--color-texto);
   margin: 10px 0 36px;
   letter-spacing: -0.02em;
 }
 
 .titleAccent {
   font-style: italic;
-  color: #3A6B46;
+  color: var(--color-verde-medio);
 }
 
 .loading {
-  color: #6B7280;
-  font-family: 'Outfit', sans-serif;
+  color: var(--color-gris);
+  font-family: var(--fuente-texto);
 }
 
 .cardsGrid {
@@ -56,23 +56,23 @@
 
 /* ── Tarjeta de oferta ────────────────────────────────────────────────── */
 .card {
-  background: white;
+  background: var(--color-blanco);
   border-radius: 22px;
   overflow: hidden;
-  border: 1.5px solid #EEEEE6;
+  border: 1.5px solid var(--color-superficie);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 30px rgba(35, 65, 42, 0.12);
+  box-shadow: var(--sombra-2);
 }
 
 .cardImg {
   position: relative;
   height: 160px;
-  background: linear-gradient(135deg, #3A6B46, #1A3020);
+  background: var(--color-verde-medio);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -85,18 +85,21 @@
 }
 
 .cardImgIcon {
-  font-size: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-acento);
 }
 
 .cardBadge {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #23412A;
-  font-size: 11px;
+  background: color-mix(in srgb, var(--color-blanco) 92%, transparent);
+  color: var(--color-verde);
+  font-size: var(--texto-2xs);
   font-weight: 700;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--fuente-texto);
   padding: 4px 12px;
   border-radius: 100px;
 }
@@ -105,11 +108,11 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #A8D66F;
-  color: #23412A;
-  font-size: 10px;
+  background: var(--color-acento);
+  color: var(--color-verde);
+  font-size: var(--texto-2xs);
   font-weight: 700;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--fuente-texto);
   padding: 4px 10px;
   border-radius: 100px;
   letter-spacing: 0.06em;
@@ -120,16 +123,16 @@
 }
 
 .cardPrice {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 19px;
-  color: #23412A;
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  color: var(--color-verde);
   margin-bottom: 4px;
 }
 
 .cardTitle {
-  font-size: 13px;
-  font-family: 'Outfit', sans-serif;
-  color: #374151;
+  font-size: var(--texto-sm);
+  font-family: var(--fuente-texto);
+  color: var(--color-texto);
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -141,14 +144,14 @@
 }
 
 .cardSpec {
-  font-size: 12px;
-  color: #6B7280;
-  font-family: 'Outfit', sans-serif;
+  font-size: var(--texto-xs);
+  color: var(--color-gris);
+  font-family: var(--fuente-texto);
 }
 
 /* ── Panel "Sobre nosotros" ───────────────────────────────────────────── */
 .nosotrosPanel {
-  background: #1A3020;
+  background: var(--color-verde-oscuro);
   border-radius: 28px;
   padding: 52px 44px;
   display: flex;
@@ -157,9 +160,9 @@
 }
 
 .eyebrowLight {
-  color: rgba(168, 214, 111, 0.65);
-  font-size: 12px;
-  font-family: 'Outfit', sans-serif;
+  color: color-mix(in srgb, var(--color-acento) 65%, transparent);
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -167,10 +170,10 @@
 }
 
 .subtitle {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: clamp(24px, 2.4vw, 32px);
+  font-family: var(--fuente-titulos);
+  font-size: var(--titulo-bloque);
   font-weight: 300;
-  color: white;
+  color: var(--color-blanco);
   line-height: 1.2;
   margin-bottom: 18px;
   letter-spacing: -0.02em;
@@ -178,13 +181,13 @@
 
 .subtitleAccent {
   font-style: italic;
-  color: #A8D66F;
+  color: var(--color-acento);
 }
 
 .nosotrosText {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 14.5px;
-  font-family: 'Outfit', sans-serif;
+  color: color-mix(in srgb, var(--color-blanco) 60%, transparent);
+  font-size: var(--texto-md);
+  font-family: var(--fuente-texto);
   line-height: 1.75;
   margin-bottom: 20px;
 }
@@ -200,20 +203,20 @@
 .nosotrosBtn {
   align-self: flex-start;
   padding: 13px 26px;
-  background: #A8D66F;
+  background: var(--color-acento);
   border: none;
   border-radius: 10px;
-  color: #23412A;
-  font-size: 14px;
+  color: var(--color-verde);
+  font-size: var(--texto-md);
   font-weight: 700;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--fuente-texto);
   cursor: pointer;
   transition: background 0.2s;
   margin-bottom: 8px;
 }
 
 .nosotrosBtn:hover {
-  background: #BDE688;
+  background: var(--color-acento-claro);
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */

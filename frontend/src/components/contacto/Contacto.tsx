@@ -1,3 +1,4 @@
+import { Mail, MapPin, Phone } from 'lucide-react'
 import styles from './Contacto.module.css';
 
 // Lista de agentes (podés agregar o editar los datos según necesites)
@@ -50,11 +51,11 @@ export default function Contacto() {
               <img src={agente.foto} alt={agente.nombre} className={styles.avatar} />
               <h3 className={styles.name}>{agente.nombre}</h3>
               <span className={styles.role}>{agente.cargo}</span>
-              <p className={styles.specialty}>📍 {agente.especialidad}</p>
+              <p className={styles.specialty}><MapPin size={15} aria-hidden="true" /> {agente.especialidad}</p>
               
               <div className={styles.info}>
-                <p>📞 {agente.telefono}</p>
-                <p>✉️ {agente.email}</p>
+                <p><Phone size={15} aria-hidden="true" /> {agente.telefono}</p>
+                <p><Mail size={15} aria-hidden="true" /> {agente.email}</p>
               </div>
 
               <a

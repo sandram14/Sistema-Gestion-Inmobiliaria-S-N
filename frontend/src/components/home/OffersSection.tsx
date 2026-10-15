@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ArrowRight, Bath, BedDouble, Ruler } from 'lucide-react'
 import { iconoCategoria, fotosPara } from '../busqueda/SearchFilter'
 import { useGeoData } from '../PropertyMap/useGeoData'
 import type { PropiedadFeature } from '../PropertyMap/types'
@@ -70,7 +71,7 @@ export default function OffersSection() {
           />
 
           <button className={styles.nosotrosBtn} onClick={() => navigate('/nosotros')}>
-            Conocé más sobre nosotros →
+            Conocé más sobre nosotros <ArrowRight size={16} aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -109,11 +110,11 @@ function OfferCard({ propiedad, onClick }: { propiedad: PropiedadFeature; onClic
         <div className={styles.cardSpecs}>
           {props.categoria !== 'Terreno' && (
             <>
-              <span className={styles.cardSpec}>🛏 {props.dormitorios}</span>
-              <span className={styles.cardSpec}>🚿 {props.banos}</span>
+              <span className={styles.cardSpec}><BedDouble size={15} aria-hidden="true" /> {props.dormitorios}</span>
+              <span className={styles.cardSpec}><Bath size={15} aria-hidden="true" /> {props.banos}</span>
             </>
           )}
-          <span className={styles.cardSpec}>📐 {props.m2} m²</span>
+          <span className={styles.cardSpec}><Ruler size={15} aria-hidden="true" /> {props.m2} m²</span>
         </div>
       </div>
     </div>

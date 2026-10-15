@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { ImageCarousel } from '../busqueda/SearchFilter'
 import { apiGet } from '../../services/api'
@@ -7,25 +8,21 @@ import styles from './Servicios.module.css'
 
 const SERVICIOS = [
   {
-    icon: '🏠',
     img: '/images/stock/compra-venta.jpg',
     title: 'Compra y Venta',
     text: 'Te asesoramos durante todo el proceso de adquisición o venta de inmuebles.',
   },
   {
-    icon: '🔑',
     img: '/images/stock/alquiler.jpg',
     title: 'Alquileres',
     text: 'Encontrá la propiedad ideal para alquilar de forma rápida y confiable.',
   },
   {
-    icon: '🌳',
     img: '/images/stock/terreno.jpg',
     title: 'Terrenos',
     text: 'Encontrá terrenos para construir, invertir o desarrollar tu próximo proyecto.',
   },
   {
-    icon: '🤝',
     img: '/images/stock/asesoria.jpg',
     title: 'Asesoría Inmobiliaria',
     text: 'Te acompañamos para tomar decisiones seguras y encontrar la mejor opción según tus necesidades.',
@@ -129,7 +126,7 @@ export default function Servicios() {
       <section className={styles.cta}>
         <h2 className={styles.ctaTitle}>¿Buscás tu próxima propiedad?</h2>
         <button className={styles.ctaBtn} onClick={() => navigate('/buscar')}>
-          Ver propiedades →
+          Ver propiedades <ArrowRight size={16} aria-hidden="true" />
         </button>
       </section>
     </>

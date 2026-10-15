@@ -2,10 +2,11 @@
    íconos como string — necesitan nombres de clase reales, no hasheados. */
 
 .pm-map {
-  width: 100%;
-  height: 100%;
-  border-radius: 14px;
-  background: #23412A;
+  /* Anclado a los cuatro bordes de su zona: ocupa todo el espacio en cualquier navegador
+     (con height: 100% algunos navegadores lo dejaban más bajo y quedaba una franja vacía debajo) */
+  position: absolute;
+  inset: 0;
+  background: var(--color-superficie);
 }
 
 .pm-ciudad-icon-wrapper,
@@ -19,9 +20,9 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #A8D66F;
-  border: 3px solid #23412A;
-  box-shadow: 0 0 0 2px rgba(168, 214, 111, 0.4);
+  background: var(--color-acento);
+  border: 3px solid var(--color-verde);
+  box-shadow: var(--anillo-foco);
 }
 
 .pm-propiedad-icon {
@@ -32,8 +33,8 @@
   height: 26px;
   border-radius: 50% 50% 50% 0;
   transform: rotate(45deg);
-  background: #A8D66F;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  background: var(--color-acento);
+  box-shadow: var(--sombra-marcador);
 }
 .pm-propiedad-icon svg {
   transform: rotate(-45deg);
@@ -42,19 +43,19 @@
 /* Terreno: mismo pin, tono verde más profundo (dentro de la paleta) para
    diferenciarlo de las viviendas sin salir de los verdes de la marca. */
 .pm-propiedad-icon--terreno {
-  background: #7CAE4E;
+  background: var(--color-acento-oscuro);
 }
 
 .pm-tooltip {
-  font-family: 'Outfit', sans-serif !important;
-  font-size: 12px !important;
+  font-family: var(--fuente-texto)!important;
+  font-size: var(--texto-xs) !important;
   border-radius: 8px !important;
-  background: #23412A !important;
-  color: #fff !important;
-  border: 1px solid rgba(168, 214, 111, 0.3) !important;
+  background: var(--color-verde) !important;
+  color: var(--color-blanco) !important;
+  border: 1px solid color-mix(in srgb, var(--color-acento) 30%, transparent) !important;
 }
 .pm-tooltip::before {
-  border-top-color: #23412A !important;
+  border-top-color: var(--color-verde) !important;
 }
 
 .pm-breadcrumb {
@@ -65,25 +66,25 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(35, 65, 42, 0.9);
+  background: color-mix(in srgb, var(--color-verde) 90%, transparent);
   backdrop-filter: blur(4px);
-  color: #fff;
+  color: var(--color-blanco);
   padding: 7px 14px;
   border-radius: 999px;
-  font-size: 12px;
-  font-family: 'Outfit', sans-serif;
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
 }
 .pm-back-btn {
   border: none;
-  background: rgba(255, 255, 255, 0.15);
-  color: #A8D66F;
+  background: color-mix(in srgb, var(--color-blanco) 15%, transparent);
+  color: var(--color-acento);
   border-radius: 999px;
   padding: 4px 12px;
-  font-size: 11px;
+  font-size: var(--texto-2xs);
   font-weight: 700;
   cursor: pointer;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--fuente-texto);
 }
 .pm-back-btn:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: color-mix(in srgb, var(--color-blanco) 28%, transparent);
 }

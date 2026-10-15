@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './AssistantWidget.module.css'
+import { ArrowRight, MessageCircle } from 'lucide-react'
 import { ApiError, apiPost } from '../../services/api'
 
 // Número del agente que recibe las consultas generadas por el asistente
@@ -53,7 +54,7 @@ interface Respuestas {
 
 const SALUDO_INICIAL: ChatMessage = {
   from: 'bot',
-  text: '¡Hola! 👋 Soy el asistente virtual de S&N Inmobiliaria. Contame qué estás buscando y te ayudo a conectarte con un agente.',
+  text: '¡Hola! Soy el asistente virtual de S&N Inmobiliaria. Contame qué estás buscando y te ayudo a conectarte con un agente.',
 }
 
 export default function AssistantWidget() {
@@ -210,7 +211,7 @@ export default function AssistantWidget() {
     <>
       {!open && (
         <button className={styles.fab} onClick={() => setOpen(true)} aria-label="Abrir asistente">
-          <span className={styles.fabIcon}>💬</span>
+          <span className={styles.fabIcon}><MessageCircle size={26} aria-hidden="true" /></span>
           <span className={styles.fabLabel}>Asistente</span>
         </button>
       )}
@@ -267,7 +268,7 @@ export default function AssistantWidget() {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        Hablar con un asesor por WhatsApp →
+                        Hablar con un asesor por WhatsApp <ArrowRight size={15} aria-hidden="true" />
                       </a>
                     )}
                   </div>
@@ -406,7 +407,7 @@ export default function AssistantWidget() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Enviar por WhatsApp →
+                      Enviar por WhatsApp <ArrowRight size={15} aria-hidden="true" />
                     </a>
                     <button className={styles.restartBtn} onClick={reiniciar}>
                       Empezar de nuevo

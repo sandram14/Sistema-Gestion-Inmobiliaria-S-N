@@ -1,15 +1,15 @@
 /* ── 1. Intro ─────────────────────────────────────────────────────────── */
 .intro {
-  background: #1A3020;
+  background: var(--color-verde-oscuro);
   padding: 128px 2rem 56px;
   text-align: center;
 }
 
 .eyebrow {
   display: block;
-  color: rgba(168, 214, 111, 0.75);
-  font-size: 12px;
-  font-family: 'Outfit', sans-serif;
+  color: color-mix(in srgb, var(--color-acento) 75%, transparent);
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -17,27 +17,27 @@
 }
 
 .title {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: clamp(30px, 4.2vw, 46px);
+  font-family: var(--fuente-titulos);
+  font-size: var(--titulo-pagina);
   font-weight: 300;
-  color: white;
+  color: var(--color-blanco);
   letter-spacing: -0.02em;
   margin: 0 0 14px;
 }
 
 .introText {
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 15.5px;
-  font-family: 'Outfit', sans-serif;
+  color: color-mix(in srgb, var(--color-blanco) 65%, transparent);
+  font-size: var(--texto-base);
+  font-family: var(--fuente-texto);
   line-height: 1.75;
 }
 
 /* ── Shared heading styles ────────────────────────────────────────────── */
 .eyebrowDark {
   display: block;
-  color: #3A6B46;
-  font-size: 12px;
-  font-family: 'Outfit', sans-serif;
+  color: var(--color-verde-medio);
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -45,10 +45,10 @@
 }
 
 .h2 {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: clamp(26px, 3.2vw, 38px);
+  font-family: var(--fuente-titulos);
+  font-size: var(--titulo-seccion);
   font-weight: 300;
-  color: #1a1a1a;
+  color: var(--color-texto);
   letter-spacing: -0.02em;
   line-height: 1.25;
   margin: 0 0 18px;
@@ -56,13 +56,13 @@
 
 .h2Accent {
   font-style: italic;
-  color: #3A6B46;
+  color: var(--color-verde-medio);
 }
 
 .body {
-  color: #6B7280;
-  font-size: 15px;
-  font-family: 'Outfit', sans-serif;
+  color: var(--color-gris);
+  font-size: var(--texto-base);
+  font-family: var(--fuente-texto);
   line-height: 1.8;
   margin: 0;
 }
@@ -71,7 +71,7 @@
 /* Mismo fondo blanco que las secciones de abajo, para que todo fluya sin
    cortes de color (solo el intro y el footer quedan distintos). */
 .servicios {
-  background: white;
+  background: var(--color-blanco);
   padding: 100px 2rem;
 }
 
@@ -101,11 +101,11 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(26,48,32,0.88) 10%, rgba(35,65,42,0.35) 60%, transparent 100%);
+  background: linear-gradient(to top, color-mix(in srgb, var(--color-verde-oscuro) 88%, transparent) 10%, color-mix(in srgb, var(--color-verde) 35%, transparent) 60%, transparent 100%);
 }
 .servicioCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 14px 30px rgba(35, 65, 42, 0.18);
+  box-shadow: var(--sombra-2);
 }
 .servicioIcon {
   display: inline-flex;
@@ -114,8 +114,8 @@
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  background: white;
-  font-size: 26px;
+  background: var(--color-blanco);
+  /* tamaño definido en el ícono (lucide-react) */
   margin-bottom: 18px;
 }
 
@@ -123,21 +123,21 @@
 .servicioText {
   position: relative;
   z-index: 1;
-  color: #A8D66F;
-  font-family: 'Fraunces';
+  color: var(--color-acento);
+  font-family: var(--fuente-titulos);
 }
 
 .servicioText {
-  font-size: 14px;
-  font-family: 'Outfit', sans-serif;
-  color: white;
+  font-size: var(--texto-md);
+  font-family: var(--fuente-texto);
+  color: var(--color-blanco);
   line-height: 1.7;
   margin: 0;
 }
 
 /* ── 3. Terrenos y propiedades + fotos deslizables ────────────────────── */
 .destacado {
-  background: white;
+  background: var(--color-blanco);
   padding: 0 2rem 100px;
 }
 
@@ -155,43 +155,43 @@
   height: 360px;
   border-radius: 24px;
   overflow: hidden;
-  border: 1px solid #ECECE3;
+  border: 1px solid var(--color-superficie);
 }
 
 /* ── 4. CTA ───────────────────────────────────────────────────────────── */
 .cta {
-  background: white;
+  background: var(--color-blanco);
   padding: 0 2rem 120px;
   text-align: center;
-  border-top: 1px solid #ECECE3;
+  border-top: 1px solid var(--color-superficie);
   margin-top: 40px;
   padding-top: 60px;
 }
 
 .ctaTitle {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: clamp(26px, 3.4vw, 38px);
+  font-family: var(--fuente-titulos);
+  font-size: var(--titulo-seccion);
   font-weight: 300;
-  color: #1a1a1a;
+  color: var(--color-texto);
   letter-spacing: -0.02em;
   margin: 0 0 32px;
 }
 
 .ctaBtn {
   padding: 15px 34px;
-  background: #23412A;
+  background: var(--color-verde);
   border: none;
   border-radius: 12px;
-  color: #A8D66F;
-  font-size: 15px;
+  color: var(--color-acento);
+  font-size: var(--texto-base);
   font-weight: 700;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--fuente-texto);
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .ctaBtn:hover {
-  background: #3A6B46;
+  background: var(--color-verde-medio);
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */

@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Navigate, Routes, Route } from 'react-router-dom'
 import SearchFilter from './components/busqueda/SearchFilter'
 import NosotrosPage from './pages/NosotrosPage'
 import { ServiciosPage } from './pages/ServiciosPage'
@@ -36,6 +36,7 @@ export default function App() {
           <Route path="/nosotros" element={<NosotrosPage />} />
         <Route path="/servicios" element={<ServiciosPage />} />
         <Route path="/contacto" element={<ContactoPage/>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 
