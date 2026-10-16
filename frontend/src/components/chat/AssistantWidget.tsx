@@ -36,9 +36,11 @@ interface RespuestaAsistente {
 
 const CIUDADES = ['Ciudad del Este', 'Hernandarias', 'Minga Guazú', 'Presidente Franco', 'No estoy seguro/a']
 
-const PRESUPUESTOS = ['Hasta USD 40.000', 'Hasta USD 70.000', 'Hasta USD 100.000', 'Hasta USD 160.000', 'Más de USD 160.000', 'Prefiero no decir']
+/** El presupuesto lo escribe el visitante con sus palabras (W4): máximo de caracteres y texto si lo omite. */
+const MAX_PRESUPUESTO = 150
+const PRESUPUESTO_OMITIDO = 'No indicado'
 
-type Step = 'inicio' | 'tipoVivienda' | 'zona' | 'presupuesto' | 'contacto' | 'resumen'
+type Step = 'inicio' | 'zona' | 'presupuesto' | 'contacto' | 'resumen'
 
 // whatsapp: mensaje para el enlace de WhatsApp cuando el asistente sugiere hablar con un asesor
 /** contacto: el asistente sugirió un asesor; se ofrecen WhatsApp (si hay número real) y el formulario, con este mensaje inicial */
@@ -113,34 +115,31 @@ export default function AssistantWidget() {
       setStep('zona')
       decir('¡Buenísimo! ¿En qué ciudad te gustaría buscar el terreno?')
     } else {
+      // Los tipos son solo Casa y Terreno: una vivienda es una casa, no hace falta preguntar el tipo
       setRespuestas((r) => ({
         ...r,
         operacion: op,
         tipoOperacion: op === 'Comprar' ? 'Venta' : 'Alquiler',
         categoria: 'Vivienda',
       }))
-      setStep('tipoVivienda')
-      decir('¿Casa, departamento, o te da igual cuál de las dos?')
+      setStep('zona')
+      decir('¿En qué ciudad te gustaría buscar?')
     }
-  }
-
-  function elegirTipoVivienda(tipo: string) {
-    responder(tipo)
-    setRespuestas((r) => ({ ...r, categoria: `Vivienda (${tipo})` }))
-    setStep('zona')
-    decir('¿En qué ciudad te gustaría buscar?')
   }
 
   function elegirZona(ciudad: string) {
     responder(ciudad)
     setRespuestas((r) => ({ ...r, zona: ciudad }))
     setStep('presupuesto')
-    decir('¿Cuál es tu presupuesto aproximado?')
+    decir('¿Cuál es tu presupuesto aproximado? Escribilo con tus palabras, por ejemplo "menos de Gs. 100.000.000" o "entre 300 y 500 millones".')
   }
 
-  function elegirPresupuesto(rango: string) {
-    responder(rango)
-    setRespuestas((r) => ({ ...r, presupuesto: rango }))
+  /** El texto que escribió el visitante queda tal cual en el resumen; "Omitir" registra "No indicado". */
+  function elegirPresupuesto(texto: string | null) {
+    const presupuesto = texto ?? PRESUPUESTO_OMITIDO
+    responder(texto ?? 'Prefiero no indicarlo')
+    setPregunta('')
+    setRespuestas((r) => ({ ...r, presupuesto }))
     setStep('contacto')
     decir('Perfecto. Para que un agente se contacte con vos, dejame tu nombre y un teléfono.')
   }
@@ -188,6 +187,11 @@ export default function AssistantWidget() {
   async function enviarPregunta() {
     const texto = pregunta.trim()
     if (!texto || esperando) return
+    // En el paso del presupuesto, lo escrito es la respuesta del recorrido guiado (no va al asistente de IA)
+    if (step === 'presupuesto') {
+      elegirPresupuesto(texto)
+      return
+    }
     responder(texto)
     setPregunta('')
     setEsperando(true)
@@ -343,20 +347,6 @@ export default function AssistantWidget() {
                   </>
                 )}
 
-                {step === 'tipoVivienda' && (
-                  <>
-                    <button className={styles.chip} onClick={() => elegirTipoVivienda('Casa')}>
-                      Casa
-                    </button>
-                    <button className={styles.chip} onClick={() => elegirTipoVivienda('Departamento')}>
-                      Departamento
-                    </button>
-                    <button className={styles.chip} onClick={() => elegirTipoVivienda('Cualquiera')}>
-                      Me da igual
-                    </button>
-                  </>
-                )}
-
                 {step === 'zona' &&
                   CIUDADES.map((c) => (
                     <button key={c} className={styles.chip} onClick={() => elegirZona(c)}>
@@ -364,12 +354,11 @@ export default function AssistantWidget() {
                     </button>
                   ))}
 
-                {step === 'presupuesto' &&
-                  PRESUPUESTOS.map((p) => (
-                    <button key={p} className={styles.chip} onClick={() => elegirPresupuesto(p)}>
-                      {p}
-                    </button>
-                  ))}
+                {step === 'presupuesto' && (
+                  <button className={styles.chip} onClick={() => elegirPresupuesto(null)}>
+                    Omitir
+                  </button>
+                )}
 
                 {step === 'contacto' && (
                   <form
@@ -408,13 +397,15 @@ export default function AssistantWidget() {
                     <input
                       className={styles.input}
                       placeholder={
-                        propiedadEnConsulta ? 'Preguntá sobre esta propiedad…' : 'Escribí tu pregunta…'
+                        step === 'presupuesto'
+                          ? 'Escribí tu presupuesto…'
+                          : propiedadEnConsulta ? 'Preguntá sobre esta propiedad…' : 'Escribí tu pregunta…'
                       }
                       value={pregunta}
-                      maxLength={MAX_PREGUNTA}
+                      maxLength={step === 'presupuesto' ? MAX_PRESUPUESTO : MAX_PREGUNTA}
                       disabled={esperando}
                       onChange={(e) => setPregunta(e.target.value)}
-                      aria-label="Pregunta para el asistente"
+                      aria-label={step === 'presupuesto' ? 'Tu presupuesto' : 'Pregunta para el asistente'}
                     />
                     <button type="submit" className={styles.sendBtn} disabled={esperando || !pregunta.trim()}>
                       Enviar

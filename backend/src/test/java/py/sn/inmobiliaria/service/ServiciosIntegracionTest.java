@@ -141,7 +141,7 @@ class ServiciosIntegracionTest {
     void creaUnaCasaConVentaYAlquilerYApareceEnLaBusqueda() {
         String esperado = siguienteCodigo("prop");
 
-        PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "120000", "USD"), op("Alquiler", "4000000", "PYG"))));
+        PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "850000000", "PYG"), op("Alquiler", "4000000", "PYG"))));
 
         assertEquals(esperado, g.codigo());
         List<String> alquileresEnPyg = consulta.buscar(
@@ -155,14 +155,14 @@ class ServiciosIntegracionTest {
     void elCodigoDeTerrenoUsaSuPropioPrefijo() {
         String esperado = siguienteCodigo("terr");
 
-        PropiedadGuardada g = admin.crear(comoTerreno(casa(null), List.of(op("Venta", "30000", "USD"))));
+        PropiedadGuardada g = admin.crear(comoTerreno(casa(null), List.of(op("Venta", "300000000", "PYG"))));
 
         assertEquals(esperado, g.codigo());
     }
 
     @Test
     void rechazaUnaUbicacionFueraDelBarrio() {
-        PropiedadRequest base = casa(List.of(op("Venta", "1", "USD")));
+        PropiedadRequest base = casa(List.of(op("Venta", "1", "PYG")));
         PropiedadRequest lejos = new PropiedadRequest(base.titulo(), null, null,
                 DatosPrueba.LATITUD_FUERA, DatosPrueba.LONGITUD_FUERA, base.idBarrio(), "Casa", null,
                 base.casa(), null, base.operaciones());
@@ -174,20 +174,20 @@ class ServiciosIntegracionTest {
 
     @Test
     void cambiaDeCasaConAlquilerATerrenoSinCambiarElCodigo() {
-        PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "120000", "USD"), op("Alquiler", "4000000", "PYG"))));
+        PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "850000000", "PYG"), op("Alquiler", "4000000", "PYG"))));
 
-        admin.actualizar(g.id(), comoTerreno(casa(null), List.of(op("Venta", "90000", "USD"))));
+        admin.actualizar(g.id(), comoTerreno(casa(null), List.of(op("Venta", "600000000", "PYG"))));
 
         String resumen = admin.obtener(g.id(), p -> p.getTipo().getNombre() + "|" + (p.getCasa() == null)
                 + "|" + p.getTerreno().getSuperficie().intValue() + "|" + p.getOperaciones().size()
                 + "|" + p.getOperaciones().get(0).getPrecio().intValue() + "|" + p.getCodigo());
-        assertEquals("Terreno|true|360|1|90000|" + g.codigo(), resumen);
+        assertEquals("Terreno|true|360|1|600000000|" + g.codigo(), resumen);
     }
 
     @Test
     void elBorradoEsLogico() {
         long disponiblesAntes = consulta.buscar(BusquedaRequest.vacia(), Propiedad::getCodigo).size();
-        PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "1000", "USD"))));
+        PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "1000", "PYG"))));
         assertEquals(disponiblesAntes + 1, consulta.buscar(BusquedaRequest.vacia(), Propiedad::getCodigo).size());
 
         admin.eliminar(g.id());
@@ -201,7 +201,7 @@ class ServiciosIntegracionTest {
 
     @Test
     void gestionaImagenesYSuPrincipal() {
-        PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "1000", "USD"))));
+        PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "1000", "PYG"))));
 
         long primera = admin.agregarImagen(g.id(), new ImagenRequest("/uploads/" + g.codigo() + "/a.jpg", "Frente"));
         long segunda = admin.agregarImagen(g.id(), new ImagenRequest("/uploads/" + g.codigo() + "/b.jpg", null));
@@ -217,7 +217,7 @@ class ServiciosIntegracionTest {
 
     @Test
     void validaQueLaImagenPertenezcaALaPropiedad() {
-        PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "1000", "USD"))));
+        PropiedadGuardada g = admin.crear(casa(List.of(op("Venta", "1000", "PYG"))));
 
         assertThrows(NoEncontradoException.class, () -> admin.marcarPrincipal(g.id(), Long.MAX_VALUE));
         assertThrows(ValidacionException.class, () -> admin.agregarImagen(g.id(), new ImagenRequest("ftp://x", null)));
@@ -237,7 +237,7 @@ class ServiciosIntegracionTest {
 
         assertEquals(List.of("Casa", "Terreno"), c.tipos());
         assertEquals(5, c.estados().size());
-        assertEquals(List.of("PYG", "USD"), c.monedas());
+        assertEquals(List.of("PYG"), c.monedas());
         assertEquals(List.of("Venta"), c.operacionesPorTipo().get("Terreno"));
         assertEquals(DatosPrueba.numero(dataSource, "SELECT count(*) FROM barrio"), c.ubicaciones().size());
     }
@@ -254,7 +254,7 @@ class ServiciosIntegracionTest {
         UbicacionDetectada u = ubicacion.localizar(zona.latitud(), zona.longitud());
         assertEquals(zona.idBarrio(), u.ubicacion().idBarrio());
 
-        PropiedadRequest base = casa(List.of(op("Venta", "1000", "USD")));
+        PropiedadRequest base = casa(List.of(op("Venta", "1000", "PYG")));
         PropiedadRequest conDetectada = new PropiedadRequest(base.titulo(), null, null, u.latitud(), u.longitud(),
                 u.ubicacion().idBarrio(), "Casa", null, base.casa(), null, base.operaciones());
 

@@ -69,7 +69,7 @@ public final class Entidades {
         p.asignarCasa(casa);
         // Se agrega primero el alquiler para comprobar que el mapper ordena Venta primero
         p.agregarOperacion(new OperacionPropiedad(ALQUILER, new BigDecimal("4000000.00"), Moneda.PYG));
-        p.agregarOperacion(new OperacionPropiedad(VENTA, new BigDecimal("45000.00"), Moneda.USD));
+        p.agregarOperacion(new OperacionPropiedad(VENTA, new BigDecimal("45000.00"), Moneda.PYG));
         for (short i = 0; i < 3; i++) {
             Imagen img = new Imagen("/images/propiedades/prop-001/" + (i + 1) + ".png", i == 0, i);
             asignar(img, "id", 100L + i);
@@ -83,7 +83,7 @@ public final class Entidades {
                 TERRENO, DISPONIBLE, AREA_1);
         asignar(p, "id", 2L);
         p.asignarTerreno(new Terreno(new BigDecimal("750.00")));
-        p.agregarOperacion(new OperacionPropiedad(VENTA, new BigDecimal("41000.00"), Moneda.USD));
+        p.agregarOperacion(new OperacionPropiedad(VENTA, new BigDecimal("41000.00"), Moneda.PYG));
         return p;
     }
 }

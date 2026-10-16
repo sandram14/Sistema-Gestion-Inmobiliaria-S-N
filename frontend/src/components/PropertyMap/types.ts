@@ -2,14 +2,12 @@
 // Los datos vienen de la API Java (ver useGeoData.ts) con el mismo formato GeoJSON
 // que tenían los archivos estáticos; los campos nuevos de la API son opcionales.
 
-// Categoría real del dato (así viene en el geojson / futura API).
-export type CategoriaPropiedad = "Casa" | "Departamento" | "Terreno";
+// Categoría real del dato, como la envía la API: los tipos son solo Casa y Terreno.
+export type CategoriaPropiedad = "Casa" | "Terreno";
 export type TipoOperacion = "Venta" | "Alquiler";
 
-// Agrupación que usa la UI: Casa + Departamento se muestran juntos como
-// "Vivienda" (comprable o alquilable). Terreno es su propio grupo y sólo
-// puede comprarse. Los íconos de casa/depto en el mapa se mantienen
-// distintos aunque compartan el mismo filtro/grupo.
+// Agrupación que usa la UI: Casa se muestra como "Vivienda" (comprable o
+// alquilable). Terreno es su propio grupo y sólo puede comprarse.
 export type GrupoPropiedad = "Vivienda" | "Terreno";
 
 export function grupoDeCategoria(categoria: CategoriaPropiedad): GrupoPropiedad {
@@ -104,6 +102,8 @@ export interface Filtros {
   barrioId: number | null;
   categoria: GrupoPropiedad | "Todos";
   tipoOperacion: TipoOperacion | "Todos";
+  /** Presupuesto en guaraníes (única moneda del sistema); null = sin límite. */
+  presupuestoMin: number | null;
   presupuestoMax: number | null;
 }
 
@@ -113,6 +113,7 @@ export const FILTROS_VACIOS: Filtros = {
   barrioId: null,
   categoria: "Todos",
   tipoOperacion: "Todos",
+  presupuestoMin: null,
   presupuestoMax: null,
 };
   

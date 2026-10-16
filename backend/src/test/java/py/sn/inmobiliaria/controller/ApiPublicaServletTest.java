@@ -93,7 +93,7 @@ class ApiPublicaServletTest {
         @Override
         public Catalogos obtener() {
             return new Catalogos(List.of("Casa", "Terreno"), List.of("Disponible"), List.of("Venta", "Alquiler"),
-                    List.of("PYG", "USD"), Map.of("Terreno", List.of("Venta")),
+                    List.of("PYG"), Map.of("Terreno", List.of("Venta")),
                     List.of(new UbicacionDao.FilaUbicacion(1, "ALTO PARANÁ", 1, "CIUDAD DEL ESTE", 10011013, "AREA 1")));
         }
     }

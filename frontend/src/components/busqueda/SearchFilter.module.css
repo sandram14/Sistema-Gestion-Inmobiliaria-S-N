@@ -30,7 +30,8 @@
   flex-shrink: 0;
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  /* Arriba: si un error del presupuesto ocupa más líneas que otro, etiquetas y campos siguen alineados */
+  align-items: flex-start;
   justify-content: center; /* filtros y botón Buscar centrados, juntos */
   gap: 14px;
   background: var(--color-blanco);
@@ -51,6 +52,7 @@
   color: var(--color-verde-medio);
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  line-height: 16px; /* fija: el botón Buscar se alinea con los campos usando esta altura */
 }
 
 .filterSelect {
@@ -74,6 +76,58 @@
   border-color: var(--color-acento);
 }
 
+/* Presupuesto en guaraníes: campos de texto con el mismo aspecto que los desplegables */
+.filterInput {
+  width: 160px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--color-borde);
+  border-radius: 10px;
+  background: var(--color-blanco);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  font-family: var(--fuente-texto);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.filterInput::placeholder {
+  color: var(--color-gris);
+}
+
+.filterInput:focus {
+  border-color: var(--color-acento);
+}
+
+.filterInputError,
+.filterInputError:focus {
+  border-color: var(--color-error);
+}
+
+.filterError {
+  max-width: 160px;
+  color: var(--color-error);
+  font-size: var(--texto-2xs);
+  font-family: var(--fuente-texto);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* Aviso bajo la barra cuando el presupuesto no tiene resultados */
+.avisoFiltro {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 10px 32px;
+  background: var(--color-blanco);
+  border-bottom: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  font-family: var(--fuente-texto);
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
 .searchBtn {
   padding: 11px 22px;
   background: var(--color-verde);
@@ -87,6 +141,12 @@
   transition: background 0.2s;
   white-space: nowrap;
   height: 40px;
+}
+
+/* Solo en la barra (la clase también la usa "Consultar sobre esta propiedad" en el detalle):
+   altura de la etiqueta (16px) + separación del grupo (6px) + 1px para centrarlo (mide 40px; los campos, 42px) */
+.filterBar > .searchBtn {
+  margin-top: 23px;
 }
 
 .searchBtn:hover {
@@ -605,9 +665,24 @@
     font-size: var(--texto-xs);
     padding: 9px 28px 9px 10px;
   }
+  .filterInput {
+    width: 100%;
+    font-size: var(--texto-xs);
+    padding: 9px 10px;
+  }
+  .filterError {
+    max-width: none;
+  }
+  .avisoFiltro {
+    padding: 10px 12px;
+    font-size: var(--texto-xs);
+  }
   .searchBtn {
     flex: 1 1 100%;
     margin-left: 0;
+  }
+  .filterBar > .searchBtn {
+    margin-top: 0; /* en su propia fila: no necesita alinearse con los campos */
   }
   .stageTitle {
     font-size: var(--texto-xl);

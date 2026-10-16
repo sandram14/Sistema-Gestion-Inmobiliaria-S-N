@@ -152,15 +152,15 @@ CREATE TABLE imagen (
 );
 -- "Como máximo una imagen principal por propiedad": índice parcial en 03_indices.sql
 
--- Operaciones de cada propiedad, con su precio y moneda
+-- Operaciones de cada propiedad, con su precio. El sistema trabaja solo en guaraníes (migración 009)
 CREATE TABLE operacion_propiedad (
     id_propiedad  bigint  NOT NULL REFERENCES propiedad (id_propiedad) ON DELETE CASCADE,
     id_operacion  integer NOT NULL REFERENCES operacion (id_operacion),
     precio        numeric(15, 2) NOT NULL,
-    moneda        char(3) NOT NULL,
+    moneda        char(3) NOT NULL DEFAULT 'PYG',
     PRIMARY KEY (id_propiedad, id_operacion),
     CONSTRAINT ck_operacion_precio CHECK (precio > 0),
-    CONSTRAINT ck_operacion_moneda CHECK (moneda IN ('PYG', 'USD'))
+    CONSTRAINT ck_operacion_moneda CHECK (moneda = 'PYG')
 );
 
 -- ---------------------------------------------------------------------

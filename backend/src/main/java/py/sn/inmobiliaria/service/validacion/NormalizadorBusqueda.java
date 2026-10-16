@@ -68,12 +68,13 @@ public final class NormalizadorBusqueda {
             if (presupuesto != null && presupuesto.signum() <= 0) {
                 errores.agregar("presupuestoMax", "Debe ser mayor a 0");
             }
+            // Solo guaraníes (migración 009): sin moneda se asume PYG; cualquier otra se rechaza
             if (vacio(req.moneda())) {
-                moneda = Moneda.USD; // decisión aprobada: USD por defecto
+                moneda = Moneda.PYG;
             } else {
                 moneda = ReglasNegocio.normalizarMoneda(req.moneda()).orElse(null);
                 if (moneda == null) {
-                    errores.agregar("moneda", "Valor no válido. Use USD o PYG");
+                    errores.agregar("moneda", "Solo se aceptan guaraníes (PYG)");
                 }
             }
         }

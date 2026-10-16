@@ -10,7 +10,8 @@
 --     o terreno.superficie.
 --   * Datos que el GeoJSON no tenía (valores supuestos, a revisar):
 --     casa.sala/comedor/cocina = true; terreno.tiene_titulo = false.
---   * Precio y moneda (USD) van a operacion_propiedad.
+--   * Precio y moneda van a operacion_propiedad. Todo en guaraníes (PYG) desde la migración 009:
+--     se conservaron los números originales, que se corrigen desde el panel.
 --   * fotos[] -> imagen; la primera es la principal y 'orden' sigue el arreglo.
 -- =====================================================================
 
@@ -23,7 +24,7 @@ SELECT 'prop-001', 'Casa en Area 1', 'Calle Curupayty 519', -25.51757, -54.63972
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 3, 2, true, true, true, 182 FROM propiedad WHERE codigo = 'prop-001';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 45000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-001' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 45000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-001' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-001/0a4c5cd8-14cc-4bbc-a4d8-0f7bc29c541d.png', true, 0),
@@ -40,7 +41,7 @@ SELECT 'prop-002', 'Departamento en Area 1', 'Av. Monseñor Rodríguez 995', -25
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 3, 1, true, true, true, 49 FROM propiedad WHERE codigo = 'prop-002';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 70000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-002' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 70000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-002' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-002/c981819c-fcb0-42d2-b7bb-60f4c91f50ef.png', true, 0),
@@ -56,7 +57,7 @@ SELECT 'prop-003', 'Casa en San Jose', 'Av. Del Lago 1002', -25.51391, -54.6458,
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 2, 2, true, true, true, 263 FROM propiedad WHERE codigo = 'prop-003';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 120000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-003' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 120000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-003' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-003/f6f6ad9a-12c0-4c79-a928-063817c6b264.png', true, 0),
@@ -72,7 +73,7 @@ SELECT 'prop-004', 'Departamento en San Jose', 'Av. Del Lago 1493', -25.51157, -
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 2, 2, true, true, true, 45 FROM propiedad WHERE codigo = 'prop-004';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 420, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-004' AND o.nombre = 'Alquiler';
+SELECT p.id_propiedad, o.id_operacion, 420, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-004' AND o.nombre = 'Alquiler';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-004/fa9f0f45-f5eb-4649-be3d-d5a23058a2d1.png', true, 0),
@@ -87,7 +88,7 @@ SELECT 'prop-005', 'Casa en Ciudad Nueva', 'Av. Monseñor Rodríguez 479', -25.5
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 3, 2, true, true, true, 315 FROM propiedad WHERE codigo = 'prop-005';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 372, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-005' AND o.nombre = 'Alquiler';
+SELECT p.id_propiedad, o.id_operacion, 372, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-005' AND o.nombre = 'Alquiler';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-005/af376fd1-d4fe-4b56-a5c9-17a1277eba37.png', true, 0),
@@ -102,7 +103,7 @@ SELECT 'prop-006', 'Departamento en Ciudad Nueva', 'Av. Kubitschek 1981', -25.50
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 2, 2, true, true, true, 89 FROM propiedad WHERE codigo = 'prop-006';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 168, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-006' AND o.nombre = 'Alquiler';
+SELECT p.id_propiedad, o.id_operacion, 168, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-006' AND o.nombre = 'Alquiler';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-006/daac2482-a9a1-4758-b882-896797ae6593.png', true, 0),
@@ -118,7 +119,7 @@ SELECT 'prop-007', 'Departamento en San Juan', 'Ruta Internacional 384', -25.482
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 1, 2, true, true, true, 82 FROM propiedad WHERE codigo = 'prop-007';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 58000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-007' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 58000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-007' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-007/bd726b05-f577-49bd-b2db-f0c5cc12392e.png', true, 0),
@@ -134,7 +135,7 @@ SELECT 'prop-008', 'Casa en San Juan', 'Av. Monseñor Rodríguez 1053', -25.4844
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 3, 2, true, true, true, 317 FROM propiedad WHERE codigo = 'prop-008';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 150000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-008' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 150000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-008' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-008/0d2da80b-8f2c-4903-84ba-5585d5b0d71a.png', true, 0),
@@ -149,7 +150,7 @@ SELECT 'prop-009', 'Casa en Domingo Sabio', 'Calle Curupayty 1616', -25.48785, -
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 3, 2, true, true, true, 236 FROM propiedad WHERE codigo = 'prop-009';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 95000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-009' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 95000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-009' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-009/8c9f705d-e45b-4c4c-b2fd-7553ab972f33.png', true, 0),
@@ -164,7 +165,7 @@ SELECT 'prop-010', 'Casa en Maria Auxiliadora', 'Calle Curupayty 2287', -25.4855
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 3, 1, true, true, true, 299 FROM propiedad WHERE codigo = 'prop-010';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 372, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-010' AND o.nombre = 'Alquiler';
+SELECT p.id_propiedad, o.id_operacion, 372, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-010' AND o.nombre = 'Alquiler';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-010/983c2120-2168-49fc-a106-ceb324e25c4b.png', true, 0),
@@ -179,7 +180,7 @@ SELECT 'prop-011', 'Casa en Virgen Del Carmen', 'Ruta Internacional 1428', -25.4
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 4, 2, true, true, true, 217 FROM propiedad WHERE codigo = 'prop-011';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 62000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-011' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 62000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-011' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-011/fa3f8cc7-11f7-469f-a965-eb18b71f24f4.png', true, 0),
@@ -194,7 +195,7 @@ SELECT 'prop-012', 'Casa en Calle 14 Monday', 'Av. San Blas 371', -25.54501, -54
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 2, 3, true, true, true, 200 FROM propiedad WHERE codigo = 'prop-012';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 62000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-012' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 62000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-012' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-012/a9dba0ca-557b-4936-8549-02e90a91a3a3.png', true, 0),
@@ -209,7 +210,7 @@ SELECT 'prop-013', 'Departamento en Parana Country Club', 'Av. Del Lago 1979', -
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 2, 3, true, true, true, 72 FROM propiedad WHERE codigo = 'prop-013';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 70000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-013' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 70000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-013' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-013/c0f9acd3-5742-41a0-a2d3-58ba38c5056f.png', true, 0),
@@ -224,7 +225,7 @@ SELECT 'prop-014', 'Departamento en Nuestra Sra De La Asuncion', 'Av. Del Lago 2
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 2, 2, true, true, true, 76 FROM propiedad WHERE codigo = 'prop-014';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 42000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-014' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 42000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-014' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-014/12b5d089-315d-4045-ab1e-a4f4bb73a2e6.png', true, 0),
@@ -239,7 +240,7 @@ SELECT 'prop-015', 'Departamento en San Antonio', 'Av. Monseñor Rodríguez 292'
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 2, 3, true, true, true, 62 FROM propiedad WHERE codigo = 'prop-015';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 252, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-015' AND o.nombre = 'Alquiler';
+SELECT p.id_propiedad, o.id_operacion, 252, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-015' AND o.nombre = 'Alquiler';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-015/f6ea7867-1ab2-48ea-8629-df6457aaed7a.png', true, 0),
@@ -254,7 +255,7 @@ SELECT 'prop-016', 'Casa en San Miguel', 'Av. Monseñor Rodríguez 1676', -25.55
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 3, 3, true, true, true, 294 FROM propiedad WHERE codigo = 'prop-016';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 62000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'prop-016' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 62000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'prop-016' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-016/90ab572b-450c-4699-be9c-44bfe851a1f2.png', true, 0),
@@ -269,7 +270,7 @@ SELECT 'terr-001', 'Terreno en NUESTRA SRA DE LA ASUNCION', 'NUESTRA SRA DE LA A
 INSERT INTO terreno (id_propiedad, superficie, tiene_titulo)
 SELECT id_propiedad, 750, false FROM propiedad WHERE codigo = 'terr-001';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 41000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'terr-001' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 41000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'terr-001' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/terr-001/106ca67f-f87c-4432-a266-87289a0fc25c.png', true, 0)
@@ -282,7 +283,7 @@ SELECT 'terr-002', 'Terreno en SAN MIGUEL', 'SAN MIGUEL, PRESIDENTE FRANCO', -25
 INSERT INTO terreno (id_propiedad, superficie, tiene_titulo)
 SELECT id_propiedad, 1000, false FROM propiedad WHERE codigo = 'terr-002';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 46000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'terr-002' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 46000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'terr-002' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/terr-002/dbc41ee5-357e-411b-9e1e-34737dad64ec.png', true, 0)
@@ -295,7 +296,7 @@ SELECT 'terr-003', 'Terreno en SAN ANTONIO', 'SAN ANTONIO, PRESIDENTE FRANCO', -
 INSERT INTO terreno (id_propiedad, superficie, tiene_titulo)
 SELECT id_propiedad, 1000, false FROM propiedad WHERE codigo = 'terr-003';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 54000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'terr-003' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 54000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'terr-003' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/terr-003/fdb86a25-0fc2-4c45-98ae-9cd30215785a.png', true, 0)
@@ -308,7 +309,7 @@ SELECT 'terr-004', 'Terreno en DOMINGO SABIO', 'DOMINGO SABIO, MINGA GUAZÚ', -2
 INSERT INTO terreno (id_propiedad, superficie, tiene_titulo)
 SELECT id_propiedad, 300, false FROM propiedad WHERE codigo = 'terr-004';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 23000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'terr-004' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 23000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'terr-004' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/terr-004/efc97db1-01b1-48a2-b6d9-6396dfd055a8.png', true, 0)
@@ -321,7 +322,7 @@ SELECT 'terr-005', 'Terreno en MARIA AUXILIADORA', 'MARIA AUXILIADORA, MINGA GUA
 INSERT INTO terreno (id_propiedad, superficie, tiene_titulo)
 SELECT id_propiedad, 750, false FROM propiedad WHERE codigo = 'terr-005';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 38000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'terr-005' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 38000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'terr-005' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/terr-005/5be4827a-977d-463e-9639-11259b489e23.png', true, 0)
@@ -334,7 +335,7 @@ SELECT 'terr-006', 'Terreno en VIRGEN DEL CARMEN', 'VIRGEN DEL CARMEN, MINGA GUA
 INSERT INTO terreno (id_propiedad, superficie, tiene_titulo)
 SELECT id_propiedad, 400, false FROM propiedad WHERE codigo = 'terr-006';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 24000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'terr-006' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 24000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'terr-006' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/terr-006/cba22d76-e3f3-4fde-b399-ba347b754d76.png', true, 0)
@@ -347,7 +348,7 @@ SELECT 'terr-007', 'Terreno en CIUDAD NUEVA', 'CIUDAD NUEVA, CIUDAD DEL ESTE', -
 INSERT INTO terreno (id_propiedad, superficie, tiene_titulo)
 SELECT id_propiedad, 750, false FROM propiedad WHERE codigo = 'terr-007';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 58000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'terr-007' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 58000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'terr-007' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/terr-007/026d06c0-1d67-423a-af2c-34ad199d4d56.png', true, 0)
@@ -360,7 +361,7 @@ SELECT 'terr-008', 'Terreno en SAN JUAN', 'SAN JUAN, CIUDAD DEL ESTE', -25.47590
 INSERT INTO terreno (id_propiedad, superficie, tiene_titulo)
 SELECT id_propiedad, 1000, false FROM propiedad WHERE codigo = 'terr-008';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 48000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'terr-008' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 48000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'terr-008' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/terr-008/079e68f3-c3c5-48f3-b86c-b96d59fd75f8.png', true, 0)
@@ -373,7 +374,7 @@ SELECT 'terr-009', 'Terreno en SAN JOSE', 'SAN JOSE, CIUDAD DEL ESTE', -25.50749
 INSERT INTO terreno (id_propiedad, superficie, tiene_titulo)
 SELECT id_propiedad, 900, false FROM propiedad WHERE codigo = 'terr-009';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 61000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'terr-009' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 61000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'terr-009' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/terr-009/4936f032-254a-493c-8ab0-6fdefe279ce6.png', true, 0)
@@ -386,7 +387,7 @@ SELECT 'terr-010', 'Terreno en AREA 1', 'AREA 1, CIUDAD DEL ESTE', -25.519365, -
 INSERT INTO terreno (id_propiedad, superficie, tiene_titulo)
 SELECT id_propiedad, 400, false FROM propiedad WHERE codigo = 'terr-010';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 32000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'terr-010' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 32000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'terr-010' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/terr-010/90902fd6-9c09-4b73-93dc-f3f09e51db73.png', true, 0)
@@ -399,7 +400,7 @@ SELECT 'terr-011', 'Terreno en PARANA COUNTRY CLUB', 'PARANA COUNTRY CLUB, HERNA
 INSERT INTO terreno (id_propiedad, superficie, tiene_titulo)
 SELECT id_propiedad, 1200, false FROM propiedad WHERE codigo = 'terr-011';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 85000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'terr-011' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 85000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'terr-011' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/terr-011/afb507e7-d719-4667-b780-1ad9a04b7e8f.png', true, 0)
@@ -412,7 +413,7 @@ SELECT 'terr-012', 'Terreno en CALLE 14 MONDAY', 'CALLE 14 MONDAY, MINGA GUAZÚ'
 INSERT INTO terreno (id_propiedad, superficie, tiene_titulo)
 SELECT id_propiedad, 600, false FROM propiedad WHERE codigo = 'terr-012';
 INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-SELECT p.id_propiedad, o.id_operacion, 43000, 'USD' FROM propiedad p, operacion o WHERE p.codigo = 'terr-012' AND o.nombre = 'Venta';
+SELECT p.id_propiedad, o.id_operacion, 43000, 'PYG' FROM propiedad p, operacion o WHERE p.codigo = 'terr-012' AND o.nombre = 'Venta';
 INSERT INTO imagen (id_propiedad, url, es_principal, orden)
 SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/terr-012/259e225e-9b65-49be-a191-fd2f5e85538b.png', true, 0)

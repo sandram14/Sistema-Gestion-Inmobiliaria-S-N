@@ -64,7 +64,7 @@ export default function FormularioPropiedad() {
   const [catalogos, setCatalogos] = useState<Catalogos | null>(null)
   const [detalle, setDetalle] = useState<PropiedadDetalle | null>(null)
   const [form, setForm] = useState<Formulario>(VACIO)
-  const [operaciones, setOperaciones] = useState<FilaOperacion[]>([{ operacion: 'Venta', precio: '', moneda: 'USD' }])
+  const [operaciones, setOperaciones] = useState<FilaOperacion[]>([{ operacion: 'Venta', precio: '' }])
   const [ubicacion, setUbicacion] = useState<ValorUbicacion>({ latitud: null, longitud: null, detectada: null })
   const [errores, setErrores] = useState<Record<string, string>>({})
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null)
@@ -76,7 +76,7 @@ export default function FormularioPropiedad() {
     setDetalle(d)
     setForm(desdeDetalle(d))
     setIdResponsable(d.responsable ? String(d.responsable.id) : '')
-    setOperaciones(d.operaciones.map((o) => ({ operacion: o.operacion, precio: String(o.precio), moneda: o.moneda })))
+    setOperaciones(d.operaciones.map((o) => ({ operacion: o.operacion, precio: String(o.precio) })))
     setUbicacion({
       latitud: d.latitud,
       longitud: d.longitud,
@@ -121,7 +121,7 @@ export default function FormularioPropiedad() {
     // Regla del negocio: un terreno solo se vende. Se quitan las operaciones no permitidas.
     const permitidas = catalogos?.operacionesPorTipo[tipo] ?? []
     const filtradas = operaciones.filter((o) => permitidas.includes(o.operacion))
-    setOperaciones(filtradas.length ? filtradas : [{ operacion: 'Venta', precio: '', moneda: 'USD' }])
+    setOperaciones(filtradas.length ? filtradas : [{ operacion: 'Venta', precio: '' }])
   }
 
   function armarRequest(): PropiedadRequest {
@@ -145,7 +145,7 @@ export default function FormularioPropiedad() {
       terreno: esCasa
         ? null
         : { superficie: numero(form.superficie), frente: numero(form.frente), fondo: numero(form.fondo), tieneTitulo: form.tieneTitulo },
-      operaciones: operaciones.map((o) => ({ operacion: o.operacion, precio: numero(o.precio), moneda: o.moneda })),
+      operaciones: operaciones.map((o) => ({ operacion: o.operacion, precio: numero(o.precio), moneda: 'PYG' as const })),
       // Solo ADMIN y GERENTE eligen el responsable; lo que crea un vendedor queda a su nombre (lo decide el backend)
       idResponsable: editaTodas && idResponsable ? Number(idResponsable) : null,
     }

@@ -86,7 +86,8 @@ public final class ContextoPropiedades {
     private static String operaciones(Propiedad p) {
         return p.getOperaciones().stream()
                 .sorted(Comparator.comparing((OperacionPropiedad op) -> !Operacion.VENTA.equals(op.getOperacion().getNombre())))
-                .map(op -> op.getOperacion().getNombre() + " " + numero(op.getPrecio()) + " " + op.getMoneda().name())
+                .map(op -> op.getOperacion().getNombre() + " " + guaranies(op.getPrecio())
+                        + (Operacion.ALQUILER.equals(op.getOperacion().getNombre()) ? " por mes" : ""))
                 .collect(Collectors.joining("; "));
     }
 
@@ -108,6 +109,12 @@ public final class ContextoPropiedades {
 
     private static String siNo(boolean valor) {
         return valor ? "sí" : "no";
+    }
+
+    /** Precio en guaraníes (única moneda del sistema): 4000000.00 → "Gs. 4.000.000". */
+    static String guaranies(BigDecimal valor) {
+        long entero = valor.setScale(0, java.math.RoundingMode.HALF_UP).longValue();
+        return "Gs. " + String.format(java.util.Locale.ROOT, "%,d", entero).replace(',', '.');
     }
 
     private static String numero(BigDecimal valor) {

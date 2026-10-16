@@ -40,7 +40,7 @@ class ValidadorPropiedadTest {
     @Test
     void casaValidaQuedaNormalizada() {
         PropiedadValidada v = ValidadorPropiedad.validar(casa(List.of(
-                op("venta", "120000", "usd"), op("Alquiler", "4000000", "PYG"))));
+                op("venta", "850000000", "pyg"), op("Alquiler", "4000000", null))));
 
         assertEquals("Casa en Area 1", v.titulo());          // sin espacios sobrantes
         assertNull(v.descripcion());                         // texto vacío -> null
@@ -51,13 +51,21 @@ class ValidadorPropiedadTest {
         assertFalse(v.casa().cocina());                      // null -> false
         assertNull(v.terreno());
         assertEquals("Venta", v.operaciones().get(0).operacion());
-        assertEquals(Moneda.USD, v.operaciones().get(0).moneda());
-        assertEquals(Moneda.PYG, v.operaciones().get(1).moneda());
+        assertEquals(Moneda.PYG, v.operaciones().get(0).moneda());
+        assertEquals(Moneda.PYG, v.operaciones().get(1).moneda()); // sin moneda: guaraníes
+    }
+
+    @Test
+    void rechazaPreciosEnDolares() {
+        ValidacionException e = assertThrows(ValidacionException.class, () -> ValidadorPropiedad.validar(
+                casa(List.of(op("Venta", "120000", "USD")))));
+
+        assertEquals("Solo se aceptan precios en guaraníes (PYG)", e.campos().get("operaciones[0].moneda"));
     }
 
     @Test
     void terrenoValidoConEstado() {
-        PropiedadValidada v = ValidadorPropiedad.validar(terreno(List.of(op("Venta", "41000", "USD"))));
+        PropiedadValidada v = ValidadorPropiedad.validar(terreno(List.of(op("Venta", "41000", "PYG"))));
 
         assertEquals("Terreno", v.tipo());
         assertEquals("Disponible", v.estado());
@@ -68,7 +76,7 @@ class ValidadorPropiedadTest {
     @Test
     void terrenoEnAlquilerSeRechaza() {
         ValidacionException e = assertThrows(ValidacionException.class, () -> ValidadorPropiedad.validar(
-                terreno(List.of(op("Venta", "41000", "USD"), op("Alquiler", "1000000", "PYG")))));
+                terreno(List.of(op("Venta", "41000", "PYG"), op("Alquiler", "1000000", "PYG")))));
 
         assertEquals("Un terreno solamente puede tener la operación Venta", e.campos().get("operaciones[1].operacion"));
     }
@@ -83,7 +91,7 @@ class ValidadorPropiedadTest {
     @Test
     void rechazaOperacionRepetidaYPrecioCero() {
         ValidacionException e = assertThrows(ValidacionException.class, () -> ValidadorPropiedad.validar(
-                casa(List.of(op("Venta", "1", "USD"), op("venta", "0", "USD")))));
+                casa(List.of(op("Venta", "1", "PYG"), op("venta", "0", "PYG")))));
 
         assertTrue(e.campos().containsKey("operaciones[1].operacion"));
         assertTrue(e.campos().containsKey("operaciones[1].precio"));
@@ -92,7 +100,7 @@ class ValidadorPropiedadTest {
     @Test
     void elSubtipoDebeCoincidirConElTipo() {
         PropiedadRequest casaConTerreno = new PropiedadRequest("Casa", null, null, BigDecimal.ONE, BigDecimal.ONE,
-                1, "Casa", null, null, TERRENO, List.of(op("Venta", "1", "USD")));
+                1, "Casa", null, null, TERRENO, List.of(op("Venta", "1", "PYG")));
 
         ValidacionException e = assertThrows(ValidacionException.class, () -> ValidadorPropiedad.validar(casaConTerreno));
 
@@ -104,7 +112,7 @@ class ValidadorPropiedadTest {
     void enElPanelNoSeAceptaViviendaNiDepartamento() {
         for (String tipo : List.of("Vivienda", "Departamento")) {
             PropiedadRequest r = new PropiedadRequest("X", null, null, BigDecimal.ONE, BigDecimal.ONE, 1, tipo,
-                    null, CASA, null, List.of(op("Venta", "1", "USD")));
+                    null, CASA, null, List.of(op("Venta", "1", "PYG")));
             ValidacionException e = assertThrows(ValidacionException.class, () -> ValidadorPropiedad.validar(r));
             assertTrue(e.campos().containsKey("tipo"), tipo);
         }
@@ -123,7 +131,7 @@ class ValidadorPropiedadTest {
     @Test
     void rechazaCoordenadasFueraDeRango() {
         PropiedadRequest r = new PropiedadRequest("X", null, null, new BigDecimal("95"), new BigDecimal("-200"), 1,
-                "Casa", null, CASA, null, List.of(op("Venta", "1", "USD")));
+                "Casa", null, CASA, null, List.of(op("Venta", "1", "PYG")));
 
         ValidacionException e = assertThrows(ValidacionException.class, () -> ValidadorPropiedad.validar(r));
 

@@ -46,9 +46,18 @@ class NormalizadorBusquedaTest {
     }
 
     @Test
-    void presupuestoSinMonedaUsaUsdPorDefecto() {
-        assertEquals(Moneda.USD, normalizar(null, "Venta", "50000", null).moneda());
+    void presupuestoSinMonedaUsaGuaraniesPorDefecto() {
+        assertEquals(Moneda.PYG, normalizar(null, "Venta", "50000", null).moneda());
         assertEquals(Moneda.PYG, normalizar(null, "Venta", "50000", "pyg").moneda());
+    }
+
+    @Test
+    void rechazaDolaresPorqueSoloSeTrabajaEnGuaranies() {
+        ValidacionException e = assertThrows(ValidacionException.class,
+                () -> normalizar(null, "Venta", "50000", "USD"));
+
+        assertEquals(java.util.Set.of("moneda"), e.campos().keySet());
+        assertEquals("Solo se aceptan guaraníes (PYG)", e.campos().get("moneda"));
     }
 
     @Test
@@ -95,15 +104,15 @@ class NormalizadorBusquedaTest {
         assertEquals(py.sn.inmobiliaria.model.Moneda.PYG, f.moneda());
         assertTrue(f.tienePresupuesto());
         var soloMinimo = NormalizadorBusqueda.normalizar(new BusquedaRequest(null, null, null, null, null, null, null, new java.math.BigDecimal("50000")));
-        assertEquals(py.sn.inmobiliaria.model.Moneda.USD, soloMinimo.moneda());   // USD por defecto, como con el máximo
+        assertEquals(py.sn.inmobiliaria.model.Moneda.PYG, soloMinimo.moneda());   // PYG por defecto, como con el máximo
     }
 
     @Test
     void elMinimoNoPuedeSuperarAlMaximoNiSerCero() {
         var invertido = assertThrows(py.sn.inmobiliaria.exception.ValidacionException.class, () -> NormalizadorBusqueda.normalizar(
-                new BusquedaRequest(null, null, null, null, new java.math.BigDecimal("100"), "USD", null, new java.math.BigDecimal("200"))));
+                new BusquedaRequest(null, null, null, null, new java.math.BigDecimal("100"), "PYG", null, new java.math.BigDecimal("200"))));
         assertTrue(invertido.campos().containsKey("presupuestoMin"));
         assertThrows(py.sn.inmobiliaria.exception.ValidacionException.class, () -> NormalizadorBusqueda.normalizar(
-                new BusquedaRequest(null, null, null, null, null, "USD", null, java.math.BigDecimal.ZERO)));
+                new BusquedaRequest(null, null, null, null, null, "PYG", null, java.math.BigDecimal.ZERO)));
     }
 }

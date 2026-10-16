@@ -18,7 +18,7 @@ import java.util.List;
  *   "casa": { "habitaciones": 3, "banos": 2, "sala": true, "comedor": true, "cocina": true,
  *             "superficieConstruida": 182, "superficieTerreno": 360 },
  *   "terreno": null,
- *   "operaciones": [ { "operacion": "Venta", "precio": 120000, "moneda": "USD" },
+ *   "operaciones": [ { "operacion": "Venta", "precio": 850000000 },
  *                    { "operacion": "Alquiler", "precio": 4000000, "moneda": "PYG" } ]
  * }
  * </pre>
@@ -65,7 +65,7 @@ public record PropiedadRequest(
             Boolean tieneTitulo) {
     }
 
-    /** Una operación con su precio: Venta USD 120000. */
+    /** Una operación con su precio en guaraníes; {@code moneda} es opcional y solo admite "PYG". */
     public record OperacionRequest(
             String operacion,
             BigDecimal precio,

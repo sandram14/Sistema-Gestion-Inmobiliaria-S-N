@@ -33,7 +33,7 @@ export default function ConsultasAnalisis() {
             <Ficha titulo="Zonas más consultadas" nota="Ciudad de la propiedad desde la que se inició la consulta." origen="comprobado">
               <Barras filas={deConteo(i.zonasComprobadas)} />
             </Ficha>
-            <Ficha titulo="Rangos de precios (propiedades consultadas)" nota="Precio de cada operación de la propiedad consultada, en su moneda (no se convierten monedas)." origen="comprobado">
+            <Ficha titulo="Rangos de precios (propiedades consultadas)" nota="Precio de cada operación de la propiedad consultada, en guaraníes." origen="comprobado">
               <Barras filas={i.rangosPrecio.map((r) => ({ clave: `${r.operacion}${r.rango}`, etiqueta: `${r.operacion}: ${r.rango}`, cantidad: r.cantidad }))} />
             </Ficha>
             <Ficha titulo="Características más solicitadas" nota="Características mencionadas en las preguntas (cochera, patio, piscina…)." origen="inferido">

@@ -20,14 +20,14 @@ class AnalisisConsultasTest {
     static Fila f(long id, String sesion, String pregunta, String respuesta, Ref prop, String resultado, List<Ref> recs) {
         return new Fila(id, F, sesion, pregunta, respuesta, prop, prop == null ? null : (prop == CASA ? "Casa" : "Terreno"),
                 prop == null ? null : "CIUDAD DEL ESTE", prop == null ? null : "AREA 1", resultado, recs,
-                prop == CASA ? List.of(new AnalisisConsultas.Precio("Venta", new java.math.BigDecimal("45000"), "USD"),
+                prop == CASA ? List.of(new AnalisisConsultas.Precio("Venta", new java.math.BigDecimal("250000000"), "PYG"),
                         new AnalisisConsultas.Precio("Alquiler", new java.math.BigDecimal("4000000"), "PYG"))
-                        : prop == TERRENO ? List.of(new AnalisisConsultas.Precio("Venta", new java.math.BigDecimal("150000"), "USD")) : List.of());
+                        : prop == TERRENO ? List.of(new AnalisisConsultas.Precio("Venta", new java.math.BigDecimal("900000000"), "PYG")) : List.of());
     }
 
     final List<Fila> filas = List.of(
             // Consultas ANTIGUAS (sin resultado registrado)
-            f(1, "s1", "¿Cuánto cuesta?", "Cuesta 45.000 USD.", CASA, null, List.of()),
+            f(1, "s1", "¿Cuánto cuesta?", "Cuesta Gs. 250.000.000.", CASA, null, List.of()),
             f(2, "s1", "¿Tiene cochera?", "No dispongo de esa información.", CASA, null, List.of()),
             f(3, "s2", "cuanto cuesta", RESPALDO, null, null, List.of()),
             f(4, "s2", "Busco casas en alquiler en Hernandarias", "Le recomiendo…", null, null, List.of()),
@@ -107,12 +107,19 @@ class AnalisisConsultasTest {
     }
 
     @Test
-    void rangosDePrecioPorOperacionYMonedaSinConvertir() {
+    void rangosDePrecioPorOperacionEnGuaranies() {
         assertEquals(List.of(
-                new AnalisisConsultas.Rango("Venta", "USD", "Menos de USD 50.000", 2),            // la casa, consultada 2 veces
-                new AnalisisConsultas.Rango("Venta", "USD", "USD 100.000 a USD 200.000", 1),      // el terreno
-                new AnalisisConsultas.Rango("Alquiler", "PYG", "PYG 4.000.000 a PYG 7.000.000", 2)), // la casa, en guaraníes
+                new AnalisisConsultas.Rango("Venta", "PYG", "Menos de Gs. 300.000.000", 2),                // la casa, consultada 2 veces
+                new AnalisisConsultas.Rango("Venta", "PYG", "Gs. 700.000.000 a Gs. 1.500.000.000", 1),     // el terreno
+                new AnalisisConsultas.Rango("Alquiler", "PYG", "Gs. 4.000.000 a Gs. 7.000.000", 2)),      // el alquiler de la casa
                 r.rangosPrecio());
+    }
+
+    @Test
+    void unPrecioEnOtraMonedaNoSeCuentaEnLosRangos() {
+        Fila conDolares = new Fila(99, F, "s9", "precio", "x", CASA, "Casa", "CIUDAD DEL ESTE", "AREA 1", null, List.of(),
+                List.of(new AnalisisConsultas.Precio("Venta", new java.math.BigDecimal("45000"), "USD")));
+        assertTrue(AnalisisConsultas.rangos(List.of(conDolares)).isEmpty());
     }
 
     @Test

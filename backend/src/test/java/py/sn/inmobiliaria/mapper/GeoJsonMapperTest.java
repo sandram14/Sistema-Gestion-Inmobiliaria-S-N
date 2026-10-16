@@ -74,7 +74,7 @@ class GeoJsonMapperTest {
 
         assertEquals("Venta", p.get("tipoOperacion").asText());
         assertEquals("45000", p.get("precio").toString());       // número plano, sin notación científica
-        assertEquals("USD", p.get("moneda").asText());
+        assertEquals("PYG", p.get("moneda").asText());
         assertEquals("Venta", p.get("operaciones").get(0).get("operacion").asText());
         assertEquals("4000000", p.get("operaciones").get(1).get("precio").toString());
     }

@@ -172,9 +172,12 @@ public final class ValidadorPropiedad {
                 e.agregar(base + ".operacion", "Un terreno solamente puede tener la operación Venta");
             }
             BigDecimal precio = positivo(op.precio(), MAX_PRECIO, true, base + ".precio", e);
-            Moneda moneda = ReglasNegocio.normalizarMoneda(op.moneda()).orElse(null);
+            // Solo guaraníes (migración 009): la moneda es opcional y, si se envía, debe ser PYG
+            Moneda moneda = op.moneda() == null || op.moneda().isBlank()
+                    ? Moneda.PYG
+                    : ReglasNegocio.normalizarMoneda(op.moneda()).orElse(null);
             if (moneda == null) {
-                e.agregar(base + ".moneda", "Moneda no válida. Use PYG o USD");
+                e.agregar(base + ".moneda", "Solo se aceptan precios en guaraníes (PYG)");
             }
             if (nombre != null && precio != null && moneda != null) {
                 resultado.add(new OperacionValidada(nombre, precio, moneda));

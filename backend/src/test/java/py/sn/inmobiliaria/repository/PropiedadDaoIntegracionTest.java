@@ -85,19 +85,19 @@ class PropiedadDaoIntegracionTest {
         }
     }
 
-    /** Casa de prueba con Venta 50.000 USD y Alquiler 4.000.000 PYG. */
+    /** Casa de prueba con Venta Gs. 850.000.000 y Alquiler Gs. 4.000.000. */
     private static Propiedad casaConDosOperaciones(EntityManager em, String codigo) {
         Propiedad p = DatosPrueba.casa(em, codigo, zona);
-        p.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "50000", Moneda.USD));
+        p.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "850000000", Moneda.PYG));
         p.agregarOperacion(DatosPrueba.operacion(em, Operacion.ALQUILER, "4000000", Moneda.PYG));
         em.persist(p);
         return p;
     }
 
-    /** Terreno de prueba con Venta 30.000 USD. */
+    /** Terreno de prueba con Venta Gs. 300.000.000. */
     private static Propiedad terrenoEnVenta(EntityManager em, String codigo) {
         Propiedad p = DatosPrueba.terreno(em, codigo, zona);
-        p.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "30000", Moneda.USD));
+        p.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "300000000", Moneda.PYG));
         em.persist(p);
         return p;
     }
@@ -217,26 +217,44 @@ class PropiedadDaoIntegracionTest {
     }
 
     @Test
-    void elPresupuestoSeComparaSoloEnLaMismaMonedaYOperacion() {
+    void elPresupuestoSeComparaContraElPrecioDeLaOperacion() {
         enTransaccionDescartada(em -> {
-            casaConDosOperaciones(em, "test-919"); // Venta 50.000 USD, Alquiler 4.000.000 PYG
+            casaConDosOperaciones(em, "test-919"); // Venta Gs. 850.000.000, Alquiler Gs. 4.000.000
             em.flush();
 
             assertTrue(codigos(propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null,
-                    Operacion.VENTA, new BigDecimal("60000"), Moneda.USD))).contains("test-919"));
+                    Operacion.VENTA, new BigDecimal("900000000"), Moneda.PYG))).contains("test-919"));
             assertFalse(codigos(propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null,
-                    Operacion.VENTA, new BigDecimal("40000"), Moneda.USD))).contains("test-919"));
+                    Operacion.VENTA, new BigDecimal("800000000"), Moneda.PYG))).contains("test-919"));
             assertTrue(codigos(propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null,
                     Operacion.ALQUILER, new BigDecimal("5000000"), Moneda.PYG))).contains("test-919"));
-            // La venta está en USD: con presupuesto en PYG no se compara (no hay conversión)
+            // Con operación Alquiler se compara el alquiler, no la venta
             assertFalse(codigos(propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null,
-                    Operacion.VENTA, new BigDecimal("999999999"), Moneda.PYG))).contains("test-919"));
+                    Operacion.ALQUILER, new BigDecimal("3000000"), Moneda.PYG))).contains("test-919"));
 
-            List<Propiedad> hasta60milUsd = propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null,
-                    Operacion.VENTA, new BigDecimal("60000"), Moneda.USD));
-            assertTrue(hasta60milUsd.stream().allMatch(p -> tieneOperacion(p, op ->
-                    op.getOperacion().getNombre().equals(Operacion.VENTA) && op.getMoneda() == Moneda.USD
-                            && op.getPrecio().compareTo(new BigDecimal("60000")) <= 0)));
+            List<Propiedad> hasta900Millones = propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null,
+                    Operacion.VENTA, new BigDecimal("900000000"), Moneda.PYG));
+            assertTrue(hasta900Millones.stream().allMatch(p -> tieneOperacion(p, op ->
+                    op.getOperacion().getNombre().equals(Operacion.VENTA)
+                            && op.getPrecio().compareTo(new BigDecimal("900000000")) <= 0)));
+        });
+    }
+
+    @Test
+    void desdeYHastaSinOperacionBuscanEnCualquieraDeSusPrecios() {
+        enTransaccionDescartada(em -> {
+            casaConDosOperaciones(em, "test-940"); // Venta Gs. 850.000.000, Alquiler Gs. 4.000.000
+            em.flush();
+
+            // Entre 3 y 5 millones: entra por el alquiler
+            assertTrue(codigos(propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null, null,
+                    new BigDecimal("5000000"), Moneda.PYG, null, new BigDecimal("3000000")))).contains("test-940"));
+            // Solo "Desde" 1.000 millones: ningún precio llega
+            assertFalse(codigos(propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null, null,
+                    null, Moneda.PYG, null, new BigDecimal("1000000000")))).contains("test-940"));
+            // Solo "Desde" 500 millones: entra por la venta
+            assertTrue(codigos(propiedadDao.buscarDisponibles(em, new FiltroPropiedades(null, null, null, null,
+                    null, Moneda.PYG, null, new BigDecimal("500000000")))).contains("test-940"));
         });
     }
 
@@ -247,7 +265,7 @@ class PropiedadDaoIntegracionTest {
             em.flush();
 
             List<Propiedad> r = propiedadDao.buscarDisponibles(em, new FiltroPropiedades(zona.idCiudad(), null,
-                    TipoPropiedad.CASA, Operacion.VENTA, new BigDecimal("100000"), Moneda.USD, zona.idDepartamento()));
+                    TipoPropiedad.CASA, Operacion.VENTA, new BigDecimal("900000000"), Moneda.PYG, zona.idDepartamento()));
 
             assertTrue(codigos(r).contains("test-920"));
             assertTrue(r.stream().allMatch(p -> p.getTipo().getNombre().equals(TipoPropiedad.CASA)

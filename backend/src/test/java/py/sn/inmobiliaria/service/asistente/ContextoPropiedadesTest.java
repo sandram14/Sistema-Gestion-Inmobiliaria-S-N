@@ -16,7 +16,7 @@ class ContextoPropiedadesTest {
         assertFalse(r.contains("\n"));
         assertTrue(r.startsWith("prop-001 | Casa | Casa en Area 1"), r);
         assertTrue(r.contains("CIUDAD DEL ESTE, barrio AREA 1"));
-        assertTrue(r.contains("Venta 45000 USD; Alquiler 4000000 PYG")); // Venta primero, sin decimales
+        assertTrue(r.contains("Venta Gs. 45.000; Alquiler Gs. 4.000.000 por mes"), r); // Venta primero, en guaraníes con puntos de miles
         assertTrue(r.contains("3 habitaciones, 2 baños, 182 m² construidos"));
     }
 

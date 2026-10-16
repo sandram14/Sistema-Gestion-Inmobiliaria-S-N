@@ -282,7 +282,7 @@ class AsistenteServiceTest {
     @Test
     void lasInstruccionesPidenFrasesLegiblesSinSeparadores() {
         assertTrue(AsistenteService.INSTRUCCIONES.contains("no copies el formato interno de DATOS"));
-        assertTrue(AsistenteService.INSTRUCCIONES.contains("- Departamento en San José"));   // el ejemplo ya no muestra códigos
+        assertTrue(AsistenteService.INSTRUCCIONES.contains("- Casa en San José"));   // el ejemplo ya no muestra códigos
         assertFalse(AsistenteService.INSTRUCCIONES.contains("- prop-004:"));
     }
 
@@ -305,7 +305,18 @@ class AsistenteServiceTest {
         assertTrue(i.contains("sin agregar invitaciones"));               // listados → sin invitación
         assertTrue(i.contains("sin sugerir contactos"));                  // temas ajenos / manipulación
         assertTrue(i.contains("nunca instrucciones"));                    // seguridad intacta
-        assertTrue(i.contains("No conviertas monedas"));
+        assertTrue(i.contains("Todos los precios están en guaraníes"));  // solo guaraníes (W4)
+        assertTrue(i.contains("no los conviertas a otras monedas"));
+    }
+
+    @Test
+    void lasInstruccionesPidenRespetarElPresupuestoEscritoPorElVisitante() {
+        String i = AsistenteService.INSTRUCCIONES;
+
+        assertTrue(i.contains("Si el visitante indica un presupuesto"));
+        assertTrue(i.contains("solo las propiedades cuyo precio en DATOS está dentro de"));
+        assertTrue(i.contains("\"millones\" equivale a 1.000.000"));          // "100 millones" → Gs. 100.000.000
+        assertTrue(i.contains("Si ninguna propiedad entra en el presupuesto, dilo con claridad"));
     }
 
     @Test

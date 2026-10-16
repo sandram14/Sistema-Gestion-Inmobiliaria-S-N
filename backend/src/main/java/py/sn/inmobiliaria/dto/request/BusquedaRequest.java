@@ -10,7 +10,7 @@ import java.math.BigDecimal;
  * @param categoria      "Casa", "Terreno" o "Vivienda" (alias de Casa usado por el frontend)
  * @param operacion      "Venta" o "Alquiler"
  * @param presupuestoMax precio máximo
- * @param moneda         "USD" o "PYG"; si hay presupuesto y no se indica, se asume USD
+ * @param moneda         opcional; solo "PYG" (si hay presupuesto y no se indica, se asume PYG)
  * @param departamentoId id del departamento
  */
 public record BusquedaRequest(

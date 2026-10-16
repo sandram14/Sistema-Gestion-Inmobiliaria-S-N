@@ -110,7 +110,7 @@ class ModeloJpaIntegracionTest {
         enTransaccionDescartada(em -> {
             Propiedad nueva = DatosPrueba.casa(em, "test-901", zona);
             nueva.setDireccion("Calle de prueba 123");
-            nueva.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "45000", Moneda.USD));
+            nueva.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "45000", Moneda.PYG));
             for (short i = 0; i < 3; i++) {
                 nueva.agregarImagen(new Imagen("/uploads/test-901/" + i + ".jpg", i == 0, i));
             }
@@ -133,7 +133,7 @@ class ModeloJpaIntegracionTest {
 
             assertEquals(1, p.getOperaciones().size());
             assertEquals(Operacion.VENTA, p.getOperaciones().get(0).getOperacion().getNombre());
-            assertEquals(Moneda.USD, p.getOperaciones().get(0).getMoneda());
+            assertEquals(Moneda.PYG, p.getOperaciones().get(0).getMoneda());
 
             assertEquals(3, p.getImagenes().size());
             assertTrue(p.getImagenes().get(0).isEsPrincipal());   // la principal primero
@@ -145,7 +145,7 @@ class ModeloJpaIntegracionTest {
     void guardaYLeeUnTerreno() {
         enTransaccionDescartada(em -> {
             Propiedad nuevo = DatosPrueba.terreno(em, "test-902", zona);
-            nuevo.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "41000", Moneda.USD));
+            nuevo.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "41000", Moneda.PYG));
 
             Propiedad p = guardarYReleer(em, nuevo);
 
@@ -160,7 +160,7 @@ class ModeloJpaIntegracionTest {
     void unaCasaPuedeTenerVentaEnUsdYAlquilerEnPyg() {
         enTransaccionDescartada(em -> {
             Propiedad nueva = DatosPrueba.casa(em, "test-903", zona);
-            nueva.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "120000", Moneda.USD));
+            nueva.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "120000", Moneda.PYG));
             nueva.agregarOperacion(DatosPrueba.operacion(em, Operacion.ALQUILER, "4000000", Moneda.PYG));
 
             Propiedad p = guardarYReleer(em, nueva);
@@ -174,7 +174,7 @@ class ModeloJpaIntegracionTest {
     void elTriggerRechazaUnTerrenoEnAlquiler() {
         enTransaccionDescartada(em -> {
             Propiedad terreno = DatosPrueba.terreno(em, "test-904", zona);
-            terreno.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "30000", Moneda.USD));
+            terreno.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "30000", Moneda.PYG));
             em.persist(terreno);
             em.flush();
 
@@ -189,7 +189,7 @@ class ModeloJpaIntegracionTest {
             Propiedad p = DatosPrueba.casa(em, "test-905", zona);
             p.setLatitud(DatosPrueba.LATITUD_FUERA);
             p.setLongitud(DatosPrueba.LONGITUD_FUERA);
-            p.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "1000", Moneda.USD));
+            p.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "1000", Moneda.PYG));
 
             // Con ids IDENTITY, Hibernate ejecuta el INSERT de la propiedad en el mismo persist()
             // (necesita el id generado), así que el trigger puede rechazarla ahí o en el flush.
@@ -204,7 +204,7 @@ class ModeloJpaIntegracionTest {
     void guardaUnaConsultaDelAsistente() {
         enTransaccionDescartada(em -> {
             Propiedad p = DatosPrueba.casa(em, "test-906", zona);
-            p.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "1000", Moneda.USD));
+            p.agregarOperacion(DatosPrueba.operacion(em, Operacion.VENTA, "1000", Moneda.PYG));
             em.persist(p);
 
             Consulta c = new Consulta(UUID.randomUUID(), "¿Esta casa tiene cochera?", p);

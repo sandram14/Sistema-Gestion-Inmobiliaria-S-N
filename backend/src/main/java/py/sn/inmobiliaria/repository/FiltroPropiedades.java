@@ -11,8 +11,8 @@ import java.math.BigDecimal;
  * @param barrioId       id del barrio (CLAVE_BAR)
  * @param tipo           nombre del tipo: "Casa" o "Terreno"
  * @param operacion      nombre de la operación: "Venta" o "Alquiler"
- * @param presupuestoMax precio máximo (se compara solo contra precios en {@code moneda})
- * @param moneda         moneda del presupuesto; obligatoria si hay presupuestoMax
+ * @param presupuestoMax precio máximo, en guaraníes
+ * @param moneda         moneda del presupuesto (siempre PYG); obligatoria si hay presupuesto
  * @param departamentoId id del departamento (por ejemplo, Alto Paraná)
  */
 public record FiltroPropiedades(

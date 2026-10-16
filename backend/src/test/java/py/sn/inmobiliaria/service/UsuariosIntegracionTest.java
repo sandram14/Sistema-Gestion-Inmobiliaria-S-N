@@ -81,7 +81,7 @@ class UsuariosIntegracionTest {
     private PropiedadRequest casa() {
         return new PropiedadRequest("Casa " + marca, null, null, zona.latitud(), zona.longitud(), zona.idBarrio(), "Casa", null,
                 new PropiedadRequest.CasaRequest(2, 1, true, true, true, new BigDecimal("90"), null), null,
-                List.of(new PropiedadRequest.OperacionRequest("Venta", new BigDecimal("1000"), "USD")));
+                List.of(new PropiedadRequest.OperacionRequest("Venta", new BigDecimal("1000"), "PYG")));
     }
 
     private static UsuarioSesion sesion(int id, String rol) {

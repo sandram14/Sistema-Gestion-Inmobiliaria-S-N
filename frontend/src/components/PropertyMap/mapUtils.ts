@@ -36,18 +36,15 @@ export function ciudadIcon(): L.DivIcon {
 
 /**
  * Ícono de propiedad: pin con símbolo según categoría.
- * Casa y Departamento son "Vivienda" (comparten grupo/filtro) pero
- * conservan cada una su propio símbolo. Terreno usa un ícono de roca,
+ * Casa (la "Vivienda" del filtro) usa una casa y Terreno un ícono de roca,
  * siempre dentro de la paleta verde de la marca.
  */
 export function propiedadIcon(categoria: CategoriaPropiedad): L.DivIcon {
   const symbol =
     categoria === "Casa"
       ? `<path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V20h14V9.5" /><path d="M9.5 20v-6h5v6" />`
-      : categoria === "Departamento"
-        ? `<rect x="6" y="3" width="12" height="18" rx="1" /><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1" />`
-        : // Terreno: roca/piedra
-          `<path d="M3 17.3c-.6-1.9.5-3.9 2.4-4.5.2-2.4 2.2-4.3 4.6-4.3 2.1 0 3.9 1.4 4.4 3.4 2.1.1 3.8 1.9 3.8 4a4 4 0 0 1-4 4H7.5c-1.9 0-3.6-.9-4.5-2.6Z" /><path d="M8.5 13.5 9.5 15.5" /><path d="M13 12.7l.8 2.3" />`;
+      : // Terreno: roca/piedra
+        `<path d="M3 17.3c-.6-1.9.5-3.9 2.4-4.5.2-2.4 2.2-4.3 4.6-4.3 2.1 0 3.9 1.4 4.4 3.4 2.1.1 3.8 1.9 3.8 4a4 4 0 0 1-4 4H7.5c-1.9 0-3.6-.9-4.5-2.6Z" /><path d="M8.5 13.5 9.5 15.5" /><path d="M13 12.7l.8 2.3" />`;
 
   const pinClass =
     categoria === "Terreno" ? "pm-propiedad-icon pm-propiedad-icon--terreno" : "pm-propiedad-icon";

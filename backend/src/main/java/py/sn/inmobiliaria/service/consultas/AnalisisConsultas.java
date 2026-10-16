@@ -32,7 +32,7 @@ public final class AnalisisConsultas {
     public record Precio(String operacion, java.math.BigDecimal monto, String moneda) {
     }
 
-    /** Cantidad de propiedades consultadas en un rango de precio, por operación y moneda (sin convertir). */
+    /** Cantidad de propiedades consultadas en un rango de precio, por operación (en guaraníes). */
     public record Rango(String operacion, String moneda, String rango, long cantidad) {
     }
 
@@ -72,10 +72,8 @@ public final class AnalisisConsultas {
         CARACTERISTICAS.put("Seguridad", List.of("seguridad", "guardia", "cerco", "alarma"));
     }
 
-    /** Límites de los rangos (en la moneda de cada precio; no se convierte). */
+    /** Límites de los rangos, en guaraníes (única moneda del sistema desde la migración 009). */
     static final Map<String, long[]> LIMITES = Map.of(
-            "Venta USD", new long[] {50_000, 100_000, 200_000},
-            "Alquiler USD", new long[] {300, 600, 1_000},
             "Venta PYG", new long[] {300_000_000, 700_000_000, 1_500_000_000},
             "Alquiler PYG", new long[] {2_000_000, 4_000_000, 7_000_000});
 
@@ -160,7 +158,7 @@ public final class AnalisisConsultas {
         }
         List<Rango> lista = new ArrayList<>();
         for (String op : List.of("Venta", "Alquiler")) {
-            for (String mon : List.of("USD", "PYG")) {
+            for (String mon : List.of("PYG")) {
                 long[] lim = LIMITES.get(op + " " + mon);
                 for (int i = 0; i <= lim.length; i++) {
                     String r = etiquetaRango(i, lim, mon);
@@ -183,7 +181,8 @@ public final class AnalisisConsultas {
     }
 
     static String etiquetaRango(int i, long[] lim, String moneda) {
-        java.util.function.LongFunction<String> f = v -> moneda + " " + String.format(java.util.Locale.ROOT, "%,d", v).replace(',', '.');
+        String simbolo = "PYG".equals(moneda) ? "Gs." : moneda;
+        java.util.function.LongFunction<String> f = v -> simbolo + " " + String.format(java.util.Locale.ROOT, "%,d", v).replace(',', '.');
         if (i == 0) {
             return "Menos de " + f.apply(lim[0]);
         }

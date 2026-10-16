@@ -1,10 +1,10 @@
 import type { Catalogos, Operacion, TipoPropiedad } from '../api/tipos'
 import ui from '../ui.module.css'
 
+/** Una operación del formulario. El precio es siempre en guaraníes (no hay selector de moneda). */
 export interface FilaOperacion {
   operacion: Operacion
   precio: string
-  moneda: string
 }
 
 /**
@@ -48,18 +48,11 @@ export default function EditorOperaciones({
             {errores[`operaciones[${i}].operacion`] && <span className={ui.errorCampo}>{errores[`operaciones[${i}].operacion`]}</span>}
           </label>
           <label className={ui.campo}>
-            <span className={ui.etiqueta}>Precio{f.operacion === 'Alquiler' ? ' mensual' : ''}</span>
+            <span className={ui.etiqueta}>Precio{f.operacion === 'Alquiler' ? ' mensual' : ''} (Gs.)</span>
             <input className={`${ui.input} ${errores[`operaciones[${i}].precio`] ? ui.inputConError : ''}`} type="number"
               min="0" step="any" value={f.precio} aria-label={`Precio ${i + 1}`}
               onChange={(e) => cambiar(i, { precio: e.target.value })} />
             {errores[`operaciones[${i}].precio`] && <span className={ui.errorCampo}>{errores[`operaciones[${i}].precio`]}</span>}
-          </label>
-          <label className={ui.campo}>
-            <span className={ui.etiqueta}>Moneda</span>
-            <select className={ui.input} value={f.moneda} aria-label={`Moneda ${i + 1}`}
-              onChange={(e) => cambiar(i, { moneda: e.target.value })}>
-              {catalogos.monedas.map((m) => <option key={m} value={m}>{m}</option>)}
-            </select>
           </label>
           <button type="button" className={`${ui.botonPeligro} ${ui.botonChico}`} style={{ marginTop: '1.6rem' }}
             onClick={() => onCambio(filas.filter((_, j) => j !== i))} aria-label={`Quitar operación ${i + 1}`}>
@@ -70,7 +63,7 @@ export default function EditorOperaciones({
 
       {disponibles.length > 0 && (
         <button type="button" className={ui.botonSecundario}
-          onClick={() => onCambio([...filas, { operacion: disponibles[0], precio: '', moneda: 'USD' }])}>
+          onClick={() => onCambio([...filas, { operacion: disponibles[0], precio: '' }])}>
           + Agregar {disponibles.join(' o ')}
         </button>
       )}

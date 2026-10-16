@@ -330,7 +330,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
 .pieTabla { margin-top: 8px; color: var(--gris); font-size: 12px; }
 
 /* ── Operaciones ──────────────────────────────────────────────────── */
-.filaOperacion { display: grid; grid-template-columns: 1fr 1fr 110px auto; gap: 8px; align-items: end; margin-bottom: 8px; }
+.filaOperacion { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; margin-bottom: 8px; }
 @media (max-width: 640px) { .filaOperacion { grid-template-columns: 1fr 1fr; } }
 
 /* ── Mapa ─────────────────────────────────────────────────────────── */

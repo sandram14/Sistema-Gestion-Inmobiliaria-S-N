@@ -4,6 +4,7 @@ import type { LatLngBounds, StyleFunction, PathOptions, Path } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { BarrioFeature, CiudadFeature, PropiedadFeature } from "./types";
 import { ciudadIcon, propiedadIcon } from "./mapUtils";
+import { textoPrecioOperacion } from "../../services/guaranies";
 import "./PropertyMap.css";
 
 const DEFAULT_CENTER: [number, number] = [-25.5, -54.9];
@@ -120,7 +121,7 @@ export default function MapCanvas({
             eventHandlers={{ click: () => onSelectPropiedad?.(p.properties.id) }}
           >
             <Tooltip direction="top" offset={[0, -22]} className="pm-tooltip">
-              {p.properties.titulo} · {p.properties.moneda} {p.properties.precio.toLocaleString()}
+              {p.properties.titulo} · {textoPrecioOperacion(p.properties.tipoOperacion, p.properties.precio)}
             </Tooltip>
           </Marker>
         ))}

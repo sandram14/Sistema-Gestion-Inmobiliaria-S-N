@@ -117,10 +117,11 @@ también como variable de entorno.
 
 Filtros de `/api/propiedades` (todos opcionales): `departamentoId`, `ciudadId`, `barrioId`,
 `categoria` (`Casa`, `Vivienda` o `Terreno`), `operacion` o `tipoOperacion` (`Venta`, `Alquiler`),
-`presupuestoMax` y `moneda` (`USD` por defecto, o `PYG`). Ejemplo:
+`presupuestoMin` y `presupuestoMax` (en guaraníes). `moneda` es opcional y solo admite `PYG`: desde la
+migración 009 el sistema trabaja solo en guaraníes (ver `docs/integracion-busqueda-presupuesto.md`). Ejemplo:
 
 ```
-GET /api/propiedades?departamentoId=1&ciudadId=1&categoria=Vivienda&operacion=Alquiler&presupuestoMax=500&moneda=USD
+GET /api/propiedades?departamentoId=1&ciudadId=1&categoria=Vivienda&operacion=Alquiler&presupuestoMin=2000000&presupuestoMax=5000000
 ```
 
 ### Asistente de IA (público)

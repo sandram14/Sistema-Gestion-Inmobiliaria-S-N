@@ -3,9 +3,10 @@ import type { LatLngBounds } from 'leaflet'
 import { useSearchParams } from 'react-router-dom'
 import styles from './SearchFilter.module.css'
 import MapCanvas from '../PropertyMap/MapCanvas'
-import { Bath, BedDouble, Building2, ChevronLeft, ChevronRight, Home, LandPlot, MapPin, MessageCircle, Ruler, X } from 'lucide-react'
+import { Bath, BedDouble, ChevronLeft, ChevronRight, Home, LandPlot, MapPin, MessageCircle, Ruler, X } from 'lucide-react'
 import { useGeoData } from '../PropertyMap/useGeoData'
-import { apiGet, esCancelacion } from '../../services/api'
+import { ApiError, apiGet, esCancelacion } from '../../services/api'
+import { conPuntosDeMiles, montoDeCampo, textoDeCampo, textoPrecioOperacion } from '../../services/guaranies'
 import { abrirAsistenteConPropiedad } from '../chat/AssistantWidget'
 import {
   boundsForBarrio,
@@ -23,19 +24,9 @@ import {
   type PropiedadFeature,
 } from '../PropertyMap/types'
 
-// Los presupuestos están en dólares: el backend compara solo contra precios en USD
-// (no convierte monedas), por eso la búsqueda envía moneda=USD junto con el tope.
-const MONEDA_PRESUPUESTO = 'USD'
-const PRESUPUESTOS = [
-  { label: 'Hasta USD 40.000', value: 40000 },
-  { label: 'Hasta USD 70.000', value: 70000 },
-  { label: 'Hasta USD 100.000', value: 100000 },
-  { label: 'Hasta USD 160.000', value: 160000 },
-]
 
 export function iconoCategoria(categoria: PropiedadFeature['properties']['categoria']) {
   if (categoria === 'Casa') return <Home size={40} strokeWidth={1.5} aria-hidden="true" />
-  if (categoria === 'Departamento') return <Building2 size={40} strokeWidth={1.5} aria-hidden="true" />
   return <LandPlot size={40} strokeWidth={1.5} aria-hidden="true" />
 }
 
@@ -47,23 +38,30 @@ export function fotosPara(props: PropiedadFeature['properties']): string[] {
   return props.fotos ?? []
 }
 
-/** "USD 45.000" o "PYG 4.000.000 / mes" (alquiler). */
+/** "Gs. 450.000.000" o "Gs. 4.000.000 / mes" (alquiler). Todo el sistema trabaja en guaraníes. */
 function textoPrecio(op: OperacionPrecio): string {
-  return `${op.moneda} ${op.precio.toLocaleString()}${op.operacion === 'Alquiler' ? ' / mes' : ''}`
+  return textoPrecioOperacion(op.operacion, op.precio)
 }
 
 /** Búsqueda con filtros contra la API: el backend aplica y valida las reglas. */
 function usePropiedadesFiltradas(filtros: Filtros, habilitado: boolean) {
-  const [estado, setEstado] = useState<{ datos: PropiedadFeature[]; cargando: boolean; error: string | null }>({
+  const [estado, setEstado] = useState<{
+    datos: PropiedadFeature[]
+    cargando: boolean
+    error: string | null
+    /** Errores por campo que devuelve el backend (por ejemplo, presupuestoMin). */
+    campos: Record<string, string>
+  }>({
     datos: [],
     cargando: true,
     error: null,
+    campos: {},
   })
 
   useEffect(() => {
     if (!habilitado) return
     const control = new AbortController()
-    setEstado((e) => ({ ...e, cargando: true, error: null }))
+    setEstado((e) => ({ ...e, cargando: true, error: null, campos: {} }))
     apiGet<GeoFeatureCollection<PropiedadFeature>>(
       '/api/propiedades',
       {
@@ -72,18 +70,20 @@ function usePropiedadesFiltradas(filtros: Filtros, habilitado: boolean) {
         barrioId: filtros.barrioId,
         categoria: filtros.categoria === 'Todos' ? null : filtros.categoria,
         operacion: filtros.tipoOperacion === 'Todos' ? null : filtros.tipoOperacion,
+        // En guaraníes: el backend asume PYG, la única moneda del sistema, así que no se envía moneda
+        presupuestoMin: filtros.presupuestoMin,
         presupuestoMax: filtros.presupuestoMax,
-        moneda: filtros.presupuestoMax ? MONEDA_PRESUPUESTO : null,
       },
       control.signal
     )
-      .then((fc) => setEstado({ datos: fc.features, cargando: false, error: null }))
+      .then((fc) => setEstado({ datos: fc.features, cargando: false, error: null, campos: {} }))
       .catch((e: unknown) => {
         if (esCancelacion(e)) return
         setEstado((s) => ({
           ...s,
           cargando: false,
           error: e instanceof Error ? e.message : 'No se pudieron cargar las propiedades.',
+          campos: e instanceof ApiError ? e.campos : {},
         }))
       })
     return () => control.abort() // si cambian los filtros, se descarta la búsqueda anterior
@@ -94,6 +94,7 @@ function usePropiedadesFiltradas(filtros: Filtros, habilitado: boolean) {
     filtros.barrioId,
     filtros.categoria,
     filtros.tipoOperacion,
+    filtros.presupuestoMin,
     filtros.presupuestoMax,
   ])
 
@@ -168,6 +169,11 @@ export default function SearchFilter() {
   const [extraBounds, setExtraBounds] = useState<LatLngBounds | null>(null)
   const [propiedadId, setPropiedadId] = useState<string | null>(null)
   const [searchParams] = useSearchParams()
+  // Presupuesto en guaraníes: lo escrito se aplica al pulsar Buscar, Enter o al salir del campo,
+  // para no buscar a cada tecla ni mostrar errores a medio escribir.
+  const [desdeTexto, setDesdeTexto] = useState('')
+  const [hastaTexto, setHastaTexto] = useState('')
+  const [errorPresupuesto, setErrorPresupuesto] = useState<string | null>(null)
 
   // Permite deep-link desde el home/footer: /buscar?ciudad=01&barrio=10011013
   // y también /buscar?categoria=Terreno&tipoOperacion=Venta
@@ -250,7 +256,7 @@ export default function SearchFilter() {
   const nivel = filtros.barrioId ? 'barrio' : filtros.ciudadId ? 'ciudad' : 'departamento'
 
   // Los filtros los aplica el backend (/api/propiedades?...): ciudad, barrio, tipo, operación,
-  // presupuesto en USD y departamento. Aquí solo se muestran los resultados.
+  // presupuesto en guaraníes (desde/hasta) y departamento. Aquí solo se muestran los resultados.
   const busqueda = usePropiedadesFiltradas(filtros, !loading && !error)
   const propiedadesFiltradas = busqueda.datos
   const propiedadesDelBarrio = propiedadesFiltradas
@@ -277,12 +283,44 @@ export default function SearchFilter() {
     return propiedades.length > 0 ? boundsFromFeatures(propiedades) : null
   }, [barrios, propiedades, filtros.ciudadId, filtros.barrioId, extraBounds, propiedadSeleccionada])
 
+  /** Aplica "Desde" y "Hasta" si cambiaron. Devuelve false si el rango no es válido. */
+  function aplicarPresupuesto(): boolean {
+    const desde = montoDeCampo(desdeTexto)
+    const hasta = montoDeCampo(hastaTexto)
+    if (desde != null && hasta != null && desde > hasta) {
+      setErrorPresupuesto('"Desde" no puede ser mayor que "Hasta".')
+      return false
+    }
+    setErrorPresupuesto(null)
+    if (desde !== filtros.presupuestoMin || hasta !== filtros.presupuestoMax) {
+      patch({ presupuestoMin: desde, presupuestoMax: hasta })
+    }
+    return true
+  }
+
+  function alPresionarTecla(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') aplicarPresupuesto()
+  }
+
   function handleBuscar() {
+    if (!aplicarPresupuesto()) return
     setPropiedadId(null)
     if (!filtros.ciudadId && propiedadesFiltradas.length > 0) {
       setExtraBounds(boundsFromFeatures(propiedadesFiltradas))
     }
   }
+
+  // Errores del presupuesto: primero la comprobación local; si no, los que devuelve el backend
+  const errorDesde = errorPresupuesto ?? busqueda.campos.presupuestoMin ?? null
+  const errorHasta = busqueda.campos.presupuestoMax ?? null
+  const hayErrorDePresupuesto = Boolean(busqueda.campos.presupuestoMin || busqueda.campos.presupuestoMax)
+  const hayPresupuesto = filtros.presupuestoMin != null || filtros.presupuestoMax != null
+  const textoRango =
+    filtros.presupuestoMin != null && filtros.presupuestoMax != null
+      ? `entre Gs. ${conPuntosDeMiles(filtros.presupuestoMin)} y Gs. ${conPuntosDeMiles(filtros.presupuestoMax)}`
+      : filtros.presupuestoMin != null
+        ? `desde Gs. ${conPuntosDeMiles(filtros.presupuestoMin)}`
+        : `hasta Gs. ${conPuntosDeMiles(filtros.presupuestoMax ?? 0)}`
 
   function seleccionarPropiedad(p: PropiedadFeature) {
     const props = p.properties
@@ -391,7 +429,7 @@ export default function SearchFilter() {
             onChange={(e) => patch({ categoria: e.target.value as Filtros['categoria'] })}
           >
             <option value="Todos">Todos</option>
-            <option value="Vivienda">Vivienda (casa / depto)</option>
+            <option value="Vivienda">Vivienda</option>
             <option value="Terreno">Terreno</option>
           </select>
         </div>
@@ -410,19 +448,53 @@ export default function SearchFilter() {
         </div>
 
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Presupuesto</label>
-          <select
-            className={styles.filterSelect}
-            value={filtros.presupuestoMax ?? ''}
-            onChange={(e) => patch({ presupuestoMax: e.target.value ? Number(e.target.value) : null })}
-          >
-            <option value="">Todos</option>
-            {PRESUPUESTOS.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
-            ))}
-          </select>
+          <label className={styles.filterLabel} htmlFor="presupuesto-desde">
+            Desde (Gs.)
+          </label>
+          <input
+            id="presupuesto-desde"
+            className={`${styles.filterInput} ${errorDesde ? styles.filterInputError : ''}`}
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="Sin mínimo"
+            value={desdeTexto}
+            aria-invalid={errorDesde ? true : undefined}
+            aria-describedby={errorDesde ? 'presupuesto-desde-error' : undefined}
+            onChange={(e) => setDesdeTexto(textoDeCampo(e.target.value))}
+            onBlur={aplicarPresupuesto}
+            onKeyDown={alPresionarTecla}
+          />
+          {errorDesde && (
+            <span id="presupuesto-desde-error" className={styles.filterError}>
+              {errorDesde}
+            </span>
+          )}
+        </div>
+
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel} htmlFor="presupuesto-hasta">
+            Hasta (Gs.)
+          </label>
+          <input
+            id="presupuesto-hasta"
+            className={`${styles.filterInput} ${errorHasta ? styles.filterInputError : ''}`}
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="Sin máximo"
+            value={hastaTexto}
+            aria-invalid={errorHasta ? true : undefined}
+            aria-describedby={errorHasta ? 'presupuesto-hasta-error' : undefined}
+            onChange={(e) => setHastaTexto(textoDeCampo(e.target.value))}
+            onBlur={aplicarPresupuesto}
+            onKeyDown={alPresionarTecla}
+          />
+          {errorHasta && (
+            <span id="presupuesto-hasta-error" className={styles.filterError}>
+              {errorHasta}
+            </span>
+          )}
         </div>
 
         <button className={styles.searchBtn} onClick={handleBuscar}>
@@ -430,9 +502,15 @@ export default function SearchFilter() {
         </button>
       </div>
 
-      {busqueda.error && (
+      {busqueda.error && !hayErrorDePresupuesto && (
         <p className={styles.emptyText} role="alert">
           {busqueda.error}
+        </p>
+      )}
+
+      {hayPresupuesto && !busqueda.cargando && !busqueda.error && resultados.length === 0 && (
+        <p className={styles.avisoFiltro} role="status">
+          No hay propiedades publicadas {textoRango}. Probá ampliar el presupuesto o quitar algún filtro.
         </p>
       )}
 

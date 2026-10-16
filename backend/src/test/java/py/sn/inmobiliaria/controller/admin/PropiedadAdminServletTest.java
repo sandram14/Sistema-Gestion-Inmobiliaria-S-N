@@ -125,7 +125,7 @@ class PropiedadAdminServletTest {
     private static final String PROPIEDAD_JSON = """
             {"titulo":"Casa nueva","latitud":-25.51,"longitud":-54.61,"idBarrio":10011013,"tipo":"Casa",
              "casa":{"habitaciones":2,"banos":1,"superficieConstruida":90},
-             "operaciones":[{"operacion":"Venta","precio":80000,"moneda":"USD"}]}
+             "operaciones":[{"operacion":"Venta","precio":850000000}]}
             """;
 
     @TempDir

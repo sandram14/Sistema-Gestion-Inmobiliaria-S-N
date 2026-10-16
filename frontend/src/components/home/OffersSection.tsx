@@ -5,6 +5,7 @@ import { iconoCategoria, fotosPara } from '../busqueda/SearchFilter'
 import { useGeoData } from '../PropertyMap/useGeoData'
 import type { PropiedadFeature } from '../PropertyMap/types'
 import { elegirOfertas, useContenidoSitio } from '../../services/contenidoSitio'
+import { textoPrecioOperacion } from '../../services/guaranies'
 import styles from './OffersSection.module.css'
 
 export default function OffersSection() {
@@ -73,8 +74,7 @@ function OfferCard({ propiedad, onClick }: { propiedad: PropiedadFeature; onClic
       </div>
       <div className={styles.cardBody}>
         <div className={styles.cardPrice}>
-          {props.moneda} {props.precio.toLocaleString()}
-          {props.tipoOperacion === 'Alquiler' ? ' / mes' : ''}
+          {textoPrecioOperacion(props.tipoOperacion, props.precio)}
         </div>
         <div className={styles.cardTitle}>{props.titulo}</div>
         <div className={styles.cardSpecs}>

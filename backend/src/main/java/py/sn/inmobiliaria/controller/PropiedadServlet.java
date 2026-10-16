@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  * <ul>
  *   <li>{@code GET /api/propiedades} → FeatureCollection. Filtros opcionales:
  *       departamentoId, ciudadId, barrioId, categoria (Casa | Vivienda | Terreno), operacion (o tipoOperacion),
- *       presupuestoMax, moneda (USD por defecto si hay presupuesto).</li>
+ *       presupuestoMax, moneda (opcional: solo se acepta PYG, la única moneda del sistema).</li>
  *   <li>{@code GET /api/propiedades/{codigo}} → Feature de una propiedad (por ejemplo prop-001).</li>
  * </ul>
  */

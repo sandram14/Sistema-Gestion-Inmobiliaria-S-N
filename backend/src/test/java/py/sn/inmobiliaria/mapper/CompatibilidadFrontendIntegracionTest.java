@@ -117,7 +117,7 @@ class CompatibilidadFrontendIntegracionTest {
             assertTrue(p.get("id").isTextual() && p.get("titulo").isTextual() && p.get("direccion").isTextual(), id);
             assertTrue(Set.of("Casa", "Terreno").contains(p.get("categoria").asText()), id);
             assertTrue(Set.of("Venta", "Alquiler").contains(p.get("tipoOperacion").asText()), id);
-            assertTrue(Set.of("USD", "PYG").contains(p.get("moneda").asText()), id);
+            assertEquals("PYG", p.get("moneda").asText(), id); // solo guaraníes (migración 009)
             assertTrue(p.get("precio").isNumber() && p.get("m2").isNumber(), id);
             assertTrue(p.get("barrioId").isInt() && p.get("dormitorios").isInt() && p.get("banos").isInt(), id);
             assertTrue(p.get("fotos").isArray(), id);

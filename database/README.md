@@ -39,7 +39,7 @@ erDiagram
 | La ubicación debe estar dentro del barrio (`ST_Covers`) | Trigger `trg_propiedad_ubicacion` |
 | Máximo una imagen principal por propiedad | Índice único parcial `uq_imagen_principal` |
 | Email único sin distinguir mayúsculas | Índice único `uq_usuario_email_lower` |
-| Precio > 0, moneda PYG/USD, código `prefijo-000`, hash BCrypt | Restricciones `CHECK` |
+| Precio > 0, moneda solo PYG (migración 009), código `prefijo-000`, hash BCrypt | Restricciones `CHECK` |
 
 `propiedad.ubicacion` es una columna **generada** a partir de `latitud`/`longitud`:
 PostgreSQL la recalcula sola y nunca queda desincronizada.
@@ -50,4 +50,5 @@ PostgreSQL la recalcula sola y nunca queda desincronizada.
   (prop-002, 004, 006, 007, 013, 014, 015); sus títulos todavía dicen "Departamento en …".
 - El GeoJSON no tenía estos datos, por lo que se cargaron valores supuestos:
   `casa.sala/comedor/cocina = true` y `terreno.tiene_titulo = false`.
-- Todos los precios están en USD, como en el frontend.
+- Todos los precios están en guaraníes (PYG), la única moneda del sistema desde la migración 009. Son los mismos
+  números que antes figuraban en USD, sin convertir: no son precios reales en guaraníes y se corrigen desde el panel.

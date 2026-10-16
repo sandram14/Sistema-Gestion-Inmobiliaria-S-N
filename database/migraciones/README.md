@@ -144,3 +144,25 @@ El sitio muestra en verde e itálica lo que está entre asteriscos (`*así*`). `
 marca las mismas palabras que el diseño destacaba antes en el título de la portada, el bloque de Servicios
 y la historia de Nosotros, **solo si esos títulos conservan su texto original** (si ya se editaron desde el
 panel, no se tocan). No cambia la estructura y se puede ejecutar más de una vez sin efecto adicional.
+
+## 009 — Solo guaraníes (sitio, etapa W4)
+
+El sistema pasa a trabajar solo en guaraníes. Los precios en USD pasan a PYG **con el mismo número, sin
+conversión** (45.000 USD queda Gs. 45.000) y se corrigen después a mano desde el panel. La columna `moneda`
+se conserva, limitada a `CHECK (moneda = 'PYG')` y con `DEFAULT 'PYG'`. No cambia ningún precio, ninguna
+operación ni ninguna propiedad (la transacción lo comprueba). Las consultas guardadas del chat que mencionan
+USD no se tocan: son un registro.
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `009_verificar_solo_guaranies.sql` | Restricción y valor por defecto actuales, y la **lista de precios en USD con cómo quedarán**. Guardar su salida: es el registro de qué estaba en dólares | No |
+| `009_solo_guaranies.sql` | La migración, con comprobaciones antes y después; se detiene si ya está aplicada | Sí, todo o nada |
+| `009_revertir_solo_guaranies.sql` | Vuelve a aceptar PYG y USD y quita el valor por defecto. **No devuelve ningún precio a USD**: para eso está el respaldo | Sí, todo o nada |
+
+**Orden obligatorio al desplegar:** respaldo (`pg_dump`) → `009_verificar` (guardar la salida) →
+`009_solo_guaranies` → backend 0.21.0. El backend 0.21.0 **no arranca bien contra una base sin migrar**: Hibernate
+falla al leer un `'USD'` porque el enum `Moneda` ya no lo tiene. El backend 0.20.0 sí funciona con la base migrada.
+
+Ensayo (base de prueba creada desde `schema/` y `seed/` anteriores): migrar, repetir (se detiene con "ya está
+aplicada"), revertir, revertir otra vez (se detiene) y volver a migrar; la base migrada es igual a una creada desde
+los `schema/` y `seed/` nuevos, y las pruebas de `database/pruebas/verificar.sql` pasan.

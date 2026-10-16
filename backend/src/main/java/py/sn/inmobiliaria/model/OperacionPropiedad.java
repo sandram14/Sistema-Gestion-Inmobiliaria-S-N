@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 
 /**
  * Tabla {@code operacion_propiedad}: qué operaciones ofrece una propiedad y a qué precio.
- * Ejemplo: Casa 001 → Venta USD 120.000 y Alquiler PYG 4.000.000.
+ * Ejemplo: Casa 001 → Venta Gs. 850.000.000 y Alquiler Gs. 4.000.000 (solo guaraníes desde la migración 009).
  *
  * <p>{@code @MapsId} indica que la clave compuesta se toma de las dos relaciones,
  * así no hay que cargar los ids a mano.</p>

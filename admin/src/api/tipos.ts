@@ -3,7 +3,8 @@
 
 export type TipoPropiedad = 'Casa' | 'Terreno'
 export type Operacion = 'Venta' | 'Alquiler'
-export type Moneda = 'PYG' | 'USD'
+/** El sistema trabaja solo en guaraníes (migración 009). */
+export type Moneda = 'PYG'
 
 /** Permisos que asigna el backend según el rol (ver seguridad/Permiso.java). */
 export type Permiso =

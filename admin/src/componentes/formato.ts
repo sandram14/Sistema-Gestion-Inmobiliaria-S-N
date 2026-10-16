@@ -1,8 +1,13 @@
 import type { OperacionPrecio } from '../api/tipos'
 
-/** "Venta USD 45.000" / "Alquiler PYG 4.000.000 / mes" */
+/** Monto en guaraníes con puntos de miles: 4000000 -> "Gs. 4.000.000". */
+export function textoGuaranies(monto: number): string {
+  return `Gs. ${Math.round(monto).toLocaleString('es-PY')}`
+}
+
+/** "Venta Gs. 450.000.000" / "Alquiler Gs. 4.000.000 / mes" */
 export function textoOperacion(op: OperacionPrecio): string {
-  return `${op.operacion} ${op.moneda} ${op.precio.toLocaleString('es-PY')}${op.operacion === 'Alquiler' ? ' / mes' : ''}`
+  return `${op.operacion} ${textoGuaranies(op.precio)}${op.operacion === 'Alquiler' ? ' / mes' : ''}`
 }
 
 export function textoFecha(iso: string | null | undefined): string {

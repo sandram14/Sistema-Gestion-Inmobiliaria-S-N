@@ -82,17 +82,27 @@ SELECT pg_temp.debe_fallar('Un terreno no puede tener operación Alquiler',
      SELECT p.id_propiedad, o.id_operacion, 1000000, 'PYG'
        FROM propiedad p, operacion o WHERE p.codigo = 'terr-001' AND o.nombre = 'Alquiler'$q$, '23514');
 
-SELECT pg_temp.debe_funcionar('Una casa puede tener Venta y Alquiler (con monedas distintas)',
+SELECT pg_temp.debe_funcionar('Una casa puede tener Venta y Alquiler',
   $q$INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
      SELECT p.id_propiedad, o.id_operacion, 4000000, 'PYG'
        FROM propiedad p, operacion o WHERE p.codigo = 'prop-001' AND o.nombre = 'Alquiler'$q$);
 
 SELECT pg_temp.debe_fallar('Una propiedad no puede repetir la misma operación',
   $q$INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio, moneda)
-     SELECT p.id_propiedad, o.id_operacion, 1, 'USD'
+     SELECT p.id_propiedad, o.id_operacion, 1, 'PYG'
        FROM propiedad p, operacion o WHERE p.codigo = 'prop-001' AND o.nombre = 'Venta'$q$, '23505');
 
-SELECT pg_temp.debe_fallar('Moneda distinta de PYG/USD se rechaza',
+SELECT pg_temp.debe_fallar('Moneda USD se rechaza (solo guaraníes, migración 009)',
+  $q$UPDATE operacion_propiedad SET moneda = 'USD'
+      WHERE id_propiedad = (SELECT id_propiedad FROM propiedad WHERE codigo = 'prop-001')$q$, '23514');
+
+SELECT pg_temp.debe_funcionar('Sin indicar moneda se guarda en PYG',
+  $q$INSERT INTO operacion_propiedad (id_propiedad, id_operacion, precio)
+     SELECT p.id_propiedad, o.id_operacion, 5000000
+       FROM propiedad p, operacion o WHERE p.codigo = 'prop-002' AND o.nombre = 'Alquiler'
+        AND NOT EXISTS (SELECT 1 FROM operacion_propiedad x WHERE x.id_propiedad = p.id_propiedad AND x.id_operacion = o.id_operacion)$q$);
+
+SELECT pg_temp.debe_fallar('Moneda distinta de PYG se rechaza',
   $q$UPDATE operacion_propiedad SET moneda = 'EUR'
       WHERE id_propiedad = (SELECT id_propiedad FROM propiedad WHERE codigo = 'prop-001')$q$, '23514');
 
