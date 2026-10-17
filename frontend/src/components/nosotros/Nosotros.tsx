@@ -26,7 +26,6 @@ export default function Nosotros() {
         <div className={styles.quienesGrid}>
           <img src={n.imagen ?? '/images/stock/nosotros_page.jpg'} alt="" className={styles.quienesImg} />
           <div>
-            <span className={styles.eyebrowDark}>Quiénes somos</span>
             {n.historiaTitulo && <h2 className={styles.h2}>{destacar(n.historiaTitulo, styles.h2Accent)}</h2>}
             {n.historiaTexto && <p className={styles.body}>{n.historiaTexto}</p>}
             {n.cifras.length > 0 && (
@@ -47,7 +46,6 @@ export default function Nosotros() {
       <section className={styles.combinado}>
         <div className={styles.combinadoGrid}>
           <div>
-            <span className={styles.eyebrowDark}>Nuestros valores</span>
             <h2 className={styles.h2}>
               Lo que nos <em className={styles.h2Accent}>guía todos los días.</em>
             </h2>
@@ -66,7 +64,6 @@ export default function Nosotros() {
           </div>
 
           <div>
-            <span className={styles.eyebrowDark}>Por qué elegirnos</span>
             <h2 className={styles.h2}>
               ¿Por qué elegir <em className={styles.h2Accent}>S&N?</em>
             </h2>
