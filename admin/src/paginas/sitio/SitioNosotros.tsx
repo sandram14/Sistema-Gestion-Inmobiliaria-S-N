@@ -40,7 +40,7 @@ export default function SitioNosotros() {
             <div className={ui.grilla}>
               {texto('introduccion', 'Introducción (encabezado de la página)', 600, true)}
               <ImagenSitio etiqueta="Imagen principal" valor={c.imagen} onCambio={(u) => setC({ ...c, imagen: u })} />
-              <div className={ui.campo}>{texto('historiaTitulo', 'Título de la historia', 120)}</div>
+              {texto('historiaTitulo', 'Título de la historia', 120)}
               {texto('historiaTexto', 'Texto de la historia', 1500, true)}
             </div>
             {campos.imagen && <span className={ui.errorCampo}>{campos.imagen}</span>}

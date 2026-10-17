@@ -186,10 +186,34 @@
   margin: 0 0 16px;
   padding-bottom: 10px;
   border-bottom: 1px solid var(--borde);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
+  color: var(--verde-texto); /* subtítulo de cada bloque, un poco más destacado */
 }
-.grilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+/* Formularios en filas horizontales: una fila por campo, con la etiqueta a la izquierda y el control a la
+   derecha (la ayuda y los errores quedan debajo del control). En pantallas angostas la etiqueta va arriba. */
+.grilla { display: flex; flex-direction: column; }
+.grilla > .campo {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  column-gap: 24px;
+  row-gap: 4px;
+  align-items: start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--borde);
+}
+.grilla > .campo:first-child { padding-top: 0; }
+.grilla > .campo:last-child { border-bottom: none; padding-bottom: 0; }
+.grilla > .campo > * { grid-column: 2; }
+.grilla > .campo > .etiqueta { grid-column: 1; padding-top: 8px; overflow-wrap: anywhere; }
+.grilla > .campo > .input { width: 100%; max-width: 640px; }
+.grilla > .campo > .checks { min-height: 36px; } /* misma altura que un campo: la etiqueta queda alineada */
+.grilla + .acciones { margin-top: 16px; }
+@media (max-width: 640px) {
+  .grilla > .campo { grid-template-columns: minmax(0, 1fr); }
+  .grilla > .campo > *, .grilla > .campo > .etiqueta { grid-column: 1; }
+  .grilla > .campo > .etiqueta { padding-top: 0; }
+}
 .campo { display: flex; flex-direction: column; gap: 4px; }
 .campoAncho { grid-column: 1 / -1; }
 .etiqueta { font-size: 13px; font-weight: 500; color: var(--texto-secundario); }
@@ -348,7 +372,7 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
 .subida { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
 
 /* ── Mi cuenta: datos en formato etiqueta / valor ─────────────────── */
-.datos { display: grid; grid-template-columns: minmax(160px, 220px) 1fr; column-gap: 24px; margin: 0; }
+.datos { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: 24px; margin: 0; } /* misma columna que los formularios */
 .datos dt, .datos dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--borde); }
 .datos dt { color: var(--texto-secundario); font-weight: 500; overflow-wrap: anywhere; }
 .datos dt:last-of-type, .datos dd:last-of-type { border-bottom: none; }

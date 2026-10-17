@@ -282,10 +282,13 @@ export default function FormularioPropiedad() {
                 <input className={clase('casa.superficieTerreno')} type="number" min="0" step="any" value={form.superficieTerreno} onChange={(e) => cambiar('superficieTerreno', e.target.value)} />
                 {err('casa.superficieTerreno')}
               </label>
-              <div className={`${ui.checks} ${ui.campoAncho}`}>
-                <label><input type="checkbox" checked={form.sala} onChange={(e) => cambiar('sala', e.target.checked)} /> Sala</label>
-                <label><input type="checkbox" checked={form.comedor} onChange={(e) => cambiar('comedor', e.target.checked)} /> Comedor</label>
-                <label><input type="checkbox" checked={form.cocina} onChange={(e) => cambiar('cocina', e.target.checked)} /> Cocina</label>
+              <div className={ui.campo}>
+                <span className={ui.etiqueta}>Ambientes</span>
+                <div className={ui.checks}>
+                  <label><input type="checkbox" checked={form.sala} onChange={(e) => cambiar('sala', e.target.checked)} /> Sala</label>
+                  <label><input type="checkbox" checked={form.comedor} onChange={(e) => cambiar('comedor', e.target.checked)} /> Comedor</label>
+                  <label><input type="checkbox" checked={form.cocina} onChange={(e) => cambiar('cocina', e.target.checked)} /> Cocina</label>
+                </div>
               </div>
             </div>
             {err('casa')}
@@ -309,8 +312,11 @@ export default function FormularioPropiedad() {
                 <input className={clase('terreno.fondo')} type="number" min="0" step="any" value={form.fondo} onChange={(e) => cambiar('fondo', e.target.value)} />
                 {err('terreno.fondo')}
               </label>
-              <div className={`${ui.checks} ${ui.campoAncho}`}>
-                <label><input type="checkbox" checked={form.tieneTitulo} onChange={(e) => cambiar('tieneTitulo', e.target.checked)} /> Cuenta con título de propiedad</label>
+              <div className={ui.campo}>
+                <span className={ui.etiqueta}>Título de propiedad</span>
+                <div className={ui.checks}>
+                  <label><input type="checkbox" checked={form.tieneTitulo} onChange={(e) => cambiar('tieneTitulo', e.target.checked)} /> Cuenta con título de propiedad</label>
+                </div>
               </div>
             </div>
             {err('terreno')}
@@ -330,7 +336,8 @@ export default function FormularioPropiedad() {
         <section className={ui.tarjeta}>
           <h2>Responsable</h2>
           {editaTodas ? (
-            <label className={ui.campo} style={{ maxWidth: 360 }}>
+            <div className={ui.grilla}>
+            <label className={ui.campo}>
               <span className={ui.etiqueta}>Usuario responsable</span>
               <select className={ui.input} value={idResponsable} onChange={(e) => setIdResponsable(e.target.value)}>
                 <option value="">Sin asignar</option>
@@ -340,6 +347,7 @@ export default function FormularioPropiedad() {
               </select>
               {errores['idResponsable'] && <span className={ui.errorCampo}>{errores['idResponsable']}</span>}
             </label>
+            </div>
           ) : (
             <p className={ui.ayuda}>{detalle?.responsable ? detalle.responsable.nombre : esEdicion ? 'Sin asignar' : 'Usted quedará como responsable de esta propiedad.'}</p>
           )}

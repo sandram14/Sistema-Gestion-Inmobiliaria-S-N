@@ -44,7 +44,7 @@ export default function SitioInicio() {
             {general && <div className={ui.avisoError} role="alert">{general}</div>}
             <div className={ui.grilla}>
               <ImagenSitio etiqueta="Imagen de fondo" valor={c.imagenPortada} onCambio={(u) => cambiar('imagenPortada', u)} />
-              <div className={ui.campo}>{texto('titulo', 'Título de la portada', 120)}</div>
+              {texto('titulo', 'Título de la portada', 120)}
               {texto('subtitulo', 'Texto introductorio', 300, true)}
             </div>
             {err('imagenPortada')}
