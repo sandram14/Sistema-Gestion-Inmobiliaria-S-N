@@ -486,6 +486,17 @@
 }
 
 /* ── Detalle de propiedad ─────────────────────────────────────────────── */
+/* Orden: título (con el botón de cerrar), fotos, precio y "Detalles" */
+.detailHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 26px 14px;
+}
+
+/* La foto se muestra completa: el espacio que sobra queda blanco como el panel (antes era verde) */
 .detailPhotos {
   position: relative;
   flex-shrink: 0;
@@ -493,6 +504,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--color-blanco);
+}
+
+/* Sobre el blanco, los puntos del carrusel necesitan un tono oscuro para verse */
+.detailPhotos .carouselDot {
+  background: color-mix(in srgb, var(--color-negro) 25%, transparent);
+}
+
+.detailPhotos .carouselDotActive {
   background: var(--color-verde-medio);
 }
 
@@ -500,8 +520,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-acento);
+  color: var(--color-verde-medio);
   opacity: 0.9;
+}
+
+.detailLabel {
+  margin-top: 16px;
+}
+
+.detailLabel + .specGrid {
+  margin-top: 0;
 }
 
 .detailPhotosTag {
@@ -518,16 +546,15 @@
   letter-spacing: 0.08em;
 }
 
+/* En la fila del título, fuera de la foto */
 .detailCloseBtn {
-  position: absolute;
-  top: 14px;
-  right: 14px;
+  flex-shrink: 0;
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--color-negro) 45%, transparent);
-  border: none;
-  color: var(--color-blanco);
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -537,7 +564,7 @@
 }
 
 .detailCloseBtn:hover {
-  background: color-mix(in srgb, var(--color-negro) 68%, transparent);
+  background: var(--color-superficie);
 }
 
 .detailTitle {
@@ -546,7 +573,9 @@
   font-weight: 400;
   color: var(--color-texto);
   letter-spacing: -0.02em;
-  margin: 0 0 8px;
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere; /* títulos largos: cortan y no empujan la X fuera del panel */
 }
 
 .detailPrice {
@@ -642,7 +671,8 @@
   }
   .stageHeader,
   .sidePanelHeader,
-  .sidePanelScroll {
+  .sidePanelScroll,
+  .detailHeader {
     padding-left: 16px;
     padding-right: 16px;
   }

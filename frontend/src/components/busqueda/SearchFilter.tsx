@@ -814,32 +814,35 @@ function DetalleView({
         />
       </div>
 
-      {/* Fotos + especificaciones (deslizable) */}
+      {/* Título, fotos, precio y detalles (deslizable) */}
       <div className={styles.sidePanel}>
+        <div className={styles.detailHeader}>
+          <h3 className={styles.detailTitle}>{props.titulo}</h3>
+          <button className={styles.detailCloseBtn} onClick={onVolver} aria-label="Volver al barrio">
+            <X size={20} aria-hidden="true" />
+          </button>
+        </div>
+
         <div className={styles.detailPhotos}>
           {fotos.length > 0 ? (
             <ImageCarousel images={fotos} />
           ) : (
             <span className={styles.detailPhotosIcon}>{iconoCategoria(props.categoria)}</span>
           )}
-          <button className={styles.detailCloseBtn} onClick={onVolver} aria-label="Volver al barrio">
-            <X size={20} aria-hidden="true" />
-          </button>
           <span className={styles.detailPhotosTag}>
             {operaciones.map((o) => o.operacion.toUpperCase()).join(' · ')}
           </span>
         </div>
 
         <div className={styles.sidePanelScroll}>
-          <span className={styles.sidePanelScrollLabel}>Especificaciones de la propiedad</span>
-
-          <h3 className={styles.detailTitle}>{props.titulo}</h3>
           {operaciones.map((op) => (
             <div key={op.operacion} className={styles.detailPrice}>
               {operaciones.length > 1 ? `${op.operacion}: ` : ''}
               {textoPrecio(op)}
             </div>
           ))}
+
+          <span className={`${styles.sidePanelScrollLabel} ${styles.detailLabel}`}>Detalles</span>
 
           <div className={styles.specGrid}>
             {!esTerreno && (
