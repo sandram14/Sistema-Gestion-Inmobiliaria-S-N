@@ -169,6 +169,9 @@ export default function SearchFilter() {
   // pulsar Buscar (o Enter en el presupuesto). Los clics en el mapa sí se aplican al instante.
   const [filtros, setFiltros] = useState<Filtros>(FILTROS_VACIOS)
   const [borrador, setBorrador] = useState<Filtros>(FILTROS_VACIOS)
+  // Lo aplicado en la última búsqueda (Buscar o un enlace con filtros): la X del detalle vuelve a ese resultado,
+  // con el mapa completo, aunque después se haya entrado a una ciudad o un barrio con clics en el mapa
+  const [filtrosBuscados, setFiltrosBuscados] = useState<Filtros>(FILTROS_VACIOS)
   const [extraBounds, setExtraBounds] = useState<LatLngBounds | null>(null)
   const [propiedadId, setPropiedadId] = useState<string | null>(null)
   const [searchParams] = useSearchParams()
@@ -207,12 +210,14 @@ export default function SearchFilter() {
       return
     }
 
-    patch({
+    const desdeEnlace: Partial<Filtros> = {
       ciudadId: ciudadParam ?? filtros.ciudadId,
       barrioId: barrioParam ? Number(barrioParam) : filtros.barrioId,
       categoria: categoria ?? filtros.categoria,
       tipoOperacion: tipoOperacion ?? filtros.tipoOperacion,
-    })
+    }
+    patch(desdeEnlace)
+    setFiltrosBuscados(conReglas({ ...filtros, ...desdeEnlace }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading])
 
@@ -329,6 +334,12 @@ export default function SearchFilter() {
     }
     setErrorPresupuesto(null)
     const next = conReglas({ ...borrador, presupuestoMin: desde, presupuestoMax: hasta })
+    setFiltrosBuscados(next)
+    aplicarBusqueda(next)
+  }
+
+  /** Aplica unos filtros a la barra y al mapa, y encuadra el mapa en sus resultados (Buscar y la X del detalle). */
+  function aplicarBusqueda(next: Filtros) {
     const sinCambios = JSON.stringify(next) === JSON.stringify(filtros)
     setFiltros(next)
     setBorrador(next)
@@ -367,8 +378,13 @@ export default function SearchFilter() {
     setPropiedadId(props.id)
   }
 
+  /** La X del detalle vuelve directo al resultado de la última búsqueda, con el mapa completo (no a la ficha del barrio). */
   function volverDesdeDetalle() {
-    setPropiedadId(null)
+    const { presupuestoMin, presupuestoMax } = filtrosBuscados
+    setDesdeTexto(presupuestoMin != null ? conPuntosDeMiles(presupuestoMin) : '')
+    setHastaTexto(presupuestoMax != null ? conPuntosDeMiles(presupuestoMax) : '')
+    setErrorPresupuesto(null)
+    aplicarBusqueda(filtrosBuscados)
   }
 
   function volverDesdeBarrio() {
@@ -823,7 +839,7 @@ function DetalleView({
       <div className={styles.mapPane}>
         <div className="pm-breadcrumb">
           <button className="pm-back-btn" onClick={onVolver}>
-            <ChevronLeft size={16} aria-hidden="true" /> Volver al barrio
+            <ChevronLeft size={16} aria-hidden="true" /> Volver a los resultados
           </button>
           <span>{props.direccion}</span>
         </div>
@@ -846,7 +862,7 @@ function DetalleView({
       <div className={styles.sidePanel}>
         <div className={styles.detailHeader}>
           <h3 className={styles.detailTitle}>{props.titulo}</h3>
-          <button className={styles.detailCloseBtn} onClick={onVolver} aria-label="Volver al barrio">
+          <button className={styles.detailCloseBtn} onClick={onVolver} aria-label="Volver a los resultados">
             <X size={20} aria-hidden="true" />
           </button>
         </div>
