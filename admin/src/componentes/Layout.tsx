@@ -36,51 +36,35 @@ export default function Layout() {
           </span>
         </div>
 
+        {/* Una sola lista, sin subtítulos de grupo: cada opción ya nombra su sección.
+            "Nueva propiedad" está en el listado (como "Nuevo usuario" en Usuarios) y en Inicio. */}
         <nav className={ui.menu}>
-          <div className={ui.menuGrupo}>
-            <NavLink to="/" end className={enlace}>
-              <House size={18} aria-hidden="true" /> Inicio
+          <NavLink to="/" end className={enlace}>
+            <House size={18} aria-hidden="true" /> Inicio
+          </NavLink>
+          {puede('PROPIEDADES_VER') && (
+            <NavLink to="/propiedades" className={enlace}>
+              <Building2 size={18} aria-hidden="true" /> Propiedades
             </NavLink>
-          </div>
-          <div className={ui.menuGrupo}>
-            <div className={ui.menuTitulo}>Propiedades</div>
-            {/* "Nueva propiedad" está en el listado (como "Nuevo usuario" en Usuarios) y en Inicio */}
-            {puede('PROPIEDADES_VER') && (
-              <NavLink to="/propiedades" className={enlace}>
-                <Building2 size={18} aria-hidden="true" /> Listado
-              </NavLink>
-            )}
-          </div>
-          {puede('CONTENIDO_EDITAR') && (
-            <div className={ui.menuGrupo}>
-              <div className={ui.menuTitulo}>Sitio web</div>
-              <NavLink to="/sitio" className={enlace}>
-                <Globe size={18} aria-hidden="true" /> Gestión del sitio web
-              </NavLink>
-            </div>
           )}
           {puede('CONSULTAS_VER') && (
-            <div className={ui.menuGrupo}>
-              <div className={ui.menuTitulo}>Clientes</div>
-              <NavLink to="/consultas" className={enlace}>
-                <MessagesSquare size={18} aria-hidden="true" /> Consultas IA
-              </NavLink>
-            </div>
+            <NavLink to="/consultas" className={enlace}>
+              <MessagesSquare size={18} aria-hidden="true" /> Consultas IA
+            </NavLink>
+          )}
+          {puede('CONTENIDO_EDITAR') && (
+            <NavLink to="/sitio" className={enlace}>
+              <Globe size={18} aria-hidden="true" /> Gestión del sitio web
+            </NavLink>
           )}
           {puede('USUARIOS_VER') && (
-            <div className={ui.menuGrupo}>
-              <div className={ui.menuTitulo}>Administración</div>
-              <NavLink to="/usuarios" className={enlace}>
-                <Users size={18} aria-hidden="true" /> Usuarios
-              </NavLink>
-            </div>
-          )}
-          <div className={ui.menuGrupo}>
-            <div className={ui.menuTitulo}>Cuenta</div>
-            <NavLink to="/cuenta" end className={enlace}>
-              <UserRound size={18} aria-hidden="true" /> Mi cuenta
+            <NavLink to="/usuarios" className={enlace}>
+              <Users size={18} aria-hidden="true" /> Usuarios
             </NavLink>
-          </div>
+          )}
+          <NavLink to="/cuenta" end className={enlace}>
+            <UserRound size={18} aria-hidden="true" /> Mi cuenta
+          </NavLink>
         </nav>
 
         <div className={ui.lateralPie}>

@@ -44,21 +44,14 @@
 .marcaTexto strong { font-size: 15px; font-weight: 600; color: var(--acento); }
 .marcaTexto span { font-size: 12px; color: rgba(255, 255, 255, 0.6); }
 
-.menu { flex: 1; overflow-y: auto; padding: 12px 8px; }
-.menuGrupo + .menuGrupo { margin-top: 16px; }
-.menuTitulo {
-  padding: 0 8px 6px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.45);
-}
+/* Una sola lista de secciones, sin subtítulos de grupo, con la misma separación entre todas */
+.menu { flex: 1; overflow-y: auto; padding: 16px 8px; display: flex; flex-direction: column; gap: 4px; }
 .menuItem {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
+  padding: 10px 12px;
+  font-size: 15px;
   border-radius: var(--radio-chico);
   color: rgba(255, 255, 255, 0.82);
   text-decoration: none;
@@ -382,7 +375,9 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
 }
 
 /* ── Inicio: saludo centrado y accesos según el rol (de 2 a 4 fichas) ── */
-.inicio { display: flex; flex-direction: column; align-items: center; padding: 48px 0 24px; text-align: center; }
+/* Centrado en el alto disponible (pantalla menos los márgenes del contenido: 24 px arriba y 48 abajo) */
+.inicio { display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: calc(100vh - 72px); padding: 24px 0; box-sizing: border-box; text-align: center; }
 .inicioSaludo h1 { margin: 0 0 8px; font-size: 26px; font-weight: 600; overflow-wrap: anywhere; }
 .inicioSaludo p { margin: 0 0 32px; color: var(--texto-secundario); font-size: 16px; }
 /* Grilla centrada: 4 fichas en una fila; si no entran (menos de 1240 px de pantalla), 2 por fila (nunca 3 + 1); en el celular, 1 */
@@ -414,7 +409,10 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
 @media (max-width: 1240px) {
   .fichasInicio { grid-template-columns: repeat(var(--columnas-medio, 2), minmax(0, 280px)); }
 }
+@media (max-width: 900px) {
+  .inicio { min-height: calc(100vh - 110px); } /* también la barra superior (54 px) y márgenes de 16 y 40 px */
+}
 @media (max-width: 640px) {
-  .inicio { padding-top: 24px; }
+  .inicio { padding-top: 8px; }
   .fichasInicio { grid-template-columns: minmax(0, 1fr); }
 }

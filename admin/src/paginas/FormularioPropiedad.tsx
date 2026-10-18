@@ -7,7 +7,7 @@ import type { Catalogos, PropiedadDetalle, PropiedadRequest, TipoPropiedad, Usua
 import EditorOperaciones, { type FilaOperacion } from '../componentes/EditorOperaciones'
 import GaleriaImagenes from '../componentes/GaleriaImagenes'
 import SelectorUbicacion, { type ValorUbicacion } from '../componentes/SelectorUbicacion'
-import { textoFecha } from '../componentes/formato'
+import { nombreDelTipo, textoFecha } from '../componentes/formato'
 import ui from '../ui.module.css'
 
 /** Valores del formulario como texto (lo que escribe el usuario), convertidos al guardar. */
@@ -232,7 +232,7 @@ export default function FormularioPropiedad() {
             <label className={ui.campo}>
               <span className={ui.etiqueta}>Tipo</span>
               <select className={clase('tipo')} value={form.tipo} onChange={(e) => cambiarTipo(e.target.value as TipoPropiedad)}>
-                {catalogos.tipos.map((t) => <option key={t} value={t}>{t}</option>)}
+                {catalogos.tipos.map((t) => <option key={t} value={t}>{nombreDelTipo(t)}</option>)}
               </select>
               {err('tipo')}
             </label>
@@ -260,7 +260,7 @@ export default function FormularioPropiedad() {
 
         {form.tipo === 'Casa' ? (
           <section className={ui.tarjeta}>
-            <h2>Datos de la casa</h2>
+            <h2>Datos de la vivienda</h2>
             <div className={ui.grilla}>
               <label className={ui.campo}>
                 <span className={ui.etiqueta}>Habitaciones</span>

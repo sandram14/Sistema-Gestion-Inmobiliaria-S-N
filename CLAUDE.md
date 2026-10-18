@@ -100,7 +100,7 @@ docker compose -f docker/docker-compose.yml exec db psql -U sn_app -d sn_inmobil
 
 | Sección | Funciones |
 |---|---|
-| Estructura | Menú lateral (en celular se abre con un botón), carga diferida, tema claro, oscuro o según el sistema (por navegador), botón Volver |
+| Estructura | Menú lateral (en celular se abre con un botón), carga diferida, tema claro, oscuro o según el sistema (por navegador), botón Volver. Desde el 18/10 el menú es **una sola lista sin subtítulos**: Inicio, Propiedades, Consultas IA, Gestión del sitio web, Usuarios y Mi cuenta (cada una según el permiso). El tipo "Casa" se **muestra** como "Vivienda" (`nombreDelTipo` en `formato.ts`; el valor enviado sigue siendo "Casa") |
 | **Inicio** (18/10) | `/admin/` y destino fijo al iniciar sesión (ya no se vuelve a la última pantalla). Saludo según la hora con el nombre ("Buenas tardes, Sandra", sin "Bienvenido/a") y una frase al azar. Fichas centradas según el rol (siempre 4 hoy): **clientes por contactar** (cuenta `conteos.pendientes`, destacada en ámbar si hay alguno, lleva a la lista filtrada `?estado=PENDIENTE`; al vendedor le cuenta solo los suyos), Nueva propiedad, y luego Nuevo usuario y Sitio web (administrador), Sitio web y Consultas IA (gerente), Consultas IA y Listado (vendedor). "Nueva propiedad" salió del menú: está en el listado. Archivo `paginas/Inicio.tsx` |
 | Propiedades | Listado, alta y edición con mapa (ubicación por PostGIS), operaciones según el tipo, fotos, baja lógica y responsable (el vendedor solo edita las suyas) |
 | Gestión del sitio web | Pestañas Inicio (portada y ofertas destacadas), Servicios, Nosotros y Contacto. Se publica al guardar |

@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { api, ApiError } from '../api/cliente'
 import type { PropiedadResumen } from '../api/tipos'
-import { textoFecha, textoOperacion } from '../componentes/formato'
+import { nombreDelTipo, textoFecha, textoOperacion } from '../componentes/formato'
 import { useSesion } from '../auth/Sesion'
 import ui from '../ui.module.css'
 
@@ -81,7 +81,7 @@ export default function ListadoPropiedades() {
         </select>
         <select className={ui.input} value={tipo} onChange={(e) => setTipo(e.target.value)} aria-label="Tipo">
           <option value="">Todos los tipos</option>
-          <option value="Casa">Casa</option>
+          <option value="Casa">{nombreDelTipo('Casa')}</option>
           <option value="Terreno">Terreno</option>
         </select>
       </div>

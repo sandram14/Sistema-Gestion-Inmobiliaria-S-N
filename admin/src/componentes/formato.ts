@@ -16,6 +16,14 @@ export function textoFecha(iso: string | null | undefined): string {
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleString('es-PY', { dateStyle: 'short', timeStyle: 'short' })
 }
 
+/**
+ * Nombre del tipo de propiedad para mostrar: en la base el tipo se llama "Casa", pero el panel
+ * (como el sitio) lo muestra como "Vivienda". El valor que se envía sigue siendo "Casa".
+ */
+export function nombreDelTipo(tipo: string): string {
+  return tipo === 'Casa' ? 'Vivienda' : tipo
+}
+
 /** Nombre del rol para mostrar ("ADMIN" -> "Administrador"). */
 export function nombreDelRol(rol: string | null | undefined): string {
   const nombres: Record<string, string> = { ADMIN: 'Administrador', GERENTE: 'Gerente', VENDEDOR: 'Vendedor' }

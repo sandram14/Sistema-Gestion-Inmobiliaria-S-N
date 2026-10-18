@@ -29,7 +29,7 @@ interface Ficha { clave: string; permiso: Permiso; destino: string; icono: React
  */
 const ACCESOS: Ficha[] = [
   { clave: 'propiedad', permiso: 'PROPIEDADES_EDITAR', destino: '/propiedades/nueva', icono: <Plus size={22} aria-hidden="true" />,
-    titulo: 'Nueva propiedad', texto: 'Cargar una casa o un terreno.' },
+    titulo: 'Nueva propiedad', texto: 'Cargar una vivienda o un terreno.' },
   { clave: 'usuario', permiso: 'USUARIOS_GESTIONAR', destino: '/usuarios/nuevo', icono: <UserPlus size={22} aria-hidden="true" />,
     titulo: 'Nuevo usuario', texto: 'Dar acceso al panel a una persona del equipo.' },
   { clave: 'sitio', permiso: 'CONTENIDO_EDITAR', destino: '/sitio', icono: <Globe size={22} aria-hidden="true" />,
