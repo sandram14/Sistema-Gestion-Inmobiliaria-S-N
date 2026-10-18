@@ -233,7 +233,10 @@
   flex-direction: column;
   background: var(--color-blanco);
   border-radius: 12px;
-  overflow: hidden;
+  /* Todo el panel (encabezado, foto y detalles) es una sola zona que se desplaza: la rueda del mouse
+     funciona en cualquier parte del panel, no solo sobre los datos. Al llegar al final sigue la página. */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .sidePanelHeader {
@@ -276,9 +279,7 @@
 }
 
 .sidePanelScroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+  flex: none; /* ya no se desplaza por separado: lo hace el panel completo */
   padding: 18px 26px 30px;
 }
 
@@ -501,6 +502,11 @@
   justify-content: space-between;
   gap: 12px;
   padding: 18px 26px 14px;
+  /* Al bajar por el detalle, el título y la X quedan visibles arriba (por encima de la foto y sus flechas) */
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--color-blanco);
 }
 
 /* La foto se muestra completa: el espacio que sobra queda blanco como el panel (antes era verde) */
@@ -669,9 +675,12 @@
     margin-top: 16px; /* mapa y panel, uno debajo del otro, separados por el margen verde */
   }
 
-  .sidePanelScroll {
-    flex: none;
-    overflow-y: visible;
+  .sidePanel {
+    overflow: hidden; /* en el celular el panel crece con su contenido y se baja con la página */
+  }
+
+  .detailHeader {
+    position: static; /* pegado arriba quedaría detrás del menú fijo */
   }
 
   .filterBar {
