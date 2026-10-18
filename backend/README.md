@@ -108,8 +108,8 @@ también como variable de entorno.
 | Método | Ruta | Respuesta |
 |--------|------|-----------|
 | GET | `/api/health` | Estado del backend, la base y Hibernate (200 ok / 503 degradado) |
-| GET | `/api/ciudades?departamentoId=` | FeatureCollection de puntos; `departamentoId` opcional (caché 1 h) |
-| GET | `/api/barrios?ciudadId=` | FeatureCollection de polígonos; `ciudadId` opcional (caché 1 h) |
+| GET | `/api/ciudades?departamentoId=&conPropiedades=` | FeatureCollection de puntos; `departamentoId` opcional; `conPropiedades=true`: solo ciudades con al menos una propiedad Disponible (lo usa el sitio) (caché 1 h) |
+| GET | `/api/barrios?ciudadId=&conPropiedades=` | FeatureCollection de polígonos **simplificados para dibujar** (unos 3 m; la validación usa el exacto); `ciudadId` opcional; `conPropiedades=true`: solo barrios de ciudades con propiedades (caché 1 h) |
 | GET | `/api/propiedades` | FeatureCollection de propiedades Disponibles |
 | GET | `/api/propiedades/{codigo}` | Feature de una propiedad (`prop-001`) |
 | GET | `/api/catalogos` | Tipos, estados, operaciones, monedas, reglas y árbol de ubicaciones |

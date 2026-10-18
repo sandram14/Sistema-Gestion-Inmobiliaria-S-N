@@ -41,12 +41,12 @@ class UbicacionAdminServletTest {
         }
 
         @Override
-        public List<CiudadGeo> listarCiudades(Integer departamentoId) {
+        public List<CiudadGeo> listarCiudades(Integer departamentoId, boolean soloConPropiedades) {
             return List.of();
         }
 
         @Override
-        public List<BarrioGeo> listarBarrios(Integer ciudadId) {
+        public List<BarrioGeo> listarBarrios(Integer ciudadId, boolean soloConPropiedades) {
             return List.of();
         }
 

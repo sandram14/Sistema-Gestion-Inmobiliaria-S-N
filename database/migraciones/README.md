@@ -166,3 +166,33 @@ falla al leer un `'USD'` porque el enum `Moneda` ya no lo tiene. El backend 0.20
 Ensayo (base de prueba creada desde `schema/` y `seed/` anteriores): migrar, repetir (se detiene con "ya está
 aplicada"), revertir, revertir otra vez (se detiene) y volver a migrar; la base migrada es igual a una creada desde
 los `schema/` y `seed/` nuevos, y las pruebas de `database/pruebas/verificar.sql` pasan.
+
+## 010 — Barrios y localidades oficiales de todo Alto Paraná (INE 2022)
+
+Antes había 4 ciudades y 12 barrios (los de las propiedades de ejemplo): una propiedad fuera de ellos no se podía
+cargar ("El punto marcado está fuera de las zonas registradas"). La 010 carga la **cartografía censal 2022 del INE**
+de Alto Paraná: **22 ciudades (distritos) y 714 barrios y localidades**, urbanos y rurales, con su código oficial
+`CLAVE_BAR`. Los datos están en `database/datos/ine2022_alto_parana.sql` (10 MB), generado por
+`database/datos/generar_ine2022.mjs` desde la descarga del INE; lo usan esta migración y `seed/02_ubicacion.sql`.
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `010_verificar_barrios_ine.sql` | Ciudades y barrios actuales, qué agregaría por ciudad (urbanos y rurales) y si cada propiedad queda dentro de su barrio con el contorno oficial, con su distancia al borde | No (ROLLBACK) |
+| `010_barrios_ine.sql` | Agrega las 18 ciudades y los 702 barrios que faltan, pasa los 12 de antes al contorno exacto del INE (estaban con 5 decimales: se mueven menos de 1 m) y quita la regla de nombre único por ciudad (el INE repite nombres entre la parte urbana y la rural de un distrito) | Sí, todo o nada |
+| `010_revertir_barrios_ine.sql` | Vuelve a 4 ciudades y 12 barrios y restaura la regla de nombre único. **Se detiene** si alguna propiedad ya está en un barrio agregado. Los 12 barrios quedan con el contorno del INE: para volver exactamente al estado previo, restaurar el respaldo | Sí, todo o nada |
+
+Se detiene sin modificar nada si: los datos del INE no son los esperados; ya está aplicada; alguna ciudad o barrio
+actual no coincide con el INE (código, nombre o distrito); o alguna propiedad quedaría fuera de su barrio con el
+contorno oficial. Después comprueba que queden 22 ciudades y 714 barrios válidos, que las ciudades y barrios de
+antes conserven id, nombre, ciudad y centro, y que ninguna propiedad cambie ni quede fuera de su barrio.
+
+**Orden al desplegar:** respaldo (`pg_dump`) → `010_verificar` (guardar la salida) → `010_barrios_ine` →
+backend 0.23.0 y sitio. El backend 0.22.0 también funciona con la base migrada, pero enviaría los 714 contornos
+completos (unos 6 MB) al sitio y al panel; el 0.23.0 los simplifica para dibujar y el sitio pide solo las
+ciudades con propiedades. El 0.23.0 también funciona con una base sin migrar.
+
+Ensayo (base de prueba creada desde `schema/` y `seed/` anteriores): migrar, repetir (se detiene con "ya está
+aplicada"), revertir, revertir otra vez (se detiene) y volver a migrar; con una propiedad movida a Yguazú, la
+reversión se negó. La base migrada es **idéntica** a una creada desde los `schema/` y `seed/` nuevos (estructura,
+ciudades, barrios y propiedades) y las 20 pruebas de `database/pruebas/verificar.sql` pasan. En los datos del INE no
+hay contornos inválidos ni barrios superpuestos.

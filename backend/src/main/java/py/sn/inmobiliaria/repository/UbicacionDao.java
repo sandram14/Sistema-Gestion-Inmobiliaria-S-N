@@ -14,21 +14,34 @@ public interface UbicacionDao {
     /**
      * Ciudades con su punto central y cantidad de barrios, ordenadas por nombre.
      *
-     * @param departamentoId departamento a filtrar; null devuelve todas
+     * @param departamentoId      departamento a filtrar; null devuelve todas
+     * @param soloConPropiedades  true: solo las ciudades con al menos una propiedad Disponible (para el sitio)
      */
-    List<CiudadGeo> listarCiudades(Integer departamentoId) throws SQLException;
+    List<CiudadGeo> listarCiudades(Integer departamentoId, boolean soloConPropiedades) throws SQLException;
+
+    /** Ciudades de un departamento (null: todas), tengan o no propiedades. */
+    default List<CiudadGeo> listarCiudades(Integer departamentoId) throws SQLException {
+        return listarCiudades(departamentoId, false);
+    }
 
     /** Todas las ciudades. */
     default List<CiudadGeo> listarCiudades() throws SQLException {
-        return listarCiudades(null);
+        return listarCiudades(null, false);
     }
 
     /**
-     * Barrios con su polígono en GeoJSON.
+     * Barrios con su polígono en GeoJSON, simplificado para dibujar (ver {@code TOLERANCIA_DIBUJO} en la
+     * implementación). La regla "¿el punto está dentro del barrio?" usa siempre el polígono exacto.
      *
-     * @param ciudadId ciudad a filtrar; null devuelve todos
+     * @param ciudadId            ciudad a filtrar; null devuelve todos
+     * @param soloConPropiedades  true: solo los barrios de ciudades con al menos una propiedad Disponible
      */
-    List<BarrioGeo> listarBarrios(Integer ciudadId) throws SQLException;
+    List<BarrioGeo> listarBarrios(Integer ciudadId, boolean soloConPropiedades) throws SQLException;
+
+    /** Barrios de una ciudad (null: todos), tenga o no propiedades. */
+    default List<BarrioGeo> listarBarrios(Integer ciudadId) throws SQLException {
+        return listarBarrios(ciudadId, false);
+    }
 
     /**
      * ¿El punto está dentro del barrio? (ST_Covers: incluye el borde).

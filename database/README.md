@@ -8,7 +8,8 @@ que se crea el contenedor (ver `docker/README.md`).
 | Carpeta | Contenido |
 |---|---|
 | `schema/` | `01_extensiones` · `02_tablas` · `03_indices` · `04_triggers` |
-| `seed/` | `01_catalogos` · `02_ubicacion` (desde los GeoJSON del frontend) · `03_propiedades_demo` (28 propiedades) · `04_admin_dev.sh` (administrador inicial) · `05_contenido_sitio` (contenido editable del sitio) |
+| `seed/` | `01_catalogos` · `02_ubicacion` (22 ciudades y 714 barrios de Alto Paraná, cartografía INE 2022, desde `datos/ine2022_alto_parana.sql`) · `03_propiedades_demo` (28 propiedades) · `04_admin_dev.sh` (administrador inicial) · `05_contenido_sitio` (contenido editable del sitio) |
+| `datos/` | `ine2022_alto_parana.sql` (generado) y `generar_ine2022.mjs`, que lo genera desde la descarga del INE. Lo usan `seed/02_ubicacion` y la migración 010 |
 | `pruebas/` | `verificar.sql`: comprueba los datos y que cada regla rechace lo inválido (todo con ROLLBACK) |
 
 ## Modelo entidad-relación

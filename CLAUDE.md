@@ -89,6 +89,7 @@ Además se actualizan `schema/` y `seed/`, para que una base nueva nazca igual q
 | 007 | Origen `CONTACTO` para clientes potenciales |
 | 008 | Solo datos: asteriscos en tres títulos del sitio (un único script, documentado así) |
 | **009** | **Solo guaraníes**: USD → PYG con el mismo número, `CHECK (moneda = 'PYG')` y `DEFAULT 'PYG'`. Sin commitear. **Aplicada en la base de desarrollo el 16/10** (sección 8.1) |
+| **010** | **Barrios oficiales del INE 2022 de todo Alto Paraná**: 22 ciudades y 714 barrios y localidades (urbanos y rurales), los 12 de antes pasan al contorno exacto (< 1 m), sin nombre único por ciudad. Datos en `database/datos/ine2022_alto_parana.sql` (10 MB, generado por `generar_ine2022.mjs`), compartido con `seed/02_ubicacion.sql`. Ensayada (18/10); **pendiente de aplicar** en la base de Sandra |
 
 Se aplican con:
 
@@ -153,6 +154,8 @@ La idea inicial era elegir guaraníes o dólares. **Sandra decidió eliminar el 
 | Tipografía del sitio (17/10) | **Montserrat** en títulos e **Inter** en el texto (antes Fraunces, con remates, y Outfit). Las palabras destacadas con asteriscos van en **verde, sin cursiva**. El panel no cambió |
 | Página de búsqueda (17/10) | Margen verde de **40 px** (PC) y **20 px** (≤ 900 px) alrededor de la barra, el mapa y el panel, con bordes redondeados, para poder bajar la página con la rueda (sobre el mapa la rueda hace zoom). Fichas más compactas |
 | Servicios dentro de Nosotros (18/10, backend 0.22.0) | La página Servicios se unió a Nosotros: **historia → valores → servicios → invitación a buscar**. `/servicios` redirige a `/nosotros#servicios`; "Servicios" salió del menú y del pie. Se retiraron "Lo que tenemos para vos" (con su carrusel) y "¿Por qué elegir S&N?" (con su imagen). En el panel la pestaña Servicios desapareció (`/sitio/servicios` redirige a Nosotros): Nosotros edita las dos secciones (`NOSOTROS` y `SERVICIOS`) con **un solo botón**, que avisa qué parte se publicó si una falla, y guarda vacíos `razones`, `bloqueTitulo` y `bloqueTexto`. El backend acepta 0 razones |
+| Zonas del mapa (18/10, migración 010 y backend 0.23.0) | Se cargan **todos los barrios y localidades de Alto Paraná del INE 2022** (opción A; dibujar zonas desde el panel queda para más adelante si hace falta). Nombres repetidos permitidos. `/api/barrios` devuelve contornos **simplificados para dibujar** (`TOLERANCIA_DIBUJO` = 0.00003°, unos 3 m; la validación usa el exacto). El sitio pide `conPropiedades=true`: mapa y filtro solo con **ciudades con propiedades Disponibles** y todos sus barrios; el panel pide todo. Otro departamento: descargar su GeoJSON del INE y repetir el procedimiento |
+| La X del detalle (18/10) | Vuelve al **resultado de la última búsqueda** (filtros al pulsar Buscar, con el mapa completo), no a la ficha del barrio. "Volver al barrio" pasó a "Volver a los resultados" |
 | Tipos de propiedad | Solo **Casa y Terreno**. En el sitio la casa se muestra como **"Vivienda"** (sin "depto"). El chat ya no pregunta "casa o departamento": de "Comprar/Alquilar una propiedad" pasa directo a la ciudad |
 
 Las decisiones D2, D3, D6 y D8 de la propuesta original (moneda inicial, selector de moneda, etc.) quedaron **sin efecto** al no haber dos monedas.

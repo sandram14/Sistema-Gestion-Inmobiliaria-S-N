@@ -41,6 +41,19 @@ public final class Parametros {
         }
     }
 
+    /** "true" o "false" (sin distinguir mayúsculas); ausente o vacío → false. */
+    public static boolean booleano(HttpServletRequest req, String nombre, Errores errores) {
+        String valor = texto(req, nombre);
+        if (valor == null || valor.equalsIgnoreCase("false")) {
+            return false;
+        }
+        if (valor.equalsIgnoreCase("true")) {
+            return true;
+        }
+        errores.agregar(nombre, "Debe ser true o false");
+        return false;
+    }
+
     public static BigDecimal decimal(HttpServletRequest req, String nombre, Errores errores) {
         String valor = texto(req, nombre);
         if (valor == null) {

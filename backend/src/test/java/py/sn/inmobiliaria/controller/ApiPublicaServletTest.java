@@ -53,10 +53,14 @@ class ApiPublicaServletTest {
         }
     }
 
+    /** Lo último que pidió el servlet al DAO: ¿solo ciudades/barrios con propiedades? (null: no se llamó). */
+    static Boolean ultimoConPropiedades;
+
     /** DAO geográfico de prueba con una ciudad y un barrio. */
     static final UbicacionDao UBICACION_FALSA = new UbicacionDao() {
         @Override
-        public List<CiudadGeo> listarCiudades(Integer departamentoId) {
+        public List<CiudadGeo> listarCiudades(Integer departamentoId, boolean soloConPropiedades) {
+            ultimoConPropiedades = soloConPropiedades;
             if (departamentoId != null && departamentoId != 1) {
                 return List.of();
             }
@@ -64,7 +68,8 @@ class ApiPublicaServletTest {
         }
 
         @Override
-        public List<BarrioGeo> listarBarrios(Integer ciudadId) {
+        public List<BarrioGeo> listarBarrios(Integer ciudadId, boolean soloConPropiedades) {
+            ultimoConPropiedades = soloConPropiedades;
             return List.of(new BarrioGeo(10011013, "AREA 1", 1, "CIUDAD DEL ESTE", "ALTO PARANÁ",
                     "{\"type\":\"MultiPolygon\",\"coordinates\":[]}"));
         }
@@ -247,6 +252,27 @@ class ApiPublicaServletTest {
 
         assertEquals(404, r.estado);
         assertEquals("no-store", r.cabecera("Cache-Control")); // los errores nunca se guardan en caché
+    }
+
+    @Test
+    void conPropiedadesLlegaAlDaoEnCiudadesYBarrios() throws Exception {
+        // El mapa del sitio pide solo ciudades y barrios con propiedades; sin el parámetro (panel), todas
+        get(ubicacion, "/api/ciudades", null, Map.of("conPropiedades", "true"));
+        assertEquals(Boolean.TRUE, ultimoConPropiedades);
+        get(ubicacion, "/api/ciudades", null, Map.of());
+        assertEquals(Boolean.FALSE, ultimoConPropiedades);
+        get(ubicacion, "/api/barrios", null, Map.of("conPropiedades", "TRUE"));
+        assertEquals(Boolean.TRUE, ultimoConPropiedades);
+        get(ubicacion, "/api/barrios", null, Map.of("conPropiedades", "false"));
+        assertEquals(Boolean.FALSE, ultimoConPropiedades);
+    }
+
+    @Test
+    void conPropiedadesInvalidoDa400ConElCampo() throws Exception {
+        var r = get(ubicacion, "/api/barrios", null, Map.of("conPropiedades", "si"));
+
+        assertEquals(400, r.estado);
+        assertEquals("Debe ser true o false", r.json().get("error").get("campos").get("conPropiedades").asText());
     }
 
     // ---- /api/catalogos ----

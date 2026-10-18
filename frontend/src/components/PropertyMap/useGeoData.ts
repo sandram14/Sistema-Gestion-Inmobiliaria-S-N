@@ -37,9 +37,11 @@ export function useGeoData(apiBaseUrl: string = "/api"): GeoDataState {
 
     async function load() {
       try {
+        // Solo las ciudades con propiedades publicadas y sus barrios (con los 714 barrios del INE cargados,
+        // todo Alto Paraná pesaría mucho más y llenaría el mapa de ciudades vacías)
         const [ciudadesFC, barriosFC, propiedadesFC] = await Promise.all([
-          apiGet<GeoFeatureCollection<CiudadFeature>>(`${apiBaseUrl}/ciudades`),
-          apiGet<GeoFeatureCollection<BarrioFeature>>(`${apiBaseUrl}/barrios`),
+          apiGet<GeoFeatureCollection<CiudadFeature>>(`${apiBaseUrl}/ciudades?conPropiedades=true`),
+          apiGet<GeoFeatureCollection<BarrioFeature>>(`${apiBaseUrl}/barrios?conPropiedades=true`),
           apiGet<GeoFeatureCollection<PropiedadFeature>>(`${apiBaseUrl}/propiedades`),
         ]);
         if (!cancelled) {

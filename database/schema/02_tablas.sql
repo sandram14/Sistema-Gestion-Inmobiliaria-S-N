@@ -57,8 +57,9 @@ CREATE TABLE barrio (
     id_barrio  integer      PRIMARY KEY,              -- CLAVE_BAR oficial, no autogenerada
     nombre     varchar(100) NOT NULL,
     id_ciudad  integer      NOT NULL REFERENCES ciudad (id_ciudad),
-    geom       geometry(MultiPolygon, 4326) NOT NULL, -- polígono del barrio
-    CONSTRAINT uq_barrio_nombre UNIQUE (id_ciudad, nombre),
+    geom       geometry(MultiPolygon, 4326) NOT NULL, -- polígono del barrio (cartografía INE 2022)
+    -- Sin nombre único por ciudad (migración 010): el INE tiene barrios urbanos y localidades rurales
+    -- con el mismo nombre en un distrito; se distinguen por su código (id_barrio) y su ubicación
     CONSTRAINT ck_barrio_geom_valida CHECK (ST_IsValid(geom))
 );
 

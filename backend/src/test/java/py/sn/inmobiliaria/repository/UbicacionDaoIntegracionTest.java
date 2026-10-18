@@ -108,6 +108,47 @@ class UbicacionDaoIntegracionTest {
         assertTrue(barrios.stream().anyMatch(b -> b.id() == z.idBarrio()));
     }
 
+    /** Ciudades con al menos una propiedad Disponible, según la base (la misma regla que usa el sitio). */
+    private static final String CIUDADES_CON_DISPONIBLES = """
+            SELECT count(DISTINCT b.id_ciudad) FROM propiedad p
+              JOIN estado_propiedad e ON e.id_estado = p.id_estado
+              JOIN barrio b ON b.id_barrio = p.id_barrio
+             WHERE e.nombre = 'Disponible'""";
+
+    @Test
+    void soloConPropiedadesDevuelveLasCiudadesConAlgunaDisponibleYSusBarrios() throws Exception {
+        List<CiudadGeo> conPropiedades = dao.listarCiudades(null, true);
+
+        assertEquals(contar(CIUDADES_CON_DISPONIBLES), conPropiedades.size());
+        assertTrue(conPropiedades.size() <= dao.listarCiudades().size());
+        for (CiudadGeo c : conPropiedades) {
+            assertTrue(contar("""
+                    SELECT count(*) FROM propiedad p JOIN estado_propiedad e ON e.id_estado = p.id_estado
+                      JOIN barrio b ON b.id_barrio = p.id_barrio WHERE e.nombre = 'Disponible' AND b.id_ciudad = ?""", c.id()) > 0,
+                    c.nombre());
+            // La cantidad de barrios es la de toda la ciudad, no solo los que tienen propiedades
+            assertEquals(contar("SELECT count(*) FROM barrio WHERE id_ciudad = ?", c.id()), c.totalBarrios(), c.nombre());
+        }
+        // Barrios: todos los de esas ciudades (no solo los barrios con propiedades)
+        var ids = conPropiedades.stream().map(CiudadGeo::id).toList();
+        List<BarrioGeo> barrios = dao.listarBarrios(null, true);
+        assertTrue(barrios.stream().allMatch(b -> ids.contains(b.idCiudad())));
+        assertEquals(ids.stream().mapToLong(id -> contar("SELECT count(*) FROM barrio WHERE id_ciudad = ?", id)).sum(), barrios.size());
+    }
+
+    @Test
+    void elPoligonoParaDibujarEstaSimplificadoYSigueSiendoValido() throws Exception {
+        long puntosExactos = contar("SELECT coalesce(sum(ST_NPoints(geom)), 0) FROM barrio");
+        long puntosDibujo = 0;
+        for (BarrioGeo b : dao.listarBarrios(null)) {
+            String geo = b.geometriaGeoJson();
+            puntosDibujo += contar("SELECT ST_NPoints(ST_GeomFromGeoJSON(?))", geo);
+            // PostGIS lo considera válido (no se cruza consigo mismo)
+            assertEquals(1, contar("SELECT CASE WHEN ST_IsValid(ST_GeomFromGeoJSON(?)) THEN 1 ELSE 0 END", geo), b.nombre());
+        }
+        assertTrue(puntosDibujo <= puntosExactos, "el dibujo no puede tener más puntos que el polígono exacto");
+    }
+
     @Test
     void devuelveLaJerarquiaCompletaSinGeometrias() throws Exception {
         List<FilaUbicacion> filas = dao.listarJerarquia();

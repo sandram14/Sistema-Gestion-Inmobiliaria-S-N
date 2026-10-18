@@ -28,17 +28,38 @@ public class JdbcUbicacionDao implements UbicacionDao {
               JOIN departamento d ON d.id_departamento = c.id_departamento
               LEFT JOIN barrio b  ON b.id_ciudad = c.id_ciudad
              WHERE (CAST(? AS integer) IS NULL OR d.id_departamento = CAST(? AS integer))
+               AND (NOT CAST(? AS boolean) OR %s)
              GROUP BY c.id_ciudad, c.nombre, c.codigo_distrito, d.id_departamento, d.nombre, c.centro
              ORDER BY c.nombre
-            """;
+            """.formatted(JdbcUbicacionDao.CIUDAD_CON_PROPIEDADES);
+
+    /** La ciudad {@code c} tiene al menos una propiedad Disponible (el sitio solo muestra esas ciudades). */
+    private static final String CIUDAD_CON_PROPIEDADES = """
+            EXISTS (SELECT 1
+                      FROM propiedad p
+                      JOIN estado_propiedad e ON e.id_estado = p.id_estado
+                      JOIN barrio bp          ON bp.id_barrio = p.id_barrio
+                     WHERE e.nombre = ? AND bp.id_ciudad = c.id_ciudad)""";
+
+    /**
+     * Tolerancia de simplificación para DIBUJAR los barrios (grados; 0.00003 ≈ 3 m): con los 714 barrios del
+     * INE el GeoJSON pasa de unos 6 MB a 2,4 MB (0,3 MB las 4 ciudades). ST_SimplifyPreserveTopology evita
+     * que un contorno se cruce consigo mismo al simplificarlo; ST_Multi lo devuelve siempre como MultiPolygon
+     * (al simplificar, un barrio de una sola parte puede salir como Polygon). La validación de ubicaciones (trigger y
+     * {@link #barrioQueContiene}) usa siempre el polígono exacto de la base.
+     */
+    static final double TOLERANCIA_DIBUJO = 0.00003;
 
     private static final String SQL_BARRIOS = """
             SELECT b.id_barrio, b.nombre, c.id_ciudad, c.nombre AS ciudad, d.nombre AS departamento,
-                   ST_AsGeoJSON(b.geom, 6) AS geojson
+                   ST_AsGeoJSON(ST_Multi(ST_SimplifyPreserveTopology(b.geom, ?)), 6) AS geojson
               FROM barrio b
               JOIN ciudad c       ON c.id_ciudad = b.id_ciudad
               JOIN departamento d ON d.id_departamento = c.id_departamento
-            """;
+             WHERE (CAST(? AS integer) IS NULL OR b.id_ciudad = CAST(? AS integer))
+               AND (NOT CAST(? AS boolean) OR %s)
+             ORDER BY c.nombre, b.nombre
+            """.formatted(CIUDAD_CON_PROPIEDADES);
 
     /** Punto en WGS84 a partir de (longitud, latitud): el mismo que usa el trigger de la base. */
     private static final String PUNTO = "ST_SetSRID(ST_MakePoint(?, ?), 4326)";
@@ -70,12 +91,14 @@ public class JdbcUbicacionDao implements UbicacionDao {
     }
 
     @Override
-    public List<CiudadGeo> listarCiudades(Integer departamentoId) throws SQLException {
+    public List<CiudadGeo> listarCiudades(Integer departamentoId, boolean soloConPropiedades) throws SQLException {
         try (Connection con = dataSource.getConnection();
              PreparedStatement ps = con.prepareStatement(SQL_CIUDADES)) {
             // El mismo parámetro dos veces: "sin filtro" (NULL) o "solo este departamento"
             ps.setObject(1, departamentoId, java.sql.Types.INTEGER);
             ps.setObject(2, departamentoId, java.sql.Types.INTEGER);
+            ps.setBoolean(3, soloConPropiedades);
+            ps.setString(4, py.sn.inmobiliaria.model.EstadoPropiedad.DISPONIBLE);
             try (ResultSet rs = ps.executeQuery()) {
                 List<CiudadGeo> ciudades = new ArrayList<>();
                 while (rs.next()) {
@@ -95,15 +118,15 @@ public class JdbcUbicacionDao implements UbicacionDao {
     }
 
     @Override
-    public List<BarrioGeo> listarBarrios(Integer ciudadId) throws SQLException {
-        String sql = SQL_BARRIOS
-                + (ciudadId != null ? " WHERE b.id_ciudad = ?" : "")
-                + " ORDER BY c.nombre, b.nombre";
+    public List<BarrioGeo> listarBarrios(Integer ciudadId, boolean soloConPropiedades) throws SQLException {
         try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            if (ciudadId != null) {
-                ps.setInt(1, ciudadId);
-            }
+             PreparedStatement ps = con.prepareStatement(SQL_BARRIOS)) {
+            ps.setDouble(1, TOLERANCIA_DIBUJO);
+            // El mismo parámetro dos veces: "sin filtro" (NULL) o "solo esta ciudad"
+            ps.setObject(2, ciudadId, java.sql.Types.INTEGER);
+            ps.setObject(3, ciudadId, java.sql.Types.INTEGER);
+            ps.setBoolean(4, soloConPropiedades);
+            ps.setString(5, py.sn.inmobiliaria.model.EstadoPropiedad.DISPONIBLE);
             try (ResultSet rs = ps.executeQuery()) {
                 List<BarrioGeo> barrios = new ArrayList<>();
                 while (rs.next()) {
