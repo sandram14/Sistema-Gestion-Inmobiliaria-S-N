@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Building2, Globe, LogOut, Menu, MessagesSquare, Plus, UserRound, Users, X } from 'lucide-react'
+import { Building2, Globe, House, LogOut, Menu, MessagesSquare, UserRound, Users, X } from 'lucide-react'
 import { useSesion } from '../auth/Sesion'
 import { nombreDelRol } from './formato'
 import ui from '../ui.module.css'
@@ -38,15 +38,16 @@ export default function Layout() {
 
         <nav className={ui.menu}>
           <div className={ui.menuGrupo}>
+            <NavLink to="/" end className={enlace}>
+              <House size={18} aria-hidden="true" /> Inicio
+            </NavLink>
+          </div>
+          <div className={ui.menuGrupo}>
             <div className={ui.menuTitulo}>Propiedades</div>
+            {/* "Nueva propiedad" está en el listado (como "Nuevo usuario" en Usuarios) y en Inicio */}
             {puede('PROPIEDADES_VER') && (
-              <NavLink to="/propiedades" end className={enlace}>
+              <NavLink to="/propiedades" className={enlace}>
                 <Building2 size={18} aria-hidden="true" /> Listado
-              </NavLink>
-            )}
-            {puede('PROPIEDADES_EDITAR') && (
-              <NavLink to="/propiedades/nueva" className={enlace}>
-                <Plus size={18} aria-hidden="true" /> Nueva propiedad
               </NavLink>
             )}
           </div>

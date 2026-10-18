@@ -380,3 +380,41 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
   .datos { grid-template-columns: 1fr; }
   .datos dt { border-bottom: none; padding-bottom: 0; }
 }
+
+/* ── Inicio: saludo centrado y accesos según el rol (de 2 a 4 fichas) ── */
+.inicio { display: flex; flex-direction: column; align-items: center; padding: 48px 0 24px; text-align: center; }
+.inicioSaludo h1 { margin: 0 0 8px; font-size: 26px; font-weight: 600; overflow-wrap: anywhere; }
+.inicioSaludo p { margin: 0 0 32px; color: var(--texto-secundario); font-size: 16px; }
+/* Grilla centrada: 4 fichas en una fila; si no entran (menos de 1240 px de pantalla), 2 por fila (nunca 3 + 1); en el celular, 1 */
+.fichasInicio { display: grid; grid-template-columns: repeat(var(--columnas, 4), minmax(0, 220px)); justify-content: center; gap: 16px; width: 100%; }
+.fichaInicio {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 18px 18px 20px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  color: var(--texto);
+  text-decoration: none;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.fichaInicio:hover { border-color: var(--verde-medio); }
+.fichaInicio strong { font-size: 15px; font-weight: 600; color: var(--verde-texto); }
+.fichaInicio span { font-size: 13px; color: var(--texto-secundario); line-height: 1.45; }
+.fichaInicio .fichaInicioIcono { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; margin-bottom: 4px;
+  border-radius: var(--radio); background: var(--acento-suave); color: var(--verde-texto); }
+/* Clientes esperando contacto: la ficha se destaca para que se atienda */
+.fichaInicioAviso { border-color: var(--ambar-borde); background: var(--ambar-suave); }
+.fichaInicioAviso:hover { border-color: var(--ambar-texto); }
+.fichaInicio .fichaInicioNumero { font-size: 28px; font-weight: 600; line-height: 1.1; color: var(--ambar-texto); }
+@media (max-width: 1240px) {
+  .fichasInicio { grid-template-columns: repeat(var(--columnas-medio, 2), minmax(0, 280px)); }
+}
+@media (max-width: 640px) {
+  .inicio { padding-top: 24px; }
+  .fichasInicio { grid-template-columns: minmax(0, 1fr); }
+}

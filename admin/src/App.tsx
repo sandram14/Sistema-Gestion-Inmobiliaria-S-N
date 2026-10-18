@@ -6,6 +6,7 @@ import Login from './paginas/Login'
 
 // Cada pantalla se descarga recién cuando se abre (carga diferida): el archivo inicial del panel
 // queda chico aunque se agreguen secciones. Mientras carga, Layout muestra "Cargando…".
+const Inicio = lazy(() => import('./paginas/Inicio'))
 const ListadoPropiedades = lazy(() => import('./paginas/ListadoPropiedades'))
 const FormularioPropiedad = lazy(() => import('./paginas/FormularioPropiedad'))
 const MiCuenta = lazy(() => import('./paginas/MiCuenta'))
@@ -30,7 +31,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route element={<RutaProtegida />}>
         <Route element={<Layout />}>
-          <Route path="/" element={<Navigate to="/propiedades" replace />} />
+          <Route path="/" element={<Inicio />} />
           <Route path="/propiedades" element={<ListadoPropiedades />} />
           <Route path="/propiedades/nueva" element={<FormularioConClave />} />
           <Route path="/propiedades/:id" element={<FormularioConClave />} />

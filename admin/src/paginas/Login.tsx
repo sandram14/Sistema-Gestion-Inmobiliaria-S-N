@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/cliente'
 import { useSesion } from '../auth/Sesion'
 import ui from '../ui.module.css'
@@ -7,7 +7,9 @@ import ui from '../ui.module.css'
 export default function Login() {
   const { usuario, cargando, expirada, iniciar } = useSesion()
   const navegar = useNavigate()
-  const desde = (useLocation().state as { desde?: string } | null)?.desde ?? '/propiedades'
+  // Al ingresar siempre se llega a Inicio (no a la última pantalla). Con contraseña temporal,
+  // RutaProtegida lleva primero a cambiarla.
+  const desde = '/'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { api } from '../api/cliente'
 import type { PaginaClientes } from '../api/tipos'
@@ -17,7 +17,10 @@ export default function ClientesPotenciales() {
   const [datos, setDatos] = useState<PaginaClientes | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [texto, setTexto] = useState('')
-  const [estado, setEstado] = useState('')
+  // Desde la ficha de Inicio se llega ya filtrado: /consultas/clientes?estado=PENDIENTE
+  const [parametros] = useSearchParams()
+  const estadoInicial = parametros.get('estado') ?? ''
+  const [estado, setEstado] = useState(['PENDIENTE', 'CONTACTADO', 'DESCARTADO'].includes(estadoInicial) ? estadoInicial : '')
   const [origen, setOrigen] = useState('')
   const [pagina, setPagina] = useState(1)
 
