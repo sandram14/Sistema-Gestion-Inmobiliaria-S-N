@@ -20,7 +20,6 @@ const ClientesPotenciales = lazy(() => import('./paginas/ClientesPotenciales'))
 const DetalleClientePotencial = lazy(() => import('./paginas/DetalleClientePotencial'))
 const NuevoClientePotencial = lazy(() => import('./paginas/NuevoClientePotencial'))
 const SitioInicio = lazy(() => import('./paginas/sitio/SitioInicio'))
-const SitioServicios = lazy(() => import('./paginas/sitio/SitioServicios'))
 const SitioNosotros = lazy(() => import('./paginas/sitio/SitioNosotros'))
 const SitioContacto = lazy(() => import('./paginas/sitio/SitioContacto'))
 
@@ -47,7 +46,8 @@ export default function App() {
           <Route path="/sitio" element={<Navigate to="/sitio/inicio" replace />} />
           <Route path="/sitio/inicio" element={<SitioInicio />} />
           <Route path="/sitio/ofertas" element={<Navigate to="/sitio/inicio" replace />} />
-          <Route path="/sitio/servicios" element={<SitioServicios />} />
+          {/* Los servicios se editan ahora en la pestaña Nosotros */}
+          <Route path="/sitio/servicios" element={<Navigate to="/sitio/nosotros" replace />} />
           <Route path="/sitio/nosotros" element={<SitioNosotros />} />
           <Route path="/sitio/contacto" element={<SitioContacto />} />
           <Route path="/usuarios" element={<Usuarios />} />

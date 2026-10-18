@@ -5,7 +5,6 @@ import styles from './Navbar.module.css'
 const LINKS = [
   { label: 'Inicio', path: '/' },
   { label: 'Buscar', path: '/buscar' },
-  { label: 'Servicios', path: '/servicios' },
   { label: 'Nosotros', path: '/nosotros' },
   { label: 'Contacto', path: '/contacto' },
 ]

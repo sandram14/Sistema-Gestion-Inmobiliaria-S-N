@@ -145,10 +145,13 @@ La idea inicial era elegir guaraníes o dólares. **Sandra decidió eliminar el 
 | D12 · presupuesto en el chat | **Ni botones ni campo de monto**: el bot pregunta el presupuesto y el cliente lo **escribe con sus palabras** en el cuadro normal del chat ("entre 300 y 500 millones"). Queda **tal cual** en el resumen y en el WhatsApp. Botón **"Omitir"** → "No indicado". Máximo 150 caracteres. No se envía a Gemini |
 | D12b · presupuesto en preguntas libres | Regla 9 de las instrucciones del asistente: si el cliente indica un presupuesto, Gemini menciona solo las propiedades que entran en ese rango ("millones" = 1.000.000) y, si no hay, lo dice |
 | D13 · historial de consultas | Las consultas guardadas que mencionan USD **no se tocan** (es un registro) |
-| D1 · cuándo se aplica el presupuesto | "Desde" y "Hasta" se aplican **al pulsar Buscar, Enter o salir del campo**, no en cada tecla. Los demás filtros siguen aplicándose al instante |
+| D1 · cuándo se aplican los filtros | **Reemplazada el 17/10:** toda la barra (departamento, ciudad, barrio, tipo, operación, "Desde" y "Hasta") se aplica **solo al pulsar Buscar** (o Enter en el presupuesto); salir del campo no busca. Las listas de la barra se ajustan entre sí sin buscar. Los clics en el mapa (ciudad, barrio, propiedad, "Volver") se aplican al instante y actualizan la barra. En el código: estado `borrador` (barra) y `filtros` (aplicado) en `SearchFilter.tsx` |
 | D4 · formato al escribir | **Puntos de miles automáticos** y teclado numérico en el celular |
 | D5 · aclaración junto al filtro | **No** se pone texto aclaratorio |
 | D7 · presupuesto en la URL | **No** por ahora |
+| Tipografía del sitio (17/10) | **Montserrat** en títulos e **Inter** en el texto (antes Fraunces, con remates, y Outfit). Las palabras destacadas con asteriscos van en **verde, sin cursiva**. El panel no cambió |
+| Página de búsqueda (17/10) | Margen verde de **40 px** (PC) y **20 px** (≤ 900 px) alrededor de la barra, el mapa y el panel, con bordes redondeados, para poder bajar la página con la rueda (sobre el mapa la rueda hace zoom). Fichas más compactas |
+| Servicios dentro de Nosotros (18/10, backend 0.22.0) | La página Servicios se unió a Nosotros: **historia → valores → servicios → invitación a buscar**. `/servicios` redirige a `/nosotros#servicios`; "Servicios" salió del menú y del pie. Se retiraron "Lo que tenemos para vos" (con su carrusel) y "¿Por qué elegir S&N?" (con su imagen). En el panel la pestaña Servicios desapareció (`/sitio/servicios` redirige a Nosotros): Nosotros edita las dos secciones (`NOSOTROS` y `SERVICIOS`) con **un solo botón**, que avisa qué parte se publicó si una falla, y guarda vacíos `razones`, `bloqueTitulo` y `bloqueTexto`. El backend acepta 0 razones |
 | Tipos de propiedad | Solo **Casa y Terreno**. En el sitio la casa se muestra como **"Vivienda"** (sin "depto"). El chat ya no pregunta "casa o departamento": de "Comprar/Alquilar una propiedad" pasa directo a la ciudad |
 
 Las decisiones D2, D3, D6 y D8 de la propuesta original (moneda inicial, selector de moneda, etc.) quedaron **sin efecto** al no haber dos monedas.
@@ -237,7 +240,7 @@ Están en la copia local, **sin commitear** (se decide en la Fase 17). Su `READM
 |---|---|
 | `admin/verificacion/` | 67 pruebas del panel (Vitest + jsdom + Testing Library) con backend simulado |
 | `frontend/verificacion/` | 66 pruebas del sitio, incluido `w4.test.tsx` |
-| `herramientas/` | `simulador.mjs` (backend simulado, puerto 8080), `capturar.py` (revisión visual con Playwright), JSON de contenido normal, largo y provisional, y `fuentes/` (Outfit y Fraunces instaladas con npm) |
+| `herramientas/` | `simulador.mjs` (backend simulado, puerto 8080), `capturar.py` (revisión visual con Playwright), JSON de contenido normal, largo y provisional, y `fuentes/` (Montserrat e Inter instaladas con npm; `capturar.py` las sirve en lugar de Google Fonts y su lista debe coincidir con `frontend/src/index.css`) |
 
 ### 10.1 Pruebas de interfaz
 

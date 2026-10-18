@@ -5,11 +5,11 @@
    bajar la página con la rueda (sobre el mapa, la rueda hace zoom). */
 .page {
   height: 100vh;
-  padding: calc(72px + 16px) 24px 24px;
+  padding: calc(72px + 24px) 40px 40px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   background: var(--color-verde-oscuro);
   overflow: hidden;
 }
@@ -182,7 +182,7 @@
 }
 
 .stageTitleAccent {
-  font-style: italic;
+  font-style: normal; /* destacado: verde, sin cursiva */
   color: var(--color-acento);
 }
 
@@ -215,7 +215,7 @@
   min-height: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
 }
 
 .mapPane {
@@ -640,8 +640,8 @@
     height: auto;
     min-height: 100vh;
     overflow: visible;
-    padding: calc(72px + 12px) 12px 12px;
-    gap: 12px;
+    padding: calc(72px + 20px) 20px 20px;
+    gap: 16px;
   }
 
   .stage {
@@ -666,7 +666,7 @@
 
   .sidePanel {
     height: auto;
-    margin-top: 12px; /* mapa y panel, uno debajo del otro, separados por el margen verde */
+    margin-top: 16px; /* mapa y panel, uno debajo del otro, separados por el margen verde */
   }
 
   .sidePanelScroll {
@@ -688,7 +688,7 @@
 
 @media (max-width: 640px) {
   .page {
-    padding-top: calc(64px + 12px);
+    padding-top: calc(64px + 20px);
   }
   .filterBar {
     gap: 10px;

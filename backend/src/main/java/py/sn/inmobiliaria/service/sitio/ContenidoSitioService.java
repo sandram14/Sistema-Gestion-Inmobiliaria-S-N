@@ -117,7 +117,8 @@ public class ContenidoSitioService {
         }
         Nosotros n = new Nosotros(opcional(x.introduccion(), "introduccion", 600, e), opcional(x.historiaTitulo(), "historiaTitulo", 120, e),
                 opcional(x.historiaTexto(), "historiaTexto", 1500, e), imagen(x.imagen(), "imagen", e), cifrasN,
-                items(x.valores(), "valores", 1, 6, e), items(x.razones(), "razones", 1, 6, e));
+                // "Por qué elegirnos" se retiró del sitio (18/10): las razones son opcionales y el panel las guarda vacías
+                items(x.valores(), "valores", 1, 6, e), items(x.razones(), "razones", 0, 6, e));
         e.lanzarSiHay();
         return n;
     }

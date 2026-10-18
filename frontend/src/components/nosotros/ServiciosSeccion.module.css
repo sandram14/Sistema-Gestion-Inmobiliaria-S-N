@@ -1,0 +1,102 @@
+/* ── Servicios (dentro de Nosotros) ───────────────────────────────────── */
+/* Mismo fondo blanco que el resto de las secciones del medio de la página. */
+.servicios {
+  background: var(--color-blanco);
+  padding: 0 2rem 100px;
+  scroll-margin-top: 88px; /* al llegar desde /servicios, el título no queda debajo del menú fijo */
+}
+
+.contenido {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.h2 {
+  font-family: var(--fuente-titulos);
+  font-size: var(--titulo-seccion);
+  font-weight: 300;
+  color: var(--color-texto);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0 0 12px;
+  overflow-wrap: anywhere;
+}
+
+.h2Accent {
+  font-style: normal; /* destacado: verde, sin cursiva */
+  color: var(--color-verde-medio);
+}
+
+.body {
+  color: var(--color-gris);
+  font-size: var(--texto-base);
+  font-family: var(--fuente-texto);
+  line-height: 1.8;
+  margin: 0 0 28px;
+  max-width: 760px;
+  overflow-wrap: anywhere;
+}
+
+.serviciosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.servicioCard {
+  position: relative;
+  min-height: 220px;
+  min-width: 0;
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.servicioCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Oscuro detrás de todo el texto (título incluido), para que se lea sobre cualquier foto */
+  background: linear-gradient(to top, color-mix(in srgb, var(--color-verde-oscuro) 94%, transparent) 0%, color-mix(in srgb, var(--color-verde-oscuro) 82%, transparent) 55%, color-mix(in srgb, var(--color-verde-oscuro) 20%, transparent) 100%);
+}
+
+.servicioCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sombra-2);
+}
+
+.servicioTitle,
+.servicioText {
+  position: relative;
+  z-index: 1;
+  overflow-wrap: anywhere;
+}
+
+.servicioTitle {
+  color: var(--color-acento);
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.servicioText {
+  font-size: var(--texto-md);
+  font-family: var(--fuente-texto);
+  color: var(--color-blanco);
+  line-height: 1.7;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .servicios {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}

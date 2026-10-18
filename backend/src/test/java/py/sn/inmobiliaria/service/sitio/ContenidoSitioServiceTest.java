@@ -80,6 +80,19 @@ class ContenidoSitioServiceTest {
     }
 
     @Test
+    void nosotros_SinRazonesEsValidoPorqueElBloqueSeRetiroDelSitio() {
+        var item = new ContenidoSitioService.Item("Confianza", "Información real.");
+        var ok = ContenidoSitioService.validarNosotros(new ContenidoSitioService.Nosotros("", "", "", null, List.of(), List.of(item), List.of()));
+        assertTrue(ok.razones().isEmpty());
+        assertEquals(1, ok.valores().size());
+        var nulas = ContenidoSitioService.validarNosotros(new ContenidoSitioService.Nosotros("", "", "", null, null, List.of(item), null));
+        assertTrue(nulas.razones().isEmpty());
+        // Los valores siguen siendo obligatorios (al menos 1)
+        assertTrue(errores(() -> ContenidoSitioService.validarNosotros(new ContenidoSitioService.Nosotros("", "", "", null, null, List.of(), List.of())))
+                .containsKey("valores"));
+    }
+
+    @Test
     void destacadas_SinRepetidasYComoMaximo12() {
         assertTrue(errores(() -> servicio.guardarDestacadas(List.of(1L, 2L, 1L))).get("ids").contains("repetidas"));
         assertTrue(errores(() -> servicio.guardarDestacadas(LongStream.rangeClosed(1, 13).boxed().toList())).get("ids").contains("12"));

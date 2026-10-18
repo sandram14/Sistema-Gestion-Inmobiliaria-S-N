@@ -35,7 +35,7 @@ export default function SitioInicio() {
   return (
     <>
       <PestanasSitio />
-      <p className={ui.ayuda}>Para destacar palabras de un título en verde e itálica, escribilas entre asteriscos. Ejemplo: <code>comenzará *tu próxima historia.*</code></p>
+      <p className={ui.ayuda}>Para destacar palabras de un título en verde, escribilas entre asteriscos. Ejemplo: <code>comenzará *tu próxima historia.*</code></p>
       {!c ? (!general && <p className={ui.cargando}>Cargando…</p>) : (
         <form onSubmit={guardar} noValidate>
           <section className={ui.tarjeta}>

@@ -46,7 +46,7 @@
 }
 
 .h2Accent {
-  font-style: italic;
+  font-style: normal; /* destacado: verde, sin cursiva */
   color: var(--color-verde-medio);
 }
 
@@ -113,26 +113,22 @@
   margin-top: 4px;
 }
 
-/* ── 3. Nuestros valores + Por qué elegirnos (combinado) ─────────────── */
-/* Mismo fondo que "Quiénes somos" y el CTA, para que las secciones del
+/* ── 3. Nuestros valores (a todo el ancho) ─────────────────────────────── */
+/* Mismo fondo que "Quiénes somos", los servicios y el CTA, para que las secciones del
    medio fluyan sin cortes de color (solo el intro y el footer son distintos). */
-.combinado {
+.valores {
   background: var(--color-blanco);
-  padding: 100px 2rem;
+  padding: 100px 2rem 72px;
 }
 
-.combinadoGrid {
+.valoresContenido {
   max-width: 1160px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 72px;
-  align-items: start;
 }
 
 .valoresGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
 }
 
@@ -178,54 +174,6 @@
   margin: 0;
 }
 
-.razonesStack {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-.razonRow {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  text-align: left;
-}
-
-.razonIcon {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: var(--color-fondo);
-  color: var(--color-verde-medio);
-}
-
-.razonTitle {
-  font-family: var(--fuente-titulos);
-  font-size: var(--texto-lg);
-  font-weight: 400;
-  color: var(--color-verde);
-  margin: 0 0 6px;
-}
-
-.razonText {
-  font-size: var(--texto-sm);
-  font-family: var(--fuente-texto);
-  color: var(--color-gris);
-  line-height: 1.65;
-  margin: 0;
-}
-.razonesImg {
-  width: 400px;
-  height: 250px;
-  border-radius: 20px;
-  margin: 32px auto 0;
-  border: 1px solid var(--color-superficie);
-
-}
 
 /* ── 4. CTA ───────────────────────────────────────────────────────────── */
 .cta {
@@ -267,10 +215,6 @@
     grid-template-columns: 1fr;
     gap: 32px;
   }
-  .combinadoGrid {
-    grid-template-columns: 1fr;
-    gap: 56px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -278,7 +222,7 @@
     padding: 108px 1.25rem 44px;
   }
   .quienes,
-  .combinado,
+  .valores,
   .cta {
     padding-left: 1.25rem;
     padding-right: 1.25rem;
@@ -290,6 +234,6 @@
 
 /* Las columnas de las grillas no se ensanchan por su contenido (textos largos cargados desde el panel) */
 .quienesGrid > *,
-.combinadoGrid > * {
+.valoresGrid > * {
   min-width: 0;
 }

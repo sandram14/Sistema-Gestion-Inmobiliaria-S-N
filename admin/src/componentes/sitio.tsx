@@ -13,7 +13,6 @@ export function PestanasSitio() {
       <div className={ui.tituloPagina}><div className={ui.tituloConVolver}><BotonVolver alternativa="/propiedades" /><h1>Gestión del sitio web</h1></div></div>
       <nav className={ui.pestanas} aria-label="Secciones del sitio web">
         <NavLink to="/sitio/inicio" className={clase}>Inicio</NavLink>
-        <NavLink to="/sitio/servicios" className={clase}>Servicios</NavLink>
         <NavLink to="/sitio/nosotros" className={clase}>Nosotros</NavLink>
         <NavLink to="/sitio/contacto" className={clase}>Contacto</NavLink>
       </nav>

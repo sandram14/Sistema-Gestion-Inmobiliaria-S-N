@@ -39,7 +39,7 @@
 }
 
 .titleAccent {
-  font-style: italic;
+  font-style: normal; /* destacado: verde, sin cursiva */
   color: var(--color-verde-medio);
 }
 

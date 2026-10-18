@@ -1,7 +1,6 @@
 import { Navigate, Routes, Route } from 'react-router-dom'
 import SearchFilter from './components/busqueda/SearchFilter'
 import NosotrosPage from './pages/NosotrosPage'
-import { ServiciosPage } from './pages/ServiciosPage'
 import ContactoPage from './pages/ContactoPage'
 import Footer from './components/layout/Footer'
 import Navbar from './components/layout/Navbar'
@@ -34,7 +33,8 @@ export default function App() {
           {/* Ruta para la búsqueda y filtros  */}
           <Route path="/buscar" element={<SearchFilter />} />
           <Route path="/nosotros" element={<NosotrosPage />} />
-        <Route path="/servicios" element={<ServiciosPage />} />
+        {/* Servicios ahora es una parte de Nosotros: los enlaces viejos llevan directo a ella */}
+        <Route path="/servicios" element={<Navigate to="/nosotros#servicios" replace />} />
         <Route path="/contacto" element={<ContactoPage/>} />
         <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

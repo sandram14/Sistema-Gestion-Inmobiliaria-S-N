@@ -1,16 +1,25 @@
-import { ArrowRight, Handshake, HeartHandshake, Home, Lightbulb, MapPinned, MessageCircle, Search, type LucideIcon } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { ArrowRight, Handshake, HeartHandshake, Lightbulb, Search, type LucideIcon } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { destacar } from '../comun/destacar'
 import { useContenidoSitio } from '../../services/contenidoSitio'
+import ServiciosSeccion from './ServiciosSeccion'
 import styles from './Nosotros.module.css'
 
-// Íconos asignados por posición: desde el panel se pueden cargar entre 1 y 6 valores y razones
+// Íconos asignados por posición: desde el panel se pueden cargar entre 1 y 6 valores
 const ICONOS_VALORES: LucideIcon[] = [Handshake, Search, HeartHandshake, Lightbulb]
-const ICONOS_RAZONES: LucideIcon[] = [Home, MapPinned, MessageCircle]
 
 export default function Nosotros() {
   const navigate = useNavigate()
-  const n = useContenidoSitio().contenido.nosotros
+  const { hash } = useLocation()
+  const { contenido } = useContenidoSitio()
+  const n = contenido.nosotros
+
+  // Desde /servicios (o un enlace a /nosotros#servicios) se baja directo a los servicios,
+  // también cuando el contenido del panel llega después y cambia la altura de la página
+  useEffect(() => {
+    if (hash === '#servicios') document.getElementById('servicios')?.scrollIntoView()
+  }, [hash, contenido])
 
   return (
     <>
@@ -42,52 +51,31 @@ export default function Nosotros() {
         </div>
       </section>
 
-      {/* 3. Nuestros valores + Por qué elegirnos (combinado, lado a lado) */}
-      <section className={styles.combinado}>
-        <div className={styles.combinadoGrid}>
-          <div>
-            <h2 className={styles.h2}>
-              Lo que nos <em className={styles.h2Accent}>guía todos los días.</em>
-            </h2>
-            <div className={styles.valoresGrid}>
-              {n.valores.map((v, k) => {
-                const Icono = ICONOS_VALORES[k % ICONOS_VALORES.length]
-                return (
-                  <div key={k} className={styles.valorCard}>
-                    <span className={styles.valorIcon}><Icono size={24} aria-hidden="true" /></span>
-                    <h3 className={styles.valorTitle}>{v.titulo}</h3>
-                    <p className={styles.valorText}>{v.texto}</p>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          <div>
-            <h2 className={styles.h2}>
-              ¿Por qué elegir <em className={styles.h2Accent}>S&N?</em>
-            </h2>
-            <div className={styles.razonesStack}>
-              {n.razones.map((r, k) => {
-                const Icono = ICONOS_RAZONES[k % ICONOS_RAZONES.length]
-                return (
-                  <div key={k} className={styles.razonRow}>
-                    <span className={styles.razonIcon}><Icono size={24} aria-hidden="true" /></span>
-                    <div>
-                      <h3 className={styles.razonTitle}>{r.titulo}</h3>
-                      <p className={styles.razonText}>{r.texto}</p>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            <img src="/images/stock/nosotros_page2.jpg" alt="" className={styles.razonesImg} />
-
+      {/* 3. Nuestros valores (a todo el ancho; "Por qué elegirnos" se retiró) */}
+      <section className={styles.valores}>
+        <div className={styles.valoresContenido}>
+          <h2 className={styles.h2}>
+            Lo que nos <em className={styles.h2Accent}>guía todos los días.</em>
+          </h2>
+          <div className={styles.valoresGrid}>
+            {n.valores.map((v, k) => {
+              const Icono = ICONOS_VALORES[k % ICONOS_VALORES.length]
+              return (
+                <div key={k} className={styles.valorCard}>
+                  <span className={styles.valorIcon}><Icono size={24} aria-hidden="true" /></span>
+                  <h3 className={styles.valorTitle}>{v.titulo}</h3>
+                  <p className={styles.valorText}>{v.texto}</p>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
 
-      {/* 4. CTA */}
+      {/* 4. Servicios (antes era la página /servicios, que ahora redirige aquí) */}
+      <ServiciosSeccion />
+
+      {/* 5. CTA */}
       <section className={styles.cta}>
         <h2 className={styles.ctaTitle}>¿Buscás tu próxima propiedad?</h2>
         <button className={styles.ctaBtn} onClick={() => navigate('/buscar')}>
