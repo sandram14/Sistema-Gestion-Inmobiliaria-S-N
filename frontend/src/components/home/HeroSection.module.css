@@ -53,7 +53,7 @@
   overflow-wrap: break-word; /* títulos largos del panel nunca se salen de la pantalla */
   font-family: var(--fuente-titulos);
   font-size: var(--titulo-portada);
-  font-weight: 300;
+  font-weight: 700;
   color: var(--color-blanco);
   line-height: 1.06;
   letter-spacing: -0.03em;

@@ -16,7 +16,6 @@ export function PestanasSitio() {
         <NavLink to="/sitio/nosotros" className={clase}>Nosotros</NavLink>
         <NavLink to="/sitio/contacto" className={clase}>Contacto</NavLink>
       </nav>
-      <p className={ui.ayuda}>Los cambios se publican en la web al guardar (pueden tardar hasta un minuto en verse).</p>
     </>
   )
 }

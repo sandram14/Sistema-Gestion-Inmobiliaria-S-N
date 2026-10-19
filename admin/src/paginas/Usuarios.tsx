@@ -36,7 +36,6 @@ export default function Usuarios() {
         <h1>Usuarios</h1>
         {gestiona && <Link to="/usuarios/nuevo" className={ui.boton}><Plus size={16} aria-hidden="true" /> Nuevo usuario</Link>}
       </div>
-      {!gestiona && <p className={ui.ayuda}>Consulta de usuarios. Solo un administrador puede crearlos o modificarlos.</p>}
       {error && <div className={ui.avisoError} role="alert">{error}</div>}
 
       <div className={ui.filtros}>

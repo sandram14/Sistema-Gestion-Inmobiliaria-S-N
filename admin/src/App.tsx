@@ -16,7 +16,6 @@ const FormularioUsuario = lazy(() => import('./paginas/FormularioUsuario'))
 const ConsultasHistorial = lazy(() => import('./paginas/ConsultasHistorial'))
 const ConsultasAnalisis = lazy(() => import('./paginas/ConsultasAnalisis'))
 const DetalleConsulta = lazy(() => import('./paginas/DetalleConsulta'))
-const ConsultasCalidad = lazy(() => import('./paginas/ConsultasCalidad'))
 const ClientesPotenciales = lazy(() => import('./paginas/ClientesPotenciales'))
 const DetalleClientePotencial = lazy(() => import('./paginas/DetalleClientePotencial'))
 const NuevoClientePotencial = lazy(() => import('./paginas/NuevoClientePotencial'))
@@ -39,7 +38,8 @@ export default function App() {
           <Route path="/cuenta/contrasena" element={<CambiarContrasena />} />
           <Route path="/consultas" element={<ConsultasHistorial />} />
           <Route path="/consultas/analisis" element={<ConsultasAnalisis />} />
-          <Route path="/consultas/calidad" element={<ConsultasCalidad />} />
+          {/* "Calidad de respuestas" se retiró: su información ya está en el Historial */}
+          <Route path="/consultas/calidad" element={<Navigate to="/consultas" replace />} />
           <Route path="/consultas/clientes" element={<ClientesPotenciales />} />
           <Route path="/consultas/clientes/nuevo" element={<NuevoClientePotencial />} />
           <Route path="/consultas/clientes/:id" element={<DetalleClientePotencial />} />

@@ -12,7 +12,7 @@
 .title {
   font-family: var(--fuente-titulos);
   font-size: var(--titulo-seccion);
-  font-weight: 400;
+  font-weight: 700;
   color: var(--color-verde);
   margin: 0;
   overflow-wrap: break-word;

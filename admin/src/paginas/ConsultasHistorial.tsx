@@ -4,15 +4,13 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import PestanasConsultas from '../componentes/PestanasConsultas'
 import { api } from '../api/cliente'
 import type { PaginaConsultas } from '../api/tipos'
-import { useSesion } from '../auth/Sesion'
-import { NOTA_REVISION, Resultado, periodo } from '../componentes/consultas'
+import { Resultado, periodo } from '../componentes/consultas'
 import { erroresDe } from '../componentes/errores'
 import { textoFecha } from '../componentes/formato'
 import ui from '../ui.module.css'
 
 /** Historial de consultas del chat IA. El vendedor ve las generales y las de sus propiedades (lo filtra el backend). */
 export default function ConsultasHistorial() {
-  const { puede } = useSesion()
   const [datos, setDatos] = useState<PaginaConsultas | null>(null)
   const [pagina, setPagina] = useState(1)
   const [error, setError] = useState<string | null>(null)
@@ -47,8 +45,6 @@ export default function ConsultasHistorial() {
   return (
     <>
       <PestanasConsultas />
-      {!puede('CONSULTAS_VER_TODAS') && <p className={ui.ayuda}>Se muestran las consultas generales y las relacionadas con sus propiedades.</p>}
-      <p className={ui.ayuda}>{NOTA_REVISION}</p>
       {error && <div className={ui.avisoError} role="alert">{error}</div>}
 
       <div className={ui.filtros}>

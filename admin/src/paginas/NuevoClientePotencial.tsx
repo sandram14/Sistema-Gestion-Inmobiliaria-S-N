@@ -35,7 +35,6 @@ export default function NuevoClientePotencial() {
   return (
     <>
       <div className={ui.tituloPagina}><div className={ui.tituloConVolver}><BotonVolver alternativa="/consultas/clientes" /><h1>Registrar cliente potencial</h1></div></div>
-      <p className={ui.ayuda}>Para personas que contactaron directamente a la inmobiliaria. Registre solo los datos necesarios para el seguimiento.</p>
       {general && <div className={ui.avisoError} role="alert">{general}</div>}
       <form onSubmit={guardar} noValidate>
         <section className={ui.tarjeta}>

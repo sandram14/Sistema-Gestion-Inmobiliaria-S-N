@@ -174,7 +174,7 @@
 .stageTitle {
   font-family: var(--fuente-titulos);
   font-size: var(--titulo-bloque);
-  font-weight: 300;
+  font-weight: 700;
   color: var(--color-blanco);
   line-height: 1.2;
   letter-spacing: -0.02em;
@@ -248,7 +248,7 @@
 .sidePanelTitle {
   font-family: var(--fuente-titulos);
   font-size: var(--texto-2xl);
-  font-weight: 400;
+  font-weight: 700;
   color: var(--color-texto);
   letter-spacing: -0.02em;
   margin: 0 0 6px;
@@ -583,7 +583,7 @@
 .detailTitle {
   font-family: var(--fuente-titulos);
   font-size: var(--texto-2xl);
-  font-weight: 400;
+  font-weight: 700;
   color: var(--color-texto);
   letter-spacing: -0.02em;
   margin: 0;

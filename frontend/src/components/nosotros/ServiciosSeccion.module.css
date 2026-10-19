@@ -14,7 +14,7 @@
 .h2 {
   font-family: var(--fuente-titulos);
   font-size: var(--titulo-seccion);
-  font-weight: 300;
+  font-weight: 700;
   color: var(--color-texto);
   letter-spacing: -0.02em;
   line-height: 1.25;
@@ -82,7 +82,7 @@
   color: var(--color-acento);
   font-family: var(--fuente-titulos);
   font-size: var(--texto-lg);
-  font-weight: 600;
+  font-weight: 700;
   margin: 0 0 8px;
 }
 

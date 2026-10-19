@@ -32,7 +32,7 @@
 .title {
   font-family: var(--fuente-titulos);
   font-size: var(--titulo-seccion);
-  font-weight: 300;
+  font-weight: 700;
   color: var(--color-texto);
   margin: 10px 0 36px;
   letter-spacing: -0.02em;

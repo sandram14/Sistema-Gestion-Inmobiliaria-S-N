@@ -1,7 +1,7 @@
 # S&N Inmobiliaria — Contexto del proyecto (para Claude Code)
 
 > Documento de traspaso. Léelo completo antes de proponer o modificar nada.
-> Estado al **16 de octubre de 2026 (tarde)**. Proyecto de **Sandra**. Lo que resta del proyecto lo trabajan **solo Sandra y Claude**
+> Estado al **18 de octubre de 2026**. Proyecto de **Sandra**. Lo que resta del proyecto lo trabajan **solo Sandra y Claude**
 > (la compañera que colaboraba en `frontend/` ya no participa).
 >
 > Este archivo se llama `CLAUDE.md` y va en la raíz del repositorio: Claude Code lo lee solo al iniciar cada sesión.
@@ -104,8 +104,8 @@ docker compose -f docker/docker-compose.yml exec db psql -U sn_app -d sn_inmobil
 | Estructura | Menú lateral (en celular se abre con un botón), carga diferida, tema claro, oscuro o según el sistema (por navegador), botón Volver. Desde el 18/10 el menú es **una sola lista sin subtítulos**: Inicio, Propiedades, Consultas IA, Gestión del sitio web, Usuarios y Mi cuenta (cada una según el permiso). El tipo "Casa" se **muestra** como "Vivienda" (`nombreDelTipo` en `formato.ts`; el valor enviado sigue siendo "Casa") |
 | **Inicio** (18/10) | `/admin/` y destino fijo al iniciar sesión (ya no se vuelve a la última pantalla). Saludo según la hora con el nombre ("Buenas tardes, Sandra", sin "Bienvenido/a") y una frase al azar. Fichas centradas según el rol (siempre 4 hoy): **clientes por contactar** (cuenta `conteos.pendientes`, destacada en ámbar si hay alguno, lleva a la lista filtrada `?estado=PENDIENTE`; al vendedor le cuenta solo los suyos), Nueva propiedad, y luego Nuevo usuario y Sitio web (administrador), Sitio web y Consultas IA (gerente), Consultas IA y Listado (vendedor). "Nueva propiedad" salió del menú: está en el listado. Archivo `paginas/Inicio.tsx` |
 | Propiedades | Listado, alta y edición con mapa (ubicación por PostGIS), operaciones según el tipo, fotos, baja lógica y responsable (el vendedor solo edita las suyas) |
-| Gestión del sitio web | Pestañas Inicio (portada y ofertas destacadas), Servicios, Nosotros y Contacto. Se publica al guardar |
-| Consultas IA | Pestañas Historial (paginado, revisión interna), Análisis técnico, Calidad de respuestas y Clientes potenciales |
+| Gestión del sitio web | Pestañas Inicio (portada y ofertas destacadas), Nosotros (con los servicios) y Contacto. Se publica al guardar |
+| Consultas IA | Pestañas Historial (paginado, revisión interna), Análisis técnico y Clientes potenciales. **Desde el 18/10** el Análisis técnico muestra solo 7 indicadores: Preguntas recibidas por el asistente y Conversaciones (números), Sin servicio (medidor circular) y Propiedades más consultadas, Zonas más consultadas, Rangos de precios y Temas consultados (inferido) en **gráficos circulares con porcentajes** (las 5 principales y el resto en "Otras"; leyenda con cantidad y %; porcentajes que suman 100). Componentes `Torta`, `Medidor` y `porcentajes` en `componentes/fichas.tsx`; colores `--serie-1…5`, `--serie-otras` y `--pista-grafico` en `global.css` (claro y oscuro). **Calidad de respuestas se retiró** (`/consultas/calidad` lleva al Historial); el backend no cambió y sigue enviando todos los datos |
 | Usuarios | Alta con contraseña temporal (se muestra una vez), edición, rol, activar y desactivar |
 | Mi cuenta | Datos propios, cambio de email (con contraseña) y de contraseña, preferencia de tema |
 
@@ -118,7 +118,7 @@ docker compose -f docker/docker-compose.yml exec db psql -U sn_app -d sn_inmobil
 | Dar de baja y asignar responsable | ✓ | ✓ | — |
 | Gestión del sitio web | ✓ | ✓ | — |
 | Consultas IA: historial | Todas | Todas | Generales y de sus propiedades |
-| Análisis técnico y calidad | ✓ | ✓ | — |
+| Análisis técnico | ✓ | ✓ | — |
 | Clientes potenciales | Todos, y asigna | Todos, y asigna | Solo los suyos (cambia el estado) |
 | Usuarios | Gestiona | Solo consulta | — |
 | Mi cuenta | ✓ | ✓ | ✓ |
@@ -151,7 +151,8 @@ La idea inicial era elegir guaraníes o dólares. **Sandra decidió eliminar el 
 | D4 · formato al escribir | **Puntos de miles automáticos** y teclado numérico en el celular |
 | D5 · aclaración junto al filtro | **No** se pone texto aclaratorio |
 | D7 · presupuesto en la URL | **No** por ahora |
-| Tipografía del sitio (17/10) | **Montserrat** en títulos e **Inter** en el texto (antes Fraunces, con remates, y Outfit). Las palabras destacadas con asteriscos van en **verde, sin cursiva**. El panel no cambió |
+| Tipografía (18/10, reemplaza la del 17/10) | **Roboto** en el sitio y en el panel. Sitio: se carga con los `<link>` de Google Fonts en `frontend/index.html` (ya no hay `@import` en `index.css`); `--fuente-titulos` y `--fuente-texto` son Roboto y los **títulos importantes van en 700** (portada, títulos de página y de sección, ofertas, búsqueda, detalle, Nosotros, Servicios, Contacto). Panel (`global.css`): **títulos en 700** (página 26 px, bloque 19 px), etiquetas, menú, pestañas y botones en **600**, contenido en 400. Las palabras con asteriscos siguen en **verde, sin cursiva**. Antes: Montserrat e Inter (y antes Fraunces y Outfit) |
+| Textos de ayuda del panel (18/10) | Se quitaron los repetidos (aclaración de la revisión interna, alcance del vendedor, subtítulos de Clientes potenciales, Usuarios y Mi cuenta, "Los cambios se publican…", etc.). Se mantienen los que evitan errores: contraseña temporal y sus requisitos, asteriscos, cifras reales, formatos de imagen, instrucción del mapa y avisos de estado |
 | Página de búsqueda (17/10) | Margen verde de **40 px** (PC) y **20 px** (≤ 900 px) alrededor de la barra, el mapa y el panel, con bordes redondeados, para poder bajar la página con la rueda (sobre el mapa la rueda hace zoom). Fichas más compactas |
 | Servicios dentro de Nosotros (18/10, backend 0.22.0) | La página Servicios se unió a Nosotros: **historia → valores → servicios → invitación a buscar**. `/servicios` redirige a `/nosotros#servicios`; "Servicios" salió del menú y del pie. Se retiraron "Lo que tenemos para vos" (con su carrusel) y "¿Por qué elegir S&N?" (con su imagen). En el panel la pestaña Servicios desapareció (`/sitio/servicios` redirige a Nosotros): Nosotros edita las dos secciones (`NOSOTROS` y `SERVICIOS`) con **un solo botón**, que avisa qué parte se publicó si una falla, y guarda vacíos `razones`, `bloqueTitulo` y `bloqueTexto`. El backend acepta 0 razones |
 | Zonas del mapa (18/10, migración 010 y backend 0.23.0) | Se cargan **todos los barrios y localidades de Alto Paraná del INE 2022** (opción A; dibujar zonas desde el panel queda para más adelante si hace falta). Nombres repetidos permitidos. `/api/barrios` devuelve contornos **simplificados para dibujar** (`TOLERANCIA_DIBUJO` = 0.00003°, unos 3 m; la validación usa el exacto). El sitio pide `conPropiedades=true`: mapa y filtro solo con **ciudades con propiedades Disponibles** y todos sus barrios; el panel pide todo. Otro departamento: descargar su GeoJSON del INE y repetir el procedimiento |
@@ -242,9 +243,9 @@ Están en la copia local, **sin commitear** (se decide en la Fase 17). Su `READM
 
 | Carpeta | Contenido |
 |---|---|
-| `admin/verificacion/` | 67 pruebas del panel (Vitest + jsdom + Testing Library) con backend simulado |
-| `frontend/verificacion/` | 66 pruebas del sitio, incluido `w4.test.tsx` |
-| `herramientas/` | `simulador.mjs` (backend simulado, puerto 8080), `capturar.py` (revisión visual con Playwright), JSON de contenido normal, largo y provisional, y `fuentes/` (Montserrat e Inter instaladas con npm; `capturar.py` las sirve en lugar de Google Fonts y su lista debe coincidir con `frontend/src/index.css`) |
+| `admin/verificacion/` | 84 pruebas del panel al 18/10 (Vitest + jsdom + Testing Library) con backend simulado |
+| `frontend/verificacion/` | 75 pruebas del sitio al 18/10, incluidos `w4.test.tsx` y `tipografia.test.tsx` |
+| `herramientas/` | `simulador.mjs` (backend simulado, puerto 8080), `capturar.py` (revisión visual con Playwright), JSON de contenido normal, largo y provisional, y `fuentes/` (fuentes instaladas con npm, hoy se usa **Roboto**; `capturar.py` la sirve en lugar de Google Fonts, para el sitio y el panel, y su lista debe coincidir con `frontend/index.html`) |
 
 ### 10.1 Pruebas de interfaz
 

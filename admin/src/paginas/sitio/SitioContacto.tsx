@@ -48,7 +48,6 @@ export default function SitioContacto() {
               {campo('direccion', 'Dirección', 200, undefined, true)}
               <label className={`${ui.campo} ${ui.campoAncho}`}><span className={ui.etiqueta}>Descripción breve</span>
                 <textarea className={ui.input} rows={2} maxLength={400} value={c.descripcion} onChange={(e) => setC({ ...c, descripcion: e.target.value })} />
-                <span className={ui.ayuda}>Se muestra en el pie de página.</span>
                 {campos.descripcion && <span className={ui.errorCampo}>{campos.descripcion}</span>}</label>
             </div>
           </section>

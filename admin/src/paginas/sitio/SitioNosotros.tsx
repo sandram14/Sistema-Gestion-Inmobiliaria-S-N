@@ -97,7 +97,6 @@ export default function SitioNosotros() {
           </section>
           <section className={ui.tarjeta}>
             <h2>Servicios</h2>
-            <p className={ui.ayuda}>Se muestran en la página Nosotros, debajo de los valores.</p>
             <div className={ui.grilla}>
               {textoServicios('titulo', 'Título de los servicios', 80)}
               {textoServicios('subtitulo', 'Subtítulo', 200)}

@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/cliente'
 import BotonVolver from '../componentes/BotonVolver'
 import type { ConsultaDetalle, PropiedadRef } from '../api/tipos'
-import { NO_REGISTRADO, NOTA_REVISION, Resultado } from '../componentes/consultas'
+import { NO_REGISTRADO, Resultado } from '../componentes/consultas'
 import { erroresDe } from '../componentes/errores'
 import { textoFecha } from '../componentes/formato'
 import ui from '../ui.module.css'
@@ -56,7 +56,6 @@ export default function DetalleConsulta() {
 
       <section className={ui.tarjeta}>
         <h2>Revisión interna</h2>
-        <p className={ui.ayuda} style={{ marginTop: 0 }}>{NOTA_REVISION}</p>
         <dl className={ui.datos}>
           <dt>Estado</dt><dd>{c.estadoRevision === 'REVISADA' ? `Revisada por ${c.revisadaPor ?? 'un usuario eliminado'} el ${textoFecha(c.revisadaEn)}` : 'Sin revisar'}</dd>
         </dl>

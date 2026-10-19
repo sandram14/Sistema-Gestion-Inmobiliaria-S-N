@@ -6,9 +6,6 @@ export const NOMBRE_RESULTADO: Record<ResultadoConsulta, string> = {
   FUERA_DE_AMBITO: 'Fuera del ámbito',
 }
 
-export const NOTA_REVISION =
-  'Revisión interna: indica si alguien del equipo ya leyó la conversación. No significa que el cliente esté esperando una respuesta ni que haya sido atendido por una persona.'
-
 /** Texto honesto para consultas anteriores al registro: no se deduce nada. */
 export const NO_REGISTRADO = 'No registrado (consulta anterior al registro de resultados y recomendaciones)'
 

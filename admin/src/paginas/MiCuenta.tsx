@@ -128,7 +128,6 @@ export default function MiCuenta() {
             {opcionTema('sistema', <Monitor size={16} aria-hidden="true" />, 'Según el sistema')}
           </div>
         </div>
-        <p className={ui.ayuda}>Se aplica de inmediato y se recuerda en este navegador.</p>
       </section>
     </>
   )

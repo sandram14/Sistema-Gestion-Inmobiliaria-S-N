@@ -113,7 +113,6 @@ export default function FormularioUsuario() {
             <label className={ui.campo}><span className={ui.etiqueta}>Teléfono (opcional)</span>
               <input className={ui.input} maxLength={30} value={form.telefono} onChange={(e) => cambiar('telefono', e.target.value)} />{err('telefono')}</label>
           </div>
-          {!esEdicion && <p className={ui.ayuda}>Al crear la cuenta, el sistema genera una contraseña temporal.</p>}
           <div className={ui.acciones}><button type="submit" className={ui.boton}>{esEdicion ? 'Guardar cambios' : 'Crear usuario'}</button></div>
         </section>
       </form>

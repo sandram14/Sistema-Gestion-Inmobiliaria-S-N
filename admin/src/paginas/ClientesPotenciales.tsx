@@ -3,7 +3,6 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { api } from '../api/cliente'
 import type { PaginaClientes } from '../api/tipos'
-import { useSesion } from '../auth/Sesion'
 import PestanasConsultas from '../componentes/PestanasConsultas'
 import { EstadoCli, NOMBRE_ORIGEN } from '../componentes/clientes'
 import { FichaNumero } from '../componentes/fichas'
@@ -13,7 +12,6 @@ import ui from '../ui.module.css'
 
 /** Clientes potenciales. El vendedor ve solo los asignados a él (lo filtra el backend). */
 export default function ClientesPotenciales() {
-  const { puede } = useSesion()
   const [datos, setDatos] = useState<PaginaClientes | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [texto, setTexto] = useState('')
@@ -42,8 +40,7 @@ export default function ClientesPotenciales() {
   return (
     <>
       <PestanasConsultas />
-      <div className={ui.encabezadoSeccion}>
-        <p className={ui.ayuda}>{puede('CLIENTES_VER_TODOS') ? 'Personas que dejaron sus datos para ser contactadas.' : 'Clientes potenciales asignados a usted.'}</p>
+      <div className={`${ui.acciones} ${ui.accionesArriba}`}>
         <Link to="/consultas/clientes/nuevo" className={ui.boton}><Plus size={16} aria-hidden="true" /> Registrar cliente</Link>
       </div>
       {error && <div className={ui.avisoError} role="alert">{error}</div>}
