@@ -33,4 +33,10 @@ public interface UsuarioDao {
     java.util.Map<Integer, Long> propiedadesPorResponsable(EntityManager em);
 
     void guardar(EntityManager em, Usuario usuario);
+
+    /**
+     * Registra una operación en la tabla auditoria (migración 011), en la misma transacción que la operación.
+     * Nunca recibe contraseñas: solo la acción, quién la hizo y a quién afectó.
+     */
+    void registrarAuditoria(EntityManager em, String accion, int idActor, int idUsuarioAfectado);
 }

@@ -105,6 +105,35 @@ class UsuarioServiceTest {
     }
 
     @Test
+    void restablecerLaContrasenaCierraSusSesionesLoAuditaSinLaContrasenaYNoCambiaElRol() {
+        int id = servicio.crear(req("vende@sn.local", "VENDEDOR")).usuario().id();
+        String hashAnterior = dao.usuarios.get(id).getPasswordHash();
+        int versionAnterior = dao.usuarios.get(id).getVersionCredencial();
+
+        var nueva = servicio.restablecerContrasena(id, 7);
+
+        var u = dao.usuarios.get(id);
+        assertEquals(versionAnterior + 1, u.getVersionCredencial());         // sus sesiones abiertas se cierran
+        assertEquals("VENDEDOR", u.getRol().getNombre());                     // el rol no cambia
+        assertEquals("VENDEDOR", nueva.usuario().rol());
+        assertNotEquals(hashAnterior, u.getPasswordHash());
+        assertEquals(java.util.List.of("CONTRASENA_TEMPORAL_RESTABLECIDA 7 " + id), dao.auditoria); // quién, a quién
+        assertFalse(dao.auditoria.get(0).contains(nueva.contrasenaTemporal())); // nunca la contraseña
+        // Dos temporales seguidas son distintas y aleatorias, y cumplen las reglas
+        var otra = servicio.restablecerContrasena(id, 7);
+        assertNotEquals(nueva.contrasenaTemporal(), otra.contrasenaTemporal());
+        assertNull(PoliticaContrasena.problema(otra.contrasenaTemporal()));
+        assertEquals(2, dao.auditoria.size());
+    }
+
+    @Test
+    void noSePuedeRestablecerLaPropiaNiAuditarSiFalla() {
+        assertThrows(ReglaNegocioException.class, () -> servicio.restablecerContrasena(7, 7));
+        assertTrue(dao.auditoria.isEmpty());
+        assertEquals(0, dao.usuarios.get(7).getVersionCredencial());
+    }
+
+    @Test
     void cambiarMiContrasenaExigeLaActualYCumplirLasReglas() {
         var mal = assertThrows(ValidacionException.class,
                 () -> servicio.cambiarMiContrasena(7, new CuentaRequest.CambioContrasena("incorrecta", "NuevaClave123")));

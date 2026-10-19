@@ -229,6 +229,13 @@ class ApiPublicaServletTest {
     }
 
     @Test
+    void conPropiedadesSeGuardaSoloCincoMinutos() throws Exception {
+        assertEquals("public, max-age=300", get(ubicacion, "/api/ciudades", null, Map.of("conPropiedades", "true")).cabecera("Cache-Control"));
+        assertEquals("public, max-age=300", get(ubicacion, "/api/barrios", null, Map.of("conPropiedades", "true")).cabecera("Cache-Control"));
+        assertEquals("public, max-age=3600", get(ubicacion, "/api/barrios", null, Map.of()).cabecera("Cache-Control"));
+    }
+
+    @Test
     void ciudadesPorDepartamento() throws Exception {
         assertEquals(1, get(ubicacion, "/api/ciudades", null, Map.of("departamentoId", "1")).json().get("features").size());
         assertEquals(0, get(ubicacion, "/api/ciudades", null, Map.of("departamentoId", "2")).json().get("features").size());

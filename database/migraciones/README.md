@@ -196,3 +196,28 @@ aplicada"), revertir, revertir otra vez (se detiene) y volver a migrar; con una 
 reversión se negó. La base migrada es **idéntica** a una creada desde los `schema/` y `seed/` nuevos (estructura,
 ciudades, barrios y propiedades) y las 20 pruebas de `database/pruebas/verificar.sql` pasan. En los datos del INE no
 hay contornos inválidos ni barrios superpuestos.
+
+## 011 — Auditoría de accesos y cierre de sesiones al restablecer una contraseña
+
+Cuando el administrador genera una contraseña temporal para otro usuario (por ejemplo, un vendedor que perdió el
+acceso), la 011 permite: **cerrar las sesiones que ese usuario tenía abiertas** y **dejar registro** de quién lo hizo,
+a quién y cuándo. La recuperación por correo ("Olvidé mi contraseña") quedó postergada: no hay tablas para eso.
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `011_verificar_auditoria_y_sesiones.sql` | Si ya existen `usuario.version_credencial` y `auditoria`, y cuántos usuarios hay por rol (activos y con contraseña temporal) | No |
+| `011_auditoria_y_sesiones.sql` | Agrega `usuario.version_credencial` (0 para todos; sube al restablecer la contraseña y la sesión con el número anterior se cierra) y crea la tabla `auditoria` (fecha, acción, quién y a quién; **sin contraseñas ni IP**) con sus índices | Sí, todo o nada |
+| `011_revertir_auditoria_y_sesiones.sql` | Quita la tabla y la columna. **Se detiene** si la auditoría ya tiene registros (es un historial) | Sí, todo o nada |
+
+Se detiene sin modificar nada si ya está aplicada o si falta la 002. Después comprueba que ningún usuario cambió
+(email, contraseña, rol, estado y contraseña temporal) y que todos quedaron con `version_credencial = 0`.
+
+**Orden al desplegar:** respaldo (`pg_dump`) → `011_verificar` (guardar la salida) → `011_auditoria_y_sesiones` →
+backend 0.24.0. El backend 0.24.0 **no funciona con una base sin migrar** (lee `version_credencial` al iniciar
+sesión). El 0.23.0 sí funciona con la base migrada. Al desplegar el 0.24.0 hay que volver a iniciar sesión.
+
+Ensayo (base de prueba creada desde `schema/` anteriores y los `seed/` actuales, que no cambiaron): migrar, repetir
+(se detiene), revertir, revertir otra vez (se detiene), volver a migrar; con un registro en la auditoría, la
+reversión se negó. La base migrada es **idéntica** a una creada desde los `schema/` nuevos (`pg_dump --schema-only`)
+y las 24 pruebas de `database/pruebas/verificar.sql` pasan (4 nuevas: valor inicial 0, no negativo, la auditoría
+acepta su acción y rechaza otras).

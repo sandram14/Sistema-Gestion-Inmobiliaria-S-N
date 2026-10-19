@@ -21,6 +21,8 @@ public record UsuarioSesion(int id, String nombre, String apellido, String email
     public static final String ATRIBUTO = "sn.usuario";
     /** Atributo de la petición con el usuario recién releído de la base. */
     public static final String ATRIBUTO_PETICION = "sn.usuarioActual";
+    /** Atributo de la sesión con la versión de la credencial al iniciar sesión (migración 011). */
+    public static final String ATRIBUTO_VERSION_CREDENCIAL = "sn.versionCredencial";
     public static final String ROL_ADMIN = Permiso.ADMIN;
 
     /** Construye la sesión con los permisos que corresponden al rol. */

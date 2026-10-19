@@ -67,6 +67,15 @@ public class JpaUsuarioDao implements UsuarioDao {
     }
 
     @Override
+    public void registrarAuditoria(EntityManager em, String accion, int idActor, int idUsuarioAfectado) {
+        em.createNativeQuery("INSERT INTO auditoria (accion, id_actor, id_usuario_afectado) VALUES (?1, ?2, ?3)")
+                .setParameter(1, accion)
+                .setParameter(2, idActor)
+                .setParameter(3, idUsuarioAfectado)
+                .executeUpdate();
+    }
+
+    @Override
     public Optional<Usuario> buscarActivoPorId(EntityManager em, int id) {
         return em.createQuery("select u from Usuario u join fetch u.rol where u.id = :id and u.activo = true", Usuario.class)
                 .setParameter("id", id)

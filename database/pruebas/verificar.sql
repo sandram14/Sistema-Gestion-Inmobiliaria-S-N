@@ -166,6 +166,19 @@ SELECT pg_temp.debe_funcionar('Borrado lógico: pasar una propiedad a Inactivo',
   $q$UPDATE propiedad SET id_estado = (SELECT id_estado FROM estado_propiedad WHERE nombre = 'Inactivo')
       WHERE codigo = 'prop-003'$q$);
 
+SELECT pg_temp.debe_funcionar('Un usuario nuevo nace con version_credencial 0 (migración 011)',
+  $q$DO $d$ BEGIN IF (SELECT version_credencial FROM usuario WHERE email = 'Prueba@Test.com') <> 0 THEN RAISE EXCEPTION 'no es 0'; END IF; END $d$$q$);
+
+SELECT pg_temp.debe_fallar('version_credencial no puede ser negativa',
+  $q$UPDATE usuario SET version_credencial = -1 WHERE email = 'Prueba@Test.com'$q$, '23514');
+
+SELECT pg_temp.debe_funcionar('La auditoría registra un restablecimiento de contraseña temporal',
+  $q$INSERT INTO auditoria (accion, id_actor, id_usuario_afectado)
+     SELECT 'CONTRASENA_TEMPORAL_RESTABLECIDA', id_usuario, id_usuario FROM usuario WHERE email = 'Prueba@Test.com'$q$);
+
+SELECT pg_temp.debe_fallar('La auditoría no acepta acciones desconocidas',
+  $q$INSERT INTO auditoria (accion) VALUES ('CUALQUIERA')$q$, '23514');
+
 ROLLBACK;
 \o
 

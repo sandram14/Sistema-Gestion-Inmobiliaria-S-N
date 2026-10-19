@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/cliente'
 import { useSesion } from '../auth/Sesion'
 import ui from '../ui.module.css'
+import CampoContrasena from '../componentes/CampoContrasena'
 
 export default function Login() {
   const { usuario, cargando, expirada, iniciar } = useSesion()
@@ -61,7 +62,7 @@ export default function Login() {
           </label>
           <label className={ui.campo}>
             <span className={ui.etiqueta}>Contraseña</span>
-            <input className={ui.input} type="password" autoComplete="current-password" value={password}
+            <CampoContrasena autoComplete="current-password" value={password}
               onChange={(e) => setPassword(e.target.value)} required />
           </label>
           <button className={ui.boton} type="submit" disabled={enviando}>

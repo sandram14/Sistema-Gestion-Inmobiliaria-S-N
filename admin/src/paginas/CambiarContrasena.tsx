@@ -5,6 +5,7 @@ import { api } from '../api/cliente'
 import { useSesion } from '../auth/Sesion'
 import { erroresDe } from '../componentes/errores'
 import ui from '../ui.module.css'
+import CampoContrasena from '../componentes/CampoContrasena'
 
 /** Cambio de la contraseña propia. Obligatorio si la cuenta tiene una contraseña temporal. */
 export default function CambiarContrasena() {
@@ -57,18 +58,18 @@ export default function CambiarContrasena() {
           <div className={ui.grilla}>
             <label className={ui.campo}>
               <span className={ui.etiqueta}>Contraseña actual</span>
-              <input className={ui.input} type="password" autoComplete="current-password" value={actual} onChange={(e) => setActual(e.target.value)} />
+              <CampoContrasena autoComplete="current-password" value={actual} onChange={(e) => setActual(e.target.value)} />
               {err('passwordActual')}
             </label>
             <label className={ui.campo}>
               <span className={ui.etiqueta}>Nueva contraseña</span>
-              <input className={ui.input} type="password" autoComplete="new-password" value={nueva} onChange={(e) => setNueva(e.target.value)} />
+              <CampoContrasena autoComplete="new-password" value={nueva} onChange={(e) => setNueva(e.target.value)} />
               <span className={ui.ayuda}>Mínimo 10 caracteres, con al menos una letra y un número.</span>
               {err('passwordNueva')}
             </label>
             <label className={ui.campo}>
               <span className={ui.etiqueta}>Repetir la nueva contraseña</span>
-              <input className={ui.input} type="password" autoComplete="new-password" value={repetida} onChange={(e) => setRepetida(e.target.value)} />
+              <CampoContrasena autoComplete="new-password" value={repetida} onChange={(e) => setRepetida(e.target.value)} />
               {err('repetida')}
             </label>
           </div>

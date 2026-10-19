@@ -36,7 +36,14 @@ public class AuthService extends ServicioBase {
     }
 
     /** Datos leídos de la base: el usuario para la sesión y el hash para comparar. */
-    private record Candidato(UsuarioSesion usuario, String hash) {
+    private record Candidato(Acceso acceso, String hash) {
+    }
+
+    /**
+     * Usuario autenticado y la versión de su credencial al momento de leerlo (migración 011). La sesión guarda la
+     * versión con que se abrió: si el administrador restablece la contraseña, la versión sube y la sesión se cierra.
+     */
+    public record Acceso(UsuarioSesion usuario, int versionCredencial) {
     }
 
     /**
@@ -46,6 +53,11 @@ public class AuthService extends ServicioBase {
      * @throws DemasiadosIntentosException  si hubo demasiados fallos recientes (429)
      */
     public UsuarioSesion login(String email, String contrasena, String ip) {
+        return iniciarSesion(email, contrasena, ip).usuario();
+    }
+
+    /** Como {@link #login}, pero devuelve también la versión de la credencial para guardarla en la sesión. */
+    public Acceso iniciarSesion(String email, String contrasena, String ip) {
         Errores errores = new Errores();
         if (email == null || email.isBlank()) {
             errores.agregar("email", "Ingrese su email");
@@ -64,13 +76,13 @@ public class AuthService extends ServicioBase {
         // Solo la lectura ocurre dentro de la transacción; la comparación BCrypt (lenta, a
         // propósito) se hace después, para no retener una conexión de la base.
         Optional<Candidato> candidato = leer(em -> usuarioDao.buscarActivoPorEmail(em, emailLimpio)
-                .map(u -> new Candidato(aSesion(u), u.getPasswordHash())));
+                .map(u -> new Candidato(aAcceso(u), u.getPasswordHash())));
 
         boolean valido;
         if (candidato.isPresent()) {
             // Solo los roles del panel (ADMIN, GERENTE, VENDEDOR) pueden ingresar
             valido = hasher.verificar(contrasena, candidato.get().hash())
-                    && Permiso.esRolValido(candidato.get().usuario().rol());
+                    && Permiso.esRolValido(candidato.get().acceso().usuario().rol());
         } else {
             hasher.verificarFicticio(contrasena); // mismo tiempo de respuesta que con un email existente
             valido = false;
@@ -81,7 +93,7 @@ public class AuthService extends ServicioBase {
             throw new NoAutenticadoException(CREDENCIALES_INVALIDAS);
         }
         limitador.registrarExito(ip, emailLimpio);
-        return candidato.get().usuario();
+        return candidato.get().acceso();
     }
 
     /**
@@ -90,8 +102,17 @@ public class AuthService extends ServicioBase {
      * @return vacío si ya no existe, está desactivado o su rol no puede usar el panel
      */
     public Optional<UsuarioSesion> recargar(int idUsuario) {
-        return leer(em -> usuarioDao.buscarActivoPorId(em, idUsuario).map(AuthService::aSesion))
-                .filter(u -> Permiso.esRolValido(u.rol()));
+        return recargarAcceso(idUsuario).map(Acceso::usuario);
+    }
+
+    /** Como {@link #recargar}, con la versión actual de la credencial (AuthFilter la compara con la de la sesión). */
+    public Optional<Acceso> recargarAcceso(int idUsuario) {
+        return leer(em -> usuarioDao.buscarActivoPorId(em, idUsuario).map(AuthService::aAcceso))
+                .filter(a -> Permiso.esRolValido(a.usuario().rol()));
+    }
+
+    static Acceso aAcceso(Usuario u) {
+        return new Acceso(aSesion(u), u.getVersionCredencial());
     }
 
     static UsuarioSesion aSesion(Usuario u) {

@@ -51,7 +51,8 @@ public class AuthServlet extends ApiServlet {
 
     private void login(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         LoginRequest datos = leerJson(req, LoginRequest.class);
-        UsuarioSesion usuario = servicio(AuthService.class).login(datos.email(), datos.password(), req.getRemoteAddr());
+        AuthService.Acceso acceso = servicio(AuthService.class).iniciarSesion(datos.email(), datos.password(), req.getRemoteAddr());
+        UsuarioSesion usuario = acceso.usuario();
 
         // Sesión NUEVA (id nuevo) en cada login: si alguien conocía un id de sesión anterior,
         // deja de servir (protección contra "fijación de sesión").
@@ -61,6 +62,7 @@ public class AuthServlet extends ApiServlet {
         }
         HttpSession sesion = req.getSession(true);
         sesion.setAttribute(UsuarioSesion.ATRIBUTO, usuario);
+        sesion.setAttribute(UsuarioSesion.ATRIBUTO_VERSION_CREDENCIAL, acceso.versionCredencial());
 
         escribirJson(resp, HttpServletResponse.SC_OK, Map.of("usuario", usuario));
     }

@@ -8,6 +8,7 @@ import { erroresDe } from '../componentes/errores'
 import { nombreDelRol } from '../componentes/formato'
 import { useTema, type Tema } from '../componentes/tema'
 import ui from '../ui.module.css'
+import CampoContrasena from '../componentes/CampoContrasena'
 
 type CampoDatos = 'nombre' | 'apellido' | 'cedula' | 'telefono'
 
@@ -61,7 +62,7 @@ export default function MiCuenta() {
             {campos[campo] && <span className={ui.errorCampo}>{campos[campo]}</span>}</label>
           {campo === 'email' && (
             <label className={ui.campo}><span className={ui.etiqueta}>Contraseña actual (para confirmar)</span>
-              <input className={ui.input} type="password" autoComplete="current-password" value={passwordActual} onChange={(e) => setPasswordActual(e.target.value)} />
+              <CampoContrasena autoComplete="current-password" value={passwordActual} onChange={(e) => setPasswordActual(e.target.value)} />
               {campos.passwordActual && <span className={ui.errorCampo}>{campos.passwordActual}</span>}</label>
           )}
           <div className={ui.acciones}>

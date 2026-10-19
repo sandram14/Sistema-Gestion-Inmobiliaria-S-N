@@ -14,6 +14,7 @@
   --borde: #dfe3dc;
   --borde-fuerte: #c9cfc6;
   --fondo: #f4f5ee;
+  --velo-inicio: 55%; /* capa clara sobre la imagen de fondo de Inicio */
   --superficie: #ffffff;
   --fila-alterna: #f9faf7;
 
@@ -54,6 +55,7 @@
   --borde-fuerte: #435047;
   --fondo: #121614;
   --superficie: #1a201c;
+  --velo-inicio: 80%; /* capa sobre la imagen de Inicio: más cubierta en oscuro para que el texto se lea */
   --serie-1: #3987e5; --serie-2: #d95926; --serie-3: #199e70; --serie-4: #c98500; --serie-5: #d55181; --serie-otras: #6b7280;
   --pista-grafico: #2a322d;
   --fila-alterna: #1f2621;
@@ -81,6 +83,7 @@
   --borde-fuerte: #435047;
   --fondo: #121614;
   --superficie: #1a201c;
+  --velo-inicio: 80%; /* capa sobre la imagen de Inicio: más cubierta en oscuro para que el texto se lea */
   --serie-1: #3987e5; --serie-2: #d95926; --serie-3: #199e70; --serie-4: #c98500; --serie-5: #d55181; --serie-otras: #6b7280;
   --pista-grafico: #2a322d;
   --fila-alterna: #1f2621;

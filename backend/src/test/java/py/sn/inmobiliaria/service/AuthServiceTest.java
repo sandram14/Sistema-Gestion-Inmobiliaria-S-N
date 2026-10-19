@@ -114,6 +114,14 @@ public class AuthServiceTest {
             Entidades.asignar(usuario, "id", id);
             usuarios.put(id, usuario);
         }
+
+        /** Registros de auditoría: acción, actor y afectado (la tabla no tiene más columnas). */
+        public final java.util.List<String> auditoria = new java.util.ArrayList<>();
+
+        @Override
+        public void registrarAuditoria(jakarta.persistence.EntityManager em, String accion, int idActor, int idUsuarioAfectado) {
+            auditoria.add(accion + " " + idActor + " " + idUsuarioAfectado);
+        }
     }
 
     /** Service con un administrador admin@sn.local / Clave-Correcta (usado también por AutenticacionTest). */

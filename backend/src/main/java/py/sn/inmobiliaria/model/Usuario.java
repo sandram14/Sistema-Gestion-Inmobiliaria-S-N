@@ -57,6 +57,13 @@ public class Usuario {
             columnDefinition = "timestamptz")
     private OffsetDateTime creadoEn;
 
+    /**
+     * Sube cada vez que el administrador restablece la contraseña (migración 011). Cada sesión recuerda el
+     * número con que se abrió: si ya no coincide, AuthFilter la cierra.
+     */
+    @Column(name = "version_credencial", nullable = false)
+    private int versionCredencial;
+
     protected Usuario() {
     }
 
@@ -74,6 +81,15 @@ public class Usuario {
 
     public void setDebeCambiarPassword(boolean debeCambiarPassword) {
         this.debeCambiarPassword = debeCambiarPassword;
+    }
+
+    public int getVersionCredencial() {
+        return versionCredencial;
+    }
+
+    /** Cierra las sesiones abiertas de este usuario a partir de su próxima petición. */
+    public void cerrarSesionesAbiertas() {
+        versionCredencial++;
     }
 
     public Integer getId() {

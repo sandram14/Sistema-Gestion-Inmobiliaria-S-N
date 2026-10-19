@@ -1,7 +1,7 @@
 # S&N Inmobiliaria — Contexto del proyecto (para Claude Code)
 
 > Documento de traspaso. Léelo completo antes de proponer o modificar nada.
-> Estado al **18 de octubre de 2026**. Proyecto de **Sandra**. Lo que resta del proyecto lo trabajan **solo Sandra y Claude**
+> Estado al **19 de octubre de 2026**. Proyecto de **Sandra**. Lo que resta del proyecto lo trabajan **solo Sandra y Claude**
 > (la compañera que colaboraba en `frontend/` ya no participa).
 >
 > Este archivo se llama `CLAUDE.md` y va en la raíz del repositorio: Claude Code lo lee solo al iniciar cada sesión.
@@ -89,7 +89,8 @@ Además se actualizan `schema/` y `seed/`, para que una base nueva nazca igual q
 | 007 | Origen `CONTACTO` para clientes potenciales |
 | 008 | Solo datos: asteriscos en tres títulos del sitio (un único script, documentado así) |
 | **009** | **Solo guaraníes**: USD → PYG con el mismo número, `CHECK (moneda = 'PYG')` y `DEFAULT 'PYG'`. Sin commitear. **Aplicada en la base de desarrollo el 16/10** (sección 8.1) |
-| **010** | **Barrios oficiales del INE 2022 de todo Alto Paraná**: 22 ciudades y 714 barrios y localidades (urbanos y rurales), los 12 de antes pasan al contorno exacto (< 1 m), sin nombre único por ciudad. Datos en `database/datos/ine2022_alto_parana.sql` (10 MB, generado por `generar_ine2022.mjs`), compartido con `seed/02_ubicacion.sql`. Ensayada (18/10); **pendiente de aplicar** en la base de Sandra |
+| **010** | **Barrios oficiales del INE 2022 de todo Alto Paraná**: 22 ciudades y 714 barrios y localidades (urbanos y rurales), los 12 de antes pasan al contorno exacto (< 1 m), sin nombre único por ciudad. Datos en `database/datos/ine2022_alto_parana.sql` (10 MB, generado por `generar_ine2022.mjs`), compartido con `seed/02_ubicacion.sql`. Ensayada (18/10). **Aplicada** en la base de Sandra (comprobado el 19/10 por la API: 217 barrios en las 4 ciudades con propiedades) |
+| **011** | **Auditoría y cierre de sesiones**: `usuario.version_credencial` (sube al restablecer la contraseña: las sesiones abiertas con el número anterior se cierran) y tabla `auditoria` (fecha, acción, quién y a quién; sin contraseñas ni IP). Ensayada (19/10); **pendiente de aplicar** en la base de Sandra. El backend 0.24.0 **necesita** la 011 |
 
 Se aplican con:
 
@@ -102,12 +103,12 @@ docker compose -f docker/docker-compose.yml exec db psql -U sn_app -d sn_inmobil
 | Sección | Funciones |
 |---|---|
 | Estructura | Menú lateral (en celular se abre con un botón), carga diferida, tema claro, oscuro o según el sistema (por navegador), botón Volver. Desde el 18/10 el menú es **una sola lista sin subtítulos**: Inicio, Propiedades, Consultas IA, Gestión del sitio web, Usuarios y Mi cuenta (cada una según el permiso). El tipo "Casa" se **muestra** como "Vivienda" (`nombreDelTipo` en `formato.ts`; el valor enviado sigue siendo "Casa") |
-| **Inicio** (18/10) | `/admin/` y destino fijo al iniciar sesión (ya no se vuelve a la última pantalla). Saludo según la hora con el nombre ("Buenas tardes, Sandra", sin "Bienvenido/a") y una frase al azar. Fichas centradas según el rol (siempre 4 hoy): **clientes por contactar** (cuenta `conteos.pendientes`, destacada en ámbar si hay alguno, lleva a la lista filtrada `?estado=PENDIENTE`; al vendedor le cuenta solo los suyos), Nueva propiedad, y luego Nuevo usuario y Sitio web (administrador), Sitio web y Consultas IA (gerente), Consultas IA y Listado (vendedor). "Nueva propiedad" salió del menú: está en el listado. Archivo `paginas/Inicio.tsx` |
+| **Inicio** (18/10) | `/admin/` y destino fijo al iniciar sesión (ya no se vuelve a la última pantalla). Saludo según la hora con el nombre ("Buenas tardes, Sandra", sin "Bienvenido/a") y una frase al azar. Fichas centradas según el rol (siempre 4 hoy): **clientes por contactar** (cuenta `conteos.pendientes`, destacada en ámbar si hay alguno, lleva a la lista filtrada `?estado=PENDIENTE`; al vendedor le cuenta solo los suyos), Nueva propiedad, y luego Nuevo usuario y Sitio web (administrador), Sitio web y Consultas IA (gerente), Consultas IA y Listado (vendedor). "Nueva propiedad" salió del menú: está en el listado. Archivo `paginas/Inicio.tsx`. **Desde el 19/10**, imagen de fondo (`src/assets/inicio-fondo.webp`, 1280 px, 17 KB) desenfocada 3 px, alineada a la derecha, con una capa del color de fondo encima (`--velo-inicio`: 55 % en claro, 80 % en oscuro) |
 | Propiedades | Listado, alta y edición con mapa (ubicación por PostGIS), operaciones según el tipo, fotos, baja lógica y responsable (el vendedor solo edita las suyas) |
 | Gestión del sitio web | Pestañas Inicio (portada y ofertas destacadas), Nosotros (con los servicios) y Contacto. Se publica al guardar |
 | Consultas IA | Pestañas Historial (paginado, revisión interna), Análisis técnico y Clientes potenciales. **Desde el 18/10** el Análisis técnico muestra solo 7 indicadores: Preguntas recibidas por el asistente y Conversaciones (números), Sin servicio (medidor circular) y Propiedades más consultadas, Zonas más consultadas, Rangos de precios y Temas consultados (inferido) en **gráficos circulares con porcentajes** (las 5 principales y el resto en "Otras"; leyenda con cantidad y %; porcentajes que suman 100). Componentes `Torta`, `Medidor` y `porcentajes` en `componentes/fichas.tsx`; colores `--serie-1…5`, `--serie-otras` y `--pista-grafico` en `global.css` (claro y oscuro). **Calidad de respuestas se retiró** (`/consultas/calidad` lleva al Historial); el backend no cambió y sigue enviando todos los datos |
-| Usuarios | Alta con contraseña temporal (se muestra una vez), edición, rol, activar y desactivar |
-| Mi cuenta | Datos propios, cambio de email (con contraseña) y de contraseña, preferencia de tema |
+| Usuarios | Alta con contraseña temporal (se muestra una vez), edición, rol, activar y desactivar. **Recuperación asistida (19/10):** "Generar contraseña temporal" (solo ADMIN) además **cierra las sesiones abiertas** de ese usuario y queda en la **auditoría**. Nadie puede ver contraseñas actuales |
+| Mi cuenta | Datos propios, cambio de email (con contraseña) y de contraseña, preferencia de tema. Todos los campos de contraseña (inicio de sesión, cambiar contraseña y confirmar el cambio de email) tienen el **botón del ojo** (`componentes/CampoContrasena.tsx`; se oculta el ojo propio de Edge) |
 
 ### Roles y permisos (fijos por rol, verificados en el backend)
 
@@ -156,6 +157,7 @@ La idea inicial era elegir guaraníes o dólares. **Sandra decidió eliminar el 
 | Página de búsqueda (17/10) | Margen verde de **40 px** (PC) y **20 px** (≤ 900 px) alrededor de la barra, el mapa y el panel, con bordes redondeados, para poder bajar la página con la rueda (sobre el mapa la rueda hace zoom). Fichas más compactas |
 | Servicios dentro de Nosotros (18/10, backend 0.22.0) | La página Servicios se unió a Nosotros: **historia → valores → servicios → invitación a buscar**. `/servicios` redirige a `/nosotros#servicios`; "Servicios" salió del menú y del pie. Se retiraron "Lo que tenemos para vos" (con su carrusel) y "¿Por qué elegir S&N?" (con su imagen). En el panel la pestaña Servicios desapareció (`/sitio/servicios` redirige a Nosotros): Nosotros edita las dos secciones (`NOSOTROS` y `SERVICIOS`) con **un solo botón**, que avisa qué parte se publicó si una falla, y guarda vacíos `razones`, `bloqueTitulo` y `bloqueTexto`. El backend acepta 0 razones |
 | Zonas del mapa (18/10, migración 010 y backend 0.23.0) | Se cargan **todos los barrios y localidades de Alto Paraná del INE 2022** (opción A; dibujar zonas desde el panel queda para más adelante si hace falta). Nombres repetidos permitidos. `/api/barrios` devuelve contornos **simplificados para dibujar** (`TOLERANCIA_DIBUJO` = 0.00003°, unos 3 m; la validación usa el exacto). El sitio pide `conPropiedades=true`: mapa y filtro solo con **ciudades con propiedades Disponibles** y todos sus barrios; el panel pide todo. Otro departamento: descargar su GeoJSON del INE y repetir el procedimiento |
+| Zonas con propiedades (19/10, backend 0.24.0) | El mapa y las listas Ciudad y Barrio muestran **solo los barrios con al menos una propiedad Disponible** y sus ciudades ("N barrio(s)" recalculado). Lo calcula el sitio con la lista de propiedades (`soloConPropiedades` en `useGeoData.ts`), que nunca se guarda en el navegador: un barrio aparece o desaparece al instante. Los contornos con `conPropiedades=true` se guardan **5 minutos** (antes 1 hora); sin ese parámetro (panel), 1 hora |
 | La X del detalle (18/10) | Vuelve al **resultado de la última búsqueda** (filtros al pulsar Buscar, con el mapa completo), no a la ficha del barrio. "Volver al barrio" pasó a "Volver a los resultados" |
 | Tipos de propiedad | Solo **Casa y Terreno**. En el sitio la casa se muestra como **"Vivienda"** (sin "depto"). El chat ya no pregunta "casa o departamento": de "Comprar/Alquilar una propiedad" pasa directo a la ciudad |
 
@@ -243,8 +245,8 @@ Están en la copia local, **sin commitear** (se decide en la Fase 17). Su `READM
 
 | Carpeta | Contenido |
 |---|---|
-| `admin/verificacion/` | 84 pruebas del panel al 18/10 (Vitest + jsdom + Testing Library) con backend simulado |
-| `frontend/verificacion/` | 75 pruebas del sitio al 18/10, incluidos `w4.test.tsx` y `tipografia.test.tsx` |
+| `admin/verificacion/` | 92 pruebas del panel al 19/10 (Vitest + jsdom + Testing Library) con backend simulado |
+| `frontend/verificacion/` | 77 pruebas del sitio al 19/10, incluidos `w4.test.tsx`, `tipografia.test.tsx` y `zonas.test.tsx` |
 | `herramientas/` | `simulador.mjs` (backend simulado, puerto 8080), `capturar.py` (revisión visual con Playwright), JSON de contenido normal, largo y provisional, y `fuentes/` (fuentes instaladas con npm, hoy se usa **Roboto**; `capturar.py` la sirve en lugar de Google Fonts, para el sitio y el panel, y su lista debe coincidir con `frontend/index.html`) |
 
 ### 10.1 Pruebas de interfaz
@@ -313,6 +315,7 @@ Captura 7 páginas y el chat en 1366 px y 390 px, y escribe `informe.json` con l
 
 ### Postergado o para el final
 
+- **Recuperación de contraseña por correo** ("Olvidé mi contraseña"): postergada por completo el 19/10 (no hay nada en el código). Requiere elegir un servicio de correo (Gmail con contraseña de aplicación mientras no haya dominio propio; Brevo cuando lo haya), enlace de un solo uso de 30 minutos con `#token=`, misma respuesta exista o no el email.
 - Vista previa del contenido antes de publicar.
 - Tema del panel guardado por cuenta (hoy por navegador).
 - Límites de envío en nginx (`limit_req`).
@@ -340,6 +343,7 @@ Captura 7 páginas y el chat en 1366 px y 390 px, y escribe `informe.json` con l
 | Comandos de la tabla de revisión que dependían de variables de otro paso: sin `$fecha`/`$resp` no se guardó la verificación ni se hizo el respaldo | Cada bloque de comandos para Sandra debe ser **independiente** (definir sus variables) y detenerse si falla el respaldo |
 | Un cambio de CSS en una clase compartida (`.searchBtn`) movía otro botón | Antes de cambiar una clase, buscar todos sus usos (`grep`) y limitar el cambio con un selector más específico |
 | La revisión automática dio 0 problemas pero había una desalineación | Mirar las capturas además del informe |
+| Con el simulador, la prueba de "solo barrios con propiedades" no distinguía nada (sus 12 barrios tienen propiedades) | Comprobar también con los datos reales, en solo lectura (Vite con `VITE_BACKEND_URL=http://localhost:80`), y probar que la prueba falla sin el cambio |
 | `python` mezclado con `node` en un solo comando quedó colgado | Usar `py` con `timeout` y no encadenar intérpretes |
 
 ## 14. Comandos de referencia (PowerShell, desde `C:\Proyectos\sn-inmobiliaria`)

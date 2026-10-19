@@ -193,6 +193,30 @@ class AutenticacionTest {
     }
 
     @Test
+    void siElAdministradorRestableceLaContrasenaLaSesionAbiertaSeCierra() throws Exception {
+        ServletFalso.ejecutar(servlet, login(LOGIN_OK));
+        assertEquals(0, estado("GET", "/api/admin/propiedades"));
+
+        dao.usuarios.get(7).cerrarSesionesAbiertas(); // lo que hace restablecerContrasena
+
+        var r = ServletFalso.filtrar(filtro, Peticion.de("GET", "/api/admin/propiedades", null).navegador(navegador));
+        assertFalse(r.continuo());
+        assertEquals(401, r.respuesta().estado);
+        assertTrue(r.respuesta().json().toString().contains("Su contraseña fue restablecida"));
+        assertTrue(navegador.sesion() == null || navegador.sesion().atributos.isEmpty()); // sesión invalidada
+
+        ServletFalso.ejecutar(servlet, login(LOGIN_OK));                      // un login nuevo vuelve a funcionar
+        assertEquals(0, estado("GET", "/api/admin/propiedades"));
+    }
+
+    @Test
+    void unaSesionSinVersionDeCredencialNoSeAcepta() throws Exception {
+        ServletFalso.ejecutar(servlet, login(LOGIN_OK));
+        navegador.sesion().atributos.remove(UsuarioSesion.ATRIBUTO_VERSION_CREDENCIAL); // sesión anterior a la 0.24.0
+        assertEquals(401, estado("GET", "/api/admin/propiedades"));
+    }
+
+    @Test
     void unCambioDeRolSeAplicaEnLaSiguientePeticion() throws Exception {
         ServletFalso.ejecutar(servlet, login(LOGIN_OK));
         assertEquals(0, estado("DELETE", "/api/admin/propiedades/5"));
@@ -265,6 +289,16 @@ class AutenticacionTest {
         assertEquals(0, estado("GET", "/api/admin/usuarios"));
         assertEquals(403, estado("POST", "/api/admin/usuarios"));
         assertEquals(403, estado("PATCH", "/api/admin/usuarios/9/estado"));
+    }
+
+    @Test
+    void soloElAdministradorGeneraContrasenasTemporales() throws Exception {
+        for (String email : new String[] {"gerente@sn.local", "vendedor@sn.local"}) {
+            ServletFalso.ejecutar(servlet, loginComo(email));
+            assertEquals(403, estado("POST", "/api/admin/usuarios/7/contrasena-temporal"), email);
+        }
+        ServletFalso.ejecutar(servlet, login(LOGIN_OK));
+        assertEquals(0, estado("POST", "/api/admin/usuarios/9/contrasena-temporal")); // el administrador sí
     }
 
     @Test

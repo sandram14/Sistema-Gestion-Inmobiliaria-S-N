@@ -61,6 +61,8 @@ class UsuariosIntegracionTest {
     void limpiar() {
         String patron = "%" + marca + "%";
         DatosPrueba.numero(dataSource, "WITH b AS (DELETE FROM propiedad WHERE titulo LIKE ? RETURNING 1) SELECT count(*) FROM b", patron);
+        DatosPrueba.numero(dataSource, "WITH b AS (DELETE FROM auditoria WHERE id_usuario_afectado IN "
+                + "(SELECT id_usuario FROM usuario WHERE email LIKE ?) RETURNING 1) SELECT count(*) FROM b", patron);
         DatosPrueba.numero(dataSource, "WITH b AS (DELETE FROM usuario WHERE email LIKE ? RETURNING 1) SELECT count(*) FROM b", patron);
     }
 
@@ -99,6 +101,23 @@ class UsuariosIntegracionTest {
         assertEquals("1", hash); // se guarda el hash, nunca la contraseña
         assertThrows(ConflictoException.class, () -> usuarios.crear(new UsuarioRequest("Otro", "Prueba",
                 creado.usuario().email().toUpperCase(), null, null, "GERENTE")));
+    }
+
+    @Test
+    void restablecerLaContrasenaSubeLaVersionYQuedaEnLaAuditoriaSinSecretos() {
+        int admin = usuarios.crear(req("Admin", "ADMIN")).usuario().id();
+        int vendedor = usuarios.crear(req("Vendedor", "VENDEDOR")).usuario().id();
+
+        var nueva = usuarios.restablecerContrasena(vendedor, admin);
+
+        assertEquals(1L, DatosPrueba.numero(dataSource, "SELECT version_credencial FROM usuario WHERE id_usuario = ?", vendedor));
+        assertEquals(1L, DatosPrueba.numero(dataSource, "SELECT count(*) FROM auditoria WHERE accion = 'CONTRASENA_TEMPORAL_RESTABLECIDA' "
+                + "AND id_actor = ? AND id_usuario_afectado = ? AND fecha > now() - interval '1 minute'", admin, vendedor));
+        // Ninguna columna de la auditoría contiene la contraseña temporal
+        assertEquals(0L, DatosPrueba.numero(dataSource, "SELECT count(*) FROM auditoria a WHERE strpos(a::text, ?) > 0", nueva.contrasenaTemporal()));
+        assertEquals("VENDEDOR", nueva.usuario().rol());
+        assertEquals(1L, DatosPrueba.numero(dataSource, "SELECT count(*) FROM usuario u JOIN rol r USING (id_rol) "
+                + "WHERE u.id_usuario = ? AND r.nombre = 'VENDEDOR' AND u.debe_cambiar_password", vendedor));
     }
 
     @Test

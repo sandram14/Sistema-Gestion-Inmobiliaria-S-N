@@ -18,15 +18,18 @@ import java.io.IOException;
  *   <li>{@code GET /api/barrios} y {@code GET /api/barrios?ciudadId=1} → polígonos de los barrios, simplificados
  *       para dibujar (unos 3 m; la validación de ubicaciones usa el polígono exacto).</li>
  *   <li>{@code conPropiedades=true} (en ambos): solo las ciudades con al menos una propiedad Disponible, y los
- *       barrios de esas ciudades. Lo usa el mapa del sitio; el panel pide todas para poder cargar en cualquier zona.</li>
+ *       barrios de esas ciudades. Lo usa el mapa del sitio, que además muestra solo los barrios donde hay propiedades
+ *       (lo calcula con la lista de propiedades, que nunca se guarda); el panel pide todas para cargar en cualquier zona.</li>
  * </ul>
- * Estos datos casi no cambian, por eso el navegador puede guardarlos una hora.
+ * La lista completa casi no cambia: el navegador puede guardarla una hora. La de ciudades con propiedades cambia al
+ * cargar la primera propiedad de una ciudad: se guarda solo cinco minutos.
  */
 @WebServlet(name = "UbicacionServlet", urlPatterns = {"/api/ciudades", "/api/barrios"})
 public class UbicacionServlet extends ApiServlet {
 
     private static final long serialVersionUID = 1L;
     private static final int UNA_HORA = 3600;
+    private static final int CINCO_MINUTOS = 300;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -40,7 +43,7 @@ public class UbicacionServlet extends ApiServlet {
                 throw ValidacionException.deCampo("departamentoId", "Debe ser un número positivo");
             }
             var ciudades = GeoJsonMapper.ciudades(ubicaciones.listarCiudades(departamentoId, conPropiedades));
-            permitirCache(resp, UNA_HORA);
+            permitirCache(resp, conPropiedades ? CINCO_MINUTOS : UNA_HORA);
             escribirJson(resp, HttpServletResponse.SC_OK, ciudades);
             return;
         }
@@ -49,7 +52,7 @@ public class UbicacionServlet extends ApiServlet {
         boolean conPropiedades = Parametros.booleano(req, "conPropiedades", errores);
         errores.lanzarSiHay();
         var barrios = GeoJsonMapper.barrios(ubicaciones.listarBarrios(ciudadId, conPropiedades));
-        permitirCache(resp, UNA_HORA);
+        permitirCache(resp, conPropiedades ? CINCO_MINUTOS : UNA_HORA);
         escribirJson(resp, HttpServletResponse.SC_OK, barrios);
     }
 }

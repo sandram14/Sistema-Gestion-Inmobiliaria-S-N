@@ -28,6 +28,7 @@ erDiagram
     PROPIEDAD ||--o{ OPERACION_PROPIEDAD : ofrece
     OPERACION ||--o{ OPERACION_PROPIEDAD : tipo
     PROPIEDAD |o--o{ CONSULTA : "consultada en"
+    USUARIO |o--o{ AUDITORIA : "actor o afectado"
 ```
 
 ## Reglas garantizadas por la base
@@ -38,6 +39,7 @@ erDiagram
 | `casa` solo para tipo Casa, `terreno` solo para tipo Terreno | Triggers `trg_casa_validar`, `trg_terreno_validar` |
 | Cambiar el tipo no puede dejar datos incoherentes | Trigger `trg_propiedad_cambio_tipo` |
 | La ubicación debe estar dentro del barrio (`ST_Covers`) | Trigger `trg_propiedad_ubicacion` |
+| La auditoría solo registra acciones conocidas y nunca contraseñas (migración 011) | `ck_auditoria_accion`; la tabla no tiene columnas para secretos |
 | Máximo una imagen principal por propiedad | Índice único parcial `uq_imagen_principal` |
 | Email único sin distinguir mayúsculas | Índice único `uq_usuario_email_lower` |
 | Precio > 0, moneda solo PYG (migración 009), código `prefijo-000`, hash BCrypt | Restricciones `CHECK` |

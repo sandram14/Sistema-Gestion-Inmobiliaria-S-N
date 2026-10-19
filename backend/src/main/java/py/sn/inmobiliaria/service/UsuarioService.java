@@ -37,6 +37,8 @@ import java.util.regex.Pattern;
 public class UsuarioService extends ServicioBase {
 
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+    /** Acción de la tabla auditoria (ck_auditoria_accion). */
+    static final String AUDITORIA_CONTRASENA_TEMPORAL = "CONTRASENA_TEMPORAL_RESTABLECIDA";
 
     private final UsuarioDao usuarioDao;
     private final CatalogoDao catalogoDao;
@@ -129,7 +131,10 @@ public class UsuarioService extends ServicioBase {
         });
     }
 
-    /** Genera una nueva contraseña temporal (por ejemplo, si el usuario olvidó la suya). */
+    /**
+     * Genera una nueva contraseña temporal (por ejemplo, si el usuario olvidó la suya). Además cierra las sesiones
+     * que ese usuario tenga abiertas y lo registra en la auditoría (sin la contraseña). El rol no cambia.
+     */
     public UsuarioDto.ConContrasenaTemporal restablecerContrasena(int id, int idActor) {
         if (id == idActor) {
             throw new ReglaNegocioException("REGLA_PROPIA_CUENTA", "Para su propia cuenta use \"Cambiar contraseña\" en Mi cuenta");
@@ -140,6 +145,8 @@ public class UsuarioService extends ServicioBase {
             Usuario u = buscar(em, id);
             u.setPasswordHash(hash);
             u.setDebeCambiarPassword(true);
+            u.cerrarSesionesAbiertas();
+            usuarioDao.registrarAuditoria(em, AUDITORIA_CONTRASENA_TEMPORAL, idActor, id);
             return dto(u, usuarioDao.propiedadesPorResponsable(em).getOrDefault(id, 0L));
         });
         return new UsuarioDto.ConContrasenaTemporal(dto, temporal);

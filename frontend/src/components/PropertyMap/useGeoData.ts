@@ -16,6 +16,31 @@ interface GeoDataState {
 }
 
 /**
+ * Deja solo las zonas donde hay propiedades disponibles: los barrios con al menos una propiedad y las ciudades
+ * con al menos uno de esos barrios (con su cantidad de barrios recalculada). Se calcula con la lista de
+ * propiedades, que el backend nunca deja guardar en el navegador: un barrio aparece o desaparece apenas se
+ * carga, se vende o se da de baja una propiedad. Los contornos sí se guardan unos minutos (cargan rápido).
+ */
+export function soloConPropiedades(
+  ciudades: CiudadFeature[],
+  barrios: BarrioFeature[],
+  propiedades: PropiedadFeature[]
+): { ciudades: CiudadFeature[]; barrios: BarrioFeature[] } {
+  const conPropiedades = new Set(propiedades.map((p) => p.properties.barrioId));
+  const barriosConPropiedades = barrios.filter((b) => conPropiedades.has(b.properties.id));
+  const porCiudad = new Map<string, number>();
+  for (const b of barriosConPropiedades) {
+    porCiudad.set(b.properties.distritoCod, (porCiudad.get(b.properties.distritoCod) ?? 0) + 1);
+  }
+  return {
+    ciudades: ciudades
+      .filter((c) => porCiudad.has(c.properties.id))
+      .map((c) => ({ ...c, properties: { ...c.properties, totalBarrios: porCiudad.get(c.properties.id)! } })),
+    barrios: barriosConPropiedades,
+  };
+}
+
+/**
  * Carga ciudades, barrios y propiedades desde la API Java:
  * /api/ciudades, /api/barrios y /api/propiedades (mismo formato FeatureCollection
  * que tenían los archivos estáticos de public/data/, que ya no se usan).
@@ -45,9 +70,11 @@ export function useGeoData(apiBaseUrl: string = "/api"): GeoDataState {
           apiGet<GeoFeatureCollection<PropiedadFeature>>(`${apiBaseUrl}/propiedades`),
         ]);
         if (!cancelled) {
+          // En el mapa y en las listas del buscador, solo donde hay propiedades
+          const zonas = soloConPropiedades(ciudadesFC.features, barriosFC.features, propiedadesFC.features);
           setState({
-            ciudades: ciudadesFC.features,
-            barrios: barriosFC.features,
+            ciudades: zonas.ciudades,
+            barrios: zonas.barrios,
             propiedades: propiedadesFC.features,
             loading: false,
             error: null,

@@ -221,6 +221,15 @@
 textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
 .input:focus { outline: none; border-color: var(--verde-medio); box-shadow: 0 0 0 2px rgba(58, 107, 70, 0.15); }
 .inputConError { border-color: var(--rojo); }
+/* Contraseña con el botón del ojo dentro del campo, a la derecha */
+.contrasena { position: relative; display: flex; width: 100%; }
+.grilla > .campo > .contrasena { max-width: 640px; }
+.contrasena > .input { flex: 1; min-width: 0; padding-right: 40px; }
+.contrasena > .input::-ms-reveal, .contrasena > .input::-ms-clear { display: none; } /* sin el ojo propio de Edge */
+.botonOjo { position: absolute; top: 2px; right: 2px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+  border: none; border-radius: var(--radio-chico); background: none; color: var(--texto-secundario); cursor: pointer; }
+.botonOjo:hover { color: var(--verde-texto); }
+.botonOjo:focus-visible { outline: 2px solid var(--verde-medio); outline-offset: -2px; }
 .errorCampo { color: var(--rojo); font-size: 12px; }
 .ayuda { color: var(--gris); font-size: 12px; }
 .checks { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
@@ -386,7 +395,15 @@ textarea.input { height: auto; padding: 8px 10px; resize: vertical; }
 /* ── Inicio: saludo centrado y accesos según el rol (de 2 a 4 fichas) ── */
 /* Centrado en el alto disponible (pantalla menos los márgenes del contenido: 24 px arriba y 48 abajo) */
 .inicio { display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-height: calc(100vh - 72px); padding: 24px 0; box-sizing: border-box; text-align: center; }
+  min-height: calc(100vh - 72px); padding: 24px 0; box-sizing: border-box; text-align: center;
+  position: relative; z-index: 0; }
+/* Imagen de fondo de Inicio: ocupa toda el área de contenido (sin el menú), desenfocada 3 px, con una capa del color
+   de fondo encima para que el saludo y las fichas se lean. Se agranda un poco para que el desenfoque no deje bordes.
+   Alineada a la derecha: en pantallas menos anchas que la imagen se recorta por la izquierda (sin dejar suelto el borde de la pared verde) */
+.inicio::before, .inicio::after { content: ''; position: fixed; top: 0; right: 0; bottom: 0; left: var(--ancho-menu); z-index: -1; pointer-events: none; }
+.inicio::before { background: url('./assets/inicio-fondo.webp') right center / cover no-repeat; filter: blur(3px); transform: scale(1.03); }
+.inicio::after { background: color-mix(in srgb, var(--fondo) var(--velo-inicio), transparent); }
+@media (max-width: 900px) { .inicio::before, .inicio::after { left: 0; } }
 .inicioSaludo h1 { margin: 0 0 8px; font-size: 30px; font-weight: 700; overflow-wrap: anywhere; }
 .inicioSaludo p { margin: 0 0 32px; color: var(--texto-secundario); font-size: 16px; }
 /* Grilla centrada: 4 fichas en una fila; si no entran (menos de 1240 px de pantalla), 2 por fila (nunca 3 + 1); en el celular, 1 */

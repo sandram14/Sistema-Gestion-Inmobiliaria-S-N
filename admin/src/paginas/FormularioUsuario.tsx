@@ -66,7 +66,7 @@ export default function FormularioUsuario() {
   })
 
   const restablecer = () => ejecutar(async () => {
-    if (!window.confirm('¿Generar una nueva contraseña temporal? La actual dejará de funcionar.')) return
+    if (!window.confirm('¿Generar una nueva contraseña temporal? La actual dejará de funcionar y se cerrarán las sesiones abiertas de este usuario.')) return
     const r = await api.post<UsuarioConContrasena>(`/api/admin/usuarios/${id}/contrasena-temporal`)
     cargar(r.usuario)
     setTemporal(r.contrasenaTemporal)

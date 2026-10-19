@@ -37,7 +37,8 @@ import java.util.Set;
  *       DELETE o PATCH .../principal) no pueden transportar un formulario. A esto se suma la
  *       cookie SameSite=Lax (META-INF/context.xml).</li>
  *   <li><b>Autenticación</b>: salvo login y logout, exige una sesión, y relee el usuario de la
- *       base en cada petición (una cuenta desactivada o con otro rol pierde el acceso enseguida).</li>
+ *       base en cada petición (una cuenta desactivada o con otro rol pierde el acceso enseguida).
+ *       Si el administrador le restableció la contraseña después de abrir la sesión, la cierra.</li>
  *   <li><b>Autorización</b>: cada ruta exige un permiso según {@link ReglasAcceso}; el rol del
  *       usuario debe tenerlo ({@link Permiso}). Una ruta sin regla queda bloqueada (403).</li>
  * </ol>
@@ -94,9 +95,9 @@ public class AuthFilter implements Filter {
                 rechazar(resp, 503, "SERVICIO_NO_DISPONIBLE", "La base de datos no está disponible");
                 return;
             }
-            Optional<UsuarioSesion> actual;
+            Optional<AuthService.Acceso> actual;
             try {
-                actual = auth.recargar(enSesion.id());
+                actual = auth.recargarAcceso(enSesion.id());
             } catch (RuntimeException e) {
                 rechazar(resp, 503, "SERVICIO_NO_DISPONIBLE", "La base de datos no está disponible");
                 return;
@@ -106,7 +107,14 @@ public class AuthFilter implements Filter {
                 rechazar(resp, 401, "NO_AUTENTICADO", "Su cuenta no está activa. Inicie sesión nuevamente");
                 return;
             }
-            UsuarioSesion u = actual.get();
+            // Si el administrador restableció la contraseña, la versión subió: esta sesión ya no vale
+            Object version = sesion.getAttribute(UsuarioSesion.ATRIBUTO_VERSION_CREDENCIAL);
+            if (!(version instanceof Integer v) || v != actual.get().versionCredencial()) {
+                sesion.invalidate();
+                rechazar(resp, 401, "NO_AUTENTICADO", "Su contraseña fue restablecida. Inicie sesión nuevamente");
+                return;
+            }
+            UsuarioSesion u = actual.get().usuario();
             if (!u.equals(enSesion)) {
                 sesion.setAttribute(UsuarioSesion.ATRIBUTO, u);
             }
