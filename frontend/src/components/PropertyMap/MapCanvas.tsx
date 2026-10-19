@@ -1,6 +1,6 @@
 import { useMemo, useEffect } from "react";
 import { MapContainer, TileLayer, GeoJSON, Marker, Tooltip, useMap, ZoomControl } from 'react-leaflet';
-import type { LatLngBounds, StyleFunction, PathOptions, Path } from "leaflet";
+import type { LatLngBounds, LatLngExpression, StyleFunction, PathOptions, Path } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { BarrioFeature, CiudadFeature, PropiedadFeature } from "./types";
 import { ciudadIcon, propiedadIcon } from "./mapUtils";
@@ -9,6 +9,12 @@ import "./PropertyMap.css";
 
 const DEFAULT_CENTER: [number, number] = [-25.5, -54.9];
 const DEFAULT_ZOOM = 10;
+
+/** Centro y zoom visibles del mapa: se guardan al abrir el detalle y se restauran exactos al cerrarlo. */
+export interface VistaMapa {
+  centro: LatLngExpression;
+  zoom: number;
+}
 
 interface MapCanvasProps {
   ciudades: CiudadFeature[];
@@ -24,15 +30,51 @@ interface MapCanvasProps {
   onSelectBarrio: (id: number, nombre: string) => void;
   onSelectPropiedad?: (id: string) => void;
   heightClassName?: string;
+  /** Si se indica, el mapa vuelve exactamente a esta vista (sin animación) en lugar de encuadrar flyToBounds. */
+  vistaRestaurada?: VistaMapa | null;
+  /** Avisa el centro y el zoom cada vez que el mapa termina de moverse. */
+  onVistaCambia?: (vista: VistaMapa) => void;
 }
 
 function FlyToBounds({ bounds }: { bounds: LatLngBounds | null }) {
   const map = useMap();
   useEffect(() => {
     if (bounds && bounds.isValid()) {
-      map.flyToBounds(bounds, { padding: [48, 48], duration: 0.85 });
+      // El alto del mapa cambia sin que Leaflet se entere (en el celular, al elegir una ciudad la barra suma la
+      // fila "Barrio" y el mapa se achica): se vuelve a medir antes de encuadrar
+      map.invalidateSize({ animate: false });
+      // La zona se encuadra sin quedar debajo de la ruta (arriba) ni del aviso (abajo), que se dibujan sobre el
+      // mapa y cambian de alto con el texto y el ancho de la pantalla: se miden en lugar de usar un margen fijo.
+      // Arriba se suma el alto de un marcador, que se dibuja por encima de su punto.
+      const marco = map.getContainer().getBoundingClientRect();
+      const zona = map.getContainer().parentElement;
+      const ruta = zona?.querySelector(".pm-breadcrumb")?.getBoundingClientRect();
+      const aviso = zona?.querySelector("[data-aviso-mapa]")?.getBoundingClientRect();
+      const arriba = Math.max(48, (ruta ? ruta.bottom - marco.top : 0) + 44);
+      const abajo = Math.max(48, (aviso ? marco.bottom - aviso.top : 0) + 12);
+      map.flyToBounds(bounds, { paddingTopLeft: [48, arriba], paddingBottomRight: [48, abajo], duration: 0.85 });
     }
   }, [bounds, map]);
+  return null;
+}
+
+function RestaurarVista({ vista }: { vista: VistaMapa | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (vista) map.setView(vista.centro, vista.zoom, { animate: false });
+  }, [vista, map]);
+  return null;
+}
+
+function AvisarVista({ onCambio }: { onCambio: (vista: VistaMapa) => void }) {
+  const map = useMap();
+  useEffect(() => {
+    const avisar = () => onCambio({ centro: map.getCenter(), zoom: map.getZoom() });
+    map.on("moveend", avisar);
+    return () => {
+      map.off("moveend", avisar);
+    };
+  }, [map, onCambio]);
   return null;
 }
 
@@ -59,6 +101,8 @@ export default function MapCanvas({
   onSelectCiudad,
   onSelectBarrio,
   onSelectPropiedad,
+  vistaRestaurada = null,
+  onVistaCambia,
 }: MapCanvasProps) {
   const barriosFC = useMemo(
     () => ({ type: "FeatureCollection" as const, features: barriosVisibles }),
@@ -76,7 +120,9 @@ export default function MapCanvas({
   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
 
-      <FlyToBounds bounds={flyToBounds} />
+      <FlyToBounds bounds={vistaRestaurada ? null : flyToBounds} />
+      <RestaurarVista vista={vistaRestaurada} />
+      {onVistaCambia && <AvisarVista onCambio={onVistaCambia} />}
 
       {showCiudades &&
         ciudades.map((c) => (

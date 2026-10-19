@@ -58,12 +58,6 @@
   margin: 0 0 32px;
 }
 
-.sectionHead {
-  max-width: 640px;
-  margin: 0 auto 52px;
-  text-align: center;
-}
-
 /* ── 2. Quiénes somos ─────────────────────────────────────────────────── */
 .quienes {
   background: var(--color-blanco);
@@ -173,7 +167,6 @@
   line-height: 1.6;
   margin: 0;
 }
-
 
 /* ── 4. CTA ───────────────────────────────────────────────────────────── */
 .cta {

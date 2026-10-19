@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Bath, BedDouble, Ruler } from 'lucide-react'
 import { iconoCategoria, fotosPara } from '../busqueda/SearchFilter'
 import { useGeoData } from '../PropertyMap/useGeoData'
-import type { PropiedadFeature } from '../PropertyMap/types'
+import { grupoDeCategoria, type PropiedadFeature } from '../PropertyMap/types'
 import { elegirOfertas, useContenidoSitio } from '../../services/contenidoSitio'
 import { textoPrecioOperacion } from '../../services/guaranies'
 import styles from './OffersSection.module.css'
@@ -69,7 +69,7 @@ function OfferCard({ propiedad, onClick }: { propiedad: PropiedadFeature; onClic
         ) : (
           <span className={styles.cardImgIcon}>{iconoCategoria(props.categoria)}</span>
         )}
-        <span className={styles.cardBadge}>{props.categoria}</span>
+        <span className={styles.cardBadge}>{grupoDeCategoria(props.categoria)}</span>
         <span className={styles.cardTag}>{props.tipoOperacion.toUpperCase()}</span>
       </div>
       <div className={styles.cardBody}>

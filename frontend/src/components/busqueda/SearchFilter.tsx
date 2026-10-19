@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { LatLngBounds } from 'leaflet'
 import { useSearchParams } from 'react-router-dom'
 import styles from './SearchFilter.module.css'
-import MapCanvas from '../PropertyMap/MapCanvas'
-import { Bath, BedDouble, ChevronLeft, ChevronRight, Home, LandPlot, MapPin, MessageCircle, Ruler, X } from 'lucide-react'
+import MapCanvas, { type VistaMapa } from '../PropertyMap/MapCanvas'
+import { ChevronLeft, ChevronRight, Home, LandPlot, MapPin, MessageCircle, X } from 'lucide-react'
 import { useGeoData } from '../PropertyMap/useGeoData'
 import { ApiError, apiGet, esCancelacion } from '../../services/api'
 import { conPuntosDeMiles, montoDeCampo, textoDeCampo, textoPrecioOperacion } from '../../services/guaranies'
@@ -17,7 +17,6 @@ import {
 import {
   FILTROS_VACIOS,
   operacionesDe,
-  tieneOperacion,
   type Filtros,
   type GeoFeatureCollection,
   type OperacionPrecio,
@@ -174,6 +173,14 @@ export default function SearchFilter() {
   const [filtrosBuscados, setFiltrosBuscados] = useState<Filtros>(FILTROS_VACIOS)
   const [extraBounds, setExtraBounds] = useState<LatLngBounds | null>(null)
   const [propiedadId, setPropiedadId] = useState<string | null>(null)
+  // Al abrir una propiedad se guarda dónde estaba el cliente (filtros, barra y vista del mapa) y la X lo devuelve ahí,
+  // con el mismo centro y zoom. vistaRestaurada se usa una sola vez: cualquier otro movimiento la descarta.
+  const ultimaVista = useRef<VistaMapa | null>(null)
+  const antesDelDetalle = useRef<{
+    filtros: Filtros; borrador: Filtros; desdeTexto: string; hastaTexto: string; extraBounds: LatLngBounds | null; vista: VistaMapa | null
+  } | null>(null)
+  const [vistaRestaurada, setVistaRestaurada] = useState<VistaMapa | null>(null)
+  const recordarVista = useCallback((v: VistaMapa) => { ultimaVista.current = v }, [])
   const [searchParams] = useSearchParams()
   // Presupuesto en guaraníes: se aplica con Buscar, como el resto de la barra.
   const [desdeTexto, setDesdeTexto] = useState('')
@@ -235,6 +242,7 @@ export default function SearchFilter() {
     )
     setExtraBounds(null)
     setPropiedadId(null)
+    setVistaRestaurada(null)
   }
 
   /** Lo que se elige en la barra: no busca hasta pulsar Buscar. */
@@ -286,7 +294,6 @@ export default function SearchFilter() {
   // presupuesto en guaraníes (desde/hasta) y departamento. Aquí solo se muestran los resultados.
   const busqueda = usePropiedadesFiltradas(filtros, !loading && !error)
   const propiedadesFiltradas = busqueda.datos
-  const propiedadesDelBarrio = propiedadesFiltradas
   const resultados = propiedadesFiltradas
 
   const propiedadSeleccionada = useMemo(
@@ -345,6 +352,7 @@ export default function SearchFilter() {
     setBorrador(next)
     setPropiedadId(null)
     setExtraBounds(null)
+    setVistaRestaurada(null)
     if (next.ciudadId) return
     if (sinCambios) {
       // No hay búsqueda nueva: se encuadra en los resultados que ya están
@@ -368,6 +376,7 @@ export default function SearchFilter() {
         : `hasta Gs. ${conPuntosDeMiles(filtros.presupuestoMax ?? 0)}`
 
   function seleccionarPropiedad(p: PropiedadFeature) {
+    antesDelDetalle.current = { filtros, borrador, desdeTexto, hastaTexto, extraBounds, vista: ultimaVista.current }
     const props = p.properties
     // Si tocan un pin fuera del contexto actual, ubicamos ciudad/barrio para
     // que el botón "volver" funcione de forma coherente.
@@ -378,8 +387,25 @@ export default function SearchFilter() {
     setPropiedadId(props.id)
   }
 
-  /** La X del detalle vuelve directo al resultado de la última búsqueda, con el mapa completo (no a la ficha del barrio). */
+  /**
+   * La X del detalle vuelve al mapa tal como estaba antes de abrir la propiedad: mismos filtros, barra, barrio,
+   * centro y zoom. Si la propiedad se abrió desde un enlace (por ejemplo, una oferta del inicio), no hay un mapa
+   * anterior: vuelve al resultado de la última búsqueda.
+   */
   function volverDesdeDetalle() {
+    const antes = antesDelDetalle.current
+    antesDelDetalle.current = null
+    if (antes) {
+      setFiltros(antes.filtros)
+      setBorrador(antes.borrador)
+      setDesdeTexto(antes.desdeTexto)
+      setHastaTexto(antes.hastaTexto)
+      setErrorPresupuesto(null)
+      setExtraBounds(antes.extraBounds)
+      setPropiedadId(null)
+      setVistaRestaurada(antes.vista)
+      return
+    }
     const { presupuestoMin, presupuestoMax } = filtrosBuscados
     setDesdeTexto(presupuestoMin != null ? conPuntosDeMiles(presupuestoMin) : '')
     setHastaTexto(presupuestoMax != null ? conPuntosDeMiles(presupuestoMax) : '')
@@ -567,28 +593,19 @@ export default function SearchFilter() {
             flyToBounds={flyToBounds}
             onVolver={volverDesdeDetalle}
           />
-        ) : nivel === 'barrio' && barrioSeleccionado ? (
-          <BarrioView
-            ciudades={ciudades}
-            barriosVisibles={barriosDeLaCiudad}
-            barrioSeleccionado={barrioSeleccionado}
-            ciudadSeleccionada={ciudadSeleccionada}
-            propiedades={propiedadesDelBarrio}
-            flyToBounds={flyToBounds}
-            barrioId={filtros.barrioId}
-            onVolver={volverDesdeBarrio}
-            onSelectBarrio={(id) => patch({ barrioId: id })}
-            onSelectPropiedad={seleccionarPropiedad}
-          />
         ) : (
           <MapaGeneralView
             ciudades={ciudadesVisibles}
             barriosVisibles={barriosDeLaCiudad}
             propiedades={resultados}
-            nivel={filtros.ciudadId ? 'ciudad' : 'departamento'}
+            nivel={nivel === 'barrio' && !barrioSeleccionado ? 'ciudad' : nivel}
             ciudadSeleccionada={ciudadSeleccionada}
+            barrioSeleccionado={barrioSeleccionado}
+            cargando={busqueda.cargando}
             flyToBounds={flyToBounds}
-            onVolver={volverDesdeCiudad}
+            vistaRestaurada={vistaRestaurada}
+            onVistaCambia={recordarVista}
+            onVolver={nivel === 'barrio' ? volverDesdeBarrio : volverDesdeCiudad}
             onSelectCiudad={(id) => patch({ ciudadId: id, barrioId: null })}
             onSelectBarrio={(id) => patch({ barrioId: id })}
             onSelectPropiedad={seleccionarPropiedad}
@@ -599,7 +616,8 @@ export default function SearchFilter() {
   )
 }
 
-// ─── Nivel "departamento" / "ciudad": mapa a pantalla completa ──────────────
+// ─── Mapa a pantalla completa: departamento, ciudad o barrio ─────────────
+// En el barrio, el mapa se acerca a esa zona y muestra sus marcadores; un marcador abre el detalle.
 
 function MapaGeneralView({
   ciudades,
@@ -607,7 +625,11 @@ function MapaGeneralView({
   propiedades,
   nivel,
   ciudadSeleccionada,
+  barrioSeleccionado,
+  cargando,
   flyToBounds,
+  vistaRestaurada,
+  onVistaCambia,
   onVolver,
   onSelectCiudad,
   onSelectBarrio,
@@ -616,201 +638,62 @@ function MapaGeneralView({
   ciudades: ReturnType<typeof useGeoData>['ciudades']
   barriosVisibles: ReturnType<typeof useGeoData>['barrios']
   propiedades: PropiedadFeature[]
-  nivel: 'departamento' | 'ciudad'
+  nivel: 'departamento' | 'ciudad' | 'barrio'
   ciudadSeleccionada: ReturnType<typeof useGeoData>['ciudades'][number] | undefined
+  barrioSeleccionado: ReturnType<typeof useGeoData>['barrios'][number] | undefined
+  cargando: boolean
   flyToBounds: LatLngBounds | null
+  vistaRestaurada: VistaMapa | null
+  onVistaCambia: (vista: VistaMapa) => void
   onVolver: () => void
   onSelectCiudad: (id: string) => void
   onSelectBarrio: (id: number) => void
   onSelectPropiedad: (p: PropiedadFeature) => void
 }) {
+  const barrioId = nivel === 'barrio' ? barrioSeleccionado?.properties.id ?? null : null
+  const sinPropiedades = nivel === 'barrio' && !cargando && propiedades.length === 0
   return (
-    <>
-      {nivel === 'ciudad' && (
-        <div className={styles.stageHeader}>
-          <h2 className={styles.stageTitle}>
-            Tenemos propiedades en los barrios de{' '}
-            <em className={styles.stageTitleAccent}>{ciudadSeleccionada?.properties.ciudad}</em>:
-          </h2>
+    <div className={styles.mapOnly}>
+      {nivel !== 'departamento' && (
+        <div className="pm-breadcrumb">
+          <button className="pm-back-btn" onClick={onVolver}>
+            <ChevronLeft size={16} aria-hidden="true" /> Volver
+          </button>
+          <span>
+            Alto Paraná › {ciudadSeleccionada?.properties.ciudad}
+            {nivel === 'barrio' && ` › ${barrioSeleccionado?.properties.barrio}`}
+          </span>
         </div>
       )}
-      <div className={styles.mapOnly}>
-        {nivel === 'ciudad' && (
-          <div className="pm-breadcrumb">
-            <button className="pm-back-btn" onClick={onVolver}>
-              <ChevronLeft size={16} aria-hidden="true" /> Volver
-            </button>
-            <span>Alto Paraná › {ciudadSeleccionada?.properties.ciudad}</span>
-          </div>
-        )}
-        <MapCanvas
-          ciudades={ciudades}
-          barriosVisibles={barriosVisibles}
-          propiedadesVisibles={propiedades}
-          showCiudades={nivel === 'departamento'}
-          showBarrios={nivel === 'ciudad'}
-          showPropiedades
-          barriosLayerKey={`sf-${ciudadSeleccionada?.properties.id ?? 'none'}`}
-          selectedBarrioId={null}
-          flyToBounds={flyToBounds}
-          onSelectCiudad={onSelectCiudad}
-          onSelectBarrio={(id) => onSelectBarrio(id)}
-          onSelectPropiedad={(id) => {
-            const p = propiedades.find((x) => x.properties.id === id)
-            if (p) onSelectPropiedad(p)
-          }}
-        />
-        <p className={styles.mapHint}>
-          {nivel === 'departamento'
-            ? 'Hacé clic en una ciudad, o filtrá por zona, para ver sus barrios'
-            : 'Hacé clic en un barrio pintado para ver sus propiedades'}
-        </p>
-      </div>
-    </>
-  )
-}
-
-// ─── Nivel "barrio": mapa con barrios pintados + panel deslizable ───────────
-
-function BarrioView({
-  ciudades,
-  barriosVisibles,
-  barrioSeleccionado,
-  ciudadSeleccionada,
-  propiedades,
-  flyToBounds,
-  barrioId,
-  onVolver,
-  onSelectBarrio,
-  onSelectPropiedad,
-}: {
-  ciudades: ReturnType<typeof useGeoData>['ciudades']
-  barriosVisibles: ReturnType<typeof useGeoData>['barrios']
-  barrioSeleccionado: ReturnType<typeof useGeoData>['barrios'][number]
-  ciudadSeleccionada: ReturnType<typeof useGeoData>['ciudades'][number] | undefined
-  propiedades: PropiedadFeature[]
-  flyToBounds: LatLngBounds | null
-  barrioId: number | null
-  onVolver: () => void
-  onSelectBarrio: (id: number) => void
-  onSelectPropiedad: (p: PropiedadFeature) => void
-}) {
-  // Una casa con Venta y Alquiler cuenta en ambos
-  const enVenta = propiedades.filter((p) => tieneOperacion(p.properties, 'Venta')).length
-  const enAlquiler = propiedades.filter((p) => tieneOperacion(p.properties, 'Alquiler')).length
-
-  return (
-    <>
-      <div className={styles.stageHeader}>
-        <h2 className={styles.stageTitle}>
-          Tenemos propiedades en los barrios/zona: <em className={styles.stageTitleAccent}>{barrioSeleccionado.properties.barrio}</em>
-        </h2>
-      </div>
-
-      <div className={styles.splitStage}>
-        {/* Mapa con los barrios pintados */}
-        <div className={styles.mapPane}>
-          <div className="pm-breadcrumb">
-            <button className="pm-back-btn" onClick={onVolver}>
-              <ChevronLeft size={16} aria-hidden="true" /> Volver
-            </button>
-            <span>
-              Alto Paraná › {ciudadSeleccionada?.properties.ciudad} › {barrioSeleccionado.properties.barrio}
-            </span>
-          </div>
-          <MapCanvas
-            ciudades={ciudades}
-            barriosVisibles={barriosVisibles}
-            propiedadesVisibles={propiedades}
-            showCiudades={false}
-            showBarrios
-            showPropiedades
-            barriosLayerKey={`sf-barrio-${ciudadSeleccionada?.properties.id ?? 'none'}`}
-            selectedBarrioId={barrioId}
-            flyToBounds={flyToBounds}
-            onSelectCiudad={() => {}}
-            onSelectBarrio={onSelectBarrio}
-            onSelectPropiedad={(id) => {
-              const p = propiedades.find((x) => x.properties.id === id)
-              if (p) onSelectPropiedad(p)
-            }}
-          />
-        </div>
-
-        {/* Panel deslizable: nombre/descripción del barrio + grilla de propiedades */}
-        <div className={styles.sidePanel}>
-          <div className={styles.sidePanelHeader}>
-            <h3 className={styles.sidePanelTitle}>{barrioSeleccionado.properties.barrio}</h3>
-            <p className={styles.sidePanelDesc}>
-              Barrio {barrioSeleccionado.properties.barrio.toLowerCase()}, en{' '}
-              {ciudadSeleccionada?.properties.ciudad}, departamento de Alto Paraná.
-            </p>
-            <div className={styles.sidePanelStats}>
-              <span className={styles.sidePanelStat}>{propiedades.length} propiedad(es)</span>
-              <span className={styles.sidePanelStat}>{enVenta} en venta</span>
-              <span className={styles.sidePanelStat}>{enAlquiler} en alquiler</span>
-            </div>
-          </div>
-
-          <div className={styles.sidePanelScroll}>
-            <span className={styles.sidePanelScrollLabel}>Propiedades que hay en este barrio</span>
-            {propiedades.length === 0 ? (
-              <p className={styles.emptyText}>
-                No hay propiedades cargadas para esta selección todavía. Probá quitando algún
-                filtro.
-              </p>
-            ) : (
-              <div className={styles.cardGrid}>
-                {propiedades.map((p) => (
-                  <PropiedadCard key={p.properties.id} p={p} onClick={() => onSelectPropiedad(p)} />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </>
-  )
-}
-
-function PropiedadCard({ p, onClick }: { p: PropiedadFeature; onClick: () => void }) {
-  const props = p.properties
-  const fotos = fotosPara(props)
-
-  return (
-    <div className={styles.propCard}>
-      <div className={styles.propCardImg}>
-        {fotos.length > 0 ? (
-          <img src={fotos[0]} alt={props.titulo} className={styles.propThumbImg} />
-        ) : (
-          <span className={styles.propCardIcon}>{iconoCategoria(props.categoria)}</span>
-        )}
-        <span className={styles.propBadge}>{props.categoria}</span>
-      </div>
-      <div
-        className={styles.propBody}
-        role="button"
-        tabIndex={0}
-        onClick={onClick}
-        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick()}
-      >
-        <div className={styles.propTitle}>{props.titulo}</div>
-        {operacionesDe(props).map((op) => (
-          <div key={op.operacion} className={styles.propPrice}>
-            {operacionesDe(props).length > 1 ? `${op.operacion}: ` : ''}
-            {textoPrecio(op)}
-          </div>
-        ))}
-        <div className={styles.propSpecs}>
-          {props.categoria !== 'Terreno' && (
-            <>
-              <span className={styles.propSpec}><BedDouble size={15} aria-hidden="true" /> {props.dormitorios}</span>
-              <span className={styles.propSpec}><Bath size={15} aria-hidden="true" /> {props.banos}</span>
-            </>
-          )}
-          <span className={styles.propSpec}><Ruler size={15} aria-hidden="true" /> {props.m2} m²</span>
-        </div>
-      </div>
+      <MapCanvas
+        ciudades={ciudades}
+        barriosVisibles={barriosVisibles}
+        propiedadesVisibles={propiedades}
+        showCiudades={nivel === 'departamento'}
+        showBarrios={nivel !== 'departamento'}
+        showPropiedades
+        // La clave cambia con el barrio elegido para que el resaltado se vuelva a pintar
+        barriosLayerKey={`sf-${ciudadSeleccionada?.properties.id ?? 'none'}-${barrioId ?? 'todos'}`}
+        selectedBarrioId={barrioId}
+        flyToBounds={flyToBounds}
+        vistaRestaurada={vistaRestaurada}
+        onVistaCambia={onVistaCambia}
+        onSelectCiudad={onSelectCiudad}
+        onSelectBarrio={(id) => onSelectBarrio(id)}
+        onSelectPropiedad={(id) => {
+          const p = propiedades.find((x) => x.properties.id === id)
+          if (p) onSelectPropiedad(p)
+        }}
+      />
+      <p className={styles.mapHint} data-aviso-mapa>
+        {nivel === 'departamento'
+          ? 'Hacé clic en una ciudad, o filtrá por zona, para ver sus barrios'
+          : nivel === 'ciudad'
+            ? 'Hacé clic en un barrio pintado para ver sus propiedades'
+            : sinPropiedades
+              ? 'No hay propiedades en este barrio con estos filtros. Probá quitando algún filtro.'
+              : 'Hacé clic en un marcador para ver la propiedad'}
+      </p>
     </div>
   )
 }

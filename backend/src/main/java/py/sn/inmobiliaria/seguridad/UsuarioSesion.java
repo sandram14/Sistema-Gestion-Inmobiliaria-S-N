@@ -2,7 +2,6 @@ package py.sn.inmobiliaria.seguridad;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Usuario autenticado, tal como se guarda en la sesión y se devuelve en /me.
@@ -42,9 +41,5 @@ public record UsuarioSesion(int id, String nombre, String apellido, String email
 
     public boolean tiene(Permiso permiso) {
         return permisos.contains(permiso.name());
-    }
-
-    public Set<Permiso> conjuntoDePermisos() {
-        return Permiso.deRol(rol);
     }
 }

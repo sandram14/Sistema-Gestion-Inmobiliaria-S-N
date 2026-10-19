@@ -17,6 +17,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JsonUtilTest {
 
+    /**
+     * Contrato de /api/admin/auth/me: los campos exactos del usuario de la sesión. Los métodos de ayuda de
+     * UsuarioSesion (tiene, esAdmin) no deben aparecer en el JSON que recibe el panel.
+     */
+    @Test
+    void elUsuarioDeLaSesionSeEnviaSoloConSusCampos() throws Exception {
+        var usuario = new py.sn.inmobiliaria.seguridad.UsuarioSesion(7, "Sandra", "P", "s@sn.local", "ADMIN", true);
+        JsonNode json = JsonUtil.mapper().readTree(JsonUtil.mapper().writeValueAsString(usuario));
+        var campos = new java.util.TreeSet<String>();
+        json.fieldNames().forEachRemaining(campos::add);
+        assertEquals(java.util.Set.of("apellido", "debeCambiarPassword", "email", "id", "nombre", "permisos", "rol"), campos);
+    }
+
     /** DTO mínimo para probar la lectura de JSON de entrada. */
     record EjemploRequest(String titulo) {
     }

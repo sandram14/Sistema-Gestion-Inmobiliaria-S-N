@@ -166,26 +166,6 @@
   background: var(--color-verde-oscuro);
 }
 
-.stageHeader {
-  flex-shrink: 0;
-  padding: 6px 8px 14px;
-}
-
-.stageTitle {
-  font-family: var(--fuente-titulos);
-  font-size: var(--titulo-bloque);
-  font-weight: 700;
-  color: var(--color-blanco);
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-
-.stageTitleAccent {
-  font-style: normal; /* destacado: verde, sin cursiva */
-  color: var(--color-acento);
-}
-
 .mapOnly {
   flex: 1;
   min-height: 0;
@@ -239,45 +219,6 @@
   overflow-y: auto;
 }
 
-.sidePanelHeader {
-  flex-shrink: 0;
-  padding: 24px 26px 18px;
-  border-bottom: 1px solid var(--color-borde);
-}
-
-.sidePanelTitle {
-  font-family: var(--fuente-titulos);
-  font-size: var(--texto-2xl);
-  font-weight: 700;
-  color: var(--color-texto);
-  letter-spacing: -0.02em;
-  margin: 0 0 6px;
-}
-
-.sidePanelDesc {
-  color: var(--color-gris);
-  font-size: var(--texto-sm);
-  font-family: var(--fuente-texto);
-  line-height: 1.65;
-  margin: 0 0 14px;
-}
-
-.sidePanelStats {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.sidePanelStat {
-  background: var(--color-fondo);
-  color: var(--color-verde);
-  font-size: var(--texto-xs);
-  font-family: var(--fuente-texto);
-  font-weight: 600;
-  padding: 5px 12px;
-  border-radius: 100px;
-}
-
 .sidePanelScroll {
   flex: none; /* ya no se desplaza por separado: lo hace el panel completo */
   padding: 18px 26px 30px;
@@ -299,54 +240,6 @@
   font-size: var(--texto-sm);
   font-family: var(--fuente-texto);
   line-height: 1.6;
-}
-
-/* ── Lista de propiedades del barrio ──────────────────────────────────── */
-.cardGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.propCard {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  width: 100%;
-  background: var(--color-blanco);
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1.5px solid var(--color-fondo);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.propCard:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--sombra-2);
-}
-
-.propCardImg {
-  position: relative;
-  flex: 0 0 150px;
-  width: 150px;
-  min-height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-verde-medio);
-}
-
-.propThumbImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.propCardIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-acento);
 }
 
 /* ── Galería de fotos deslizable ──────────────────────────────────────── */
@@ -437,60 +330,6 @@
   background: var(--color-acento);
   width: 16px;
   border-radius: 4px;
-}
-
-.propBadge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: color-mix(in srgb, var(--color-blanco) 92%, transparent);
-  color: var(--color-verde);
-  font-size: var(--texto-2xs);
-  font-weight: 700;
-  font-family: var(--fuente-texto);
-  padding: 4px 12px;
-  border-radius: 100px;
-  box-shadow: var(--sombra-1);
-}
-
-
-.propBody {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 6px;
-  padding: 14px 18px;
-  cursor: pointer;
-}
-
-.propTitle {
-  font-size: var(--texto-base);
-  font-family: var(--fuente-texto);
-  color: var(--color-texto);
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.propPrice {
-  font-family: var(--fuente-titulos);
-  font-size: var(--texto-xl);
-  font-weight: 400;
-  color: var(--color-verde);
-}
-
-.propSpecs {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-top: 4px;
-}
-
-.propSpec {
-  font-size: var(--texto-sm);
-  color: var(--color-gris);
-  font-family: var(--fuente-texto);
 }
 
 /* ── Detalle de propiedad ─────────────────────────────────────────────── */
@@ -686,8 +525,6 @@
   .filterBar {
     padding: 14px 16px;
   }
-  .stageHeader,
-  .sidePanelHeader,
   .sidePanelScroll,
   .detailHeader {
     padding-left: 16px;
@@ -730,30 +567,6 @@
   }
   .filterBar > .searchBtn {
     margin-top: 0; /* en su propia fila: no necesita alinearse con los campos */
-  }
-  .stageTitle {
-    font-size: var(--texto-xl);
-  }
-  .sidePanelTitle {
-    font-size: var(--texto-xl);
-  }
-  .sidePanelHeader {
-    padding-top: 18px;
-    padding-bottom: 14px;
-  }
-  .propCardImg {
-    flex-basis: 120px;
-    width: 120px;
-    min-height: 90px;
-  }
-  .propBody {
-    padding: 12px 14px;
-  }
-  .propTitle {
-    font-size: var(--texto-md);
-  }
-  .propPrice {
-    font-size: var(--texto-lg);
   }
   .detailPhotos {
     height: 220px;

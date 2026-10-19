@@ -2,6 +2,8 @@
 .env
 .env.*
 !.env.example
+# Dependencias instaladas con npm (cada proyecto las reinstala con npm ci; incluye herramientas/fuentes)
+node_modules/
 # Java / Maven
 backend/target/
 # IDEs

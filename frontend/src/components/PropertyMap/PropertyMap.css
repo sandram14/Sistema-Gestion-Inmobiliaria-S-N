@@ -62,6 +62,7 @@
   position: absolute;
   top: 16px;
   left: 16px;
+  max-width: calc(100% - 88px); /* nunca debajo de los botones de zoom (arriba a la derecha) */
   z-index: 500;
   display: flex;
   align-items: center;

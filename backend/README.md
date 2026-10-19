@@ -81,8 +81,8 @@ Probar: `curl.exe -i http://localhost:8080/api/health`
 | `ASISTENTE_LIMITE_*` | Límites por minuto/día, por visitante y global | 10, 30, 8, 200 |
 
 Si falta alguna variable `DB_*`, el backend arranca igual y `/api/health` responde 503
-con `"baseDatos": {"estado": "no_configurada"}`. La API key de Gemini se agregará en su fase,
-también como variable de entorno.
+con `"baseDatos": {"estado": "no_configurada"}`. Sin `GEMINI_API_KEY` el backend también arranca:
+el asistente responde 503 con un mensaje claro y el resto del sistema funciona.
 
 ## Estructura de paquetes (`py.sn.inmobiliaria`)
 

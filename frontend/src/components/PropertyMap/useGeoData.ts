@@ -43,7 +43,8 @@ export function soloConPropiedades(
 /**
  * Carga ciudades, barrios y propiedades desde la API Java:
  * /api/ciudades, /api/barrios y /api/propiedades (mismo formato FeatureCollection
- * que tenían los archivos estáticos de public/data/, que ya no se usan).
+ * que los archivos de public/data/). El sitio ya no lee esos archivos: los usan el
+ * simulador de herramientas/ y la prueba CompatibilidadFrontendIntegracionTest del backend.
  *
  * "propiedades" trae todas las disponibles (para Ofertas y para abrir el detalle
  * desde un enlace); la búsqueda con filtros la hace el buscador contra la API.

@@ -1,7 +1,7 @@
 # S&N Inmobiliaria — Contexto del proyecto (para Claude Code)
 
 > Documento de traspaso. Léelo completo antes de proponer o modificar nada.
-> Estado al **19 de octubre de 2026**. Proyecto de **Sandra**. Lo que resta del proyecto lo trabajan **solo Sandra y Claude**
+> Estado al **19 de octubre de 2026 (preparación de la entrega)**. Proyecto de **Sandra**. Lo que resta del proyecto lo trabajan **solo Sandra y Claude**
 > (la compañera que colaboraba en `frontend/` ya no participa).
 >
 > Este archivo se llama `CLAUDE.md` y va en la raíz del repositorio: Claude Code lo lee solo al iniciar cada sesión.
@@ -10,11 +10,11 @@
 
 ## 0. Lo más importante, en cinco líneas
 
-1. La **W4** del sitio (presupuesto y **solo guaraníes** en todo el sistema) está **terminada, verificada y desplegada**, pero **sin commitear**: falta la revisión de Sandra en el navegador y su commit (sección 9).
-2. La **migración 009 ya está aplicada en la base de desarrollo** de Sandra y el backend **0.21.0** está corriendo en Docker.
-3. Después del despliegue se quitaron los restos del tipo "departamento" (solo **Casa y Terreno**): ese cambio del sitio **todavía no está desplegado** (falta `docker compose up -d --build web`).
-4. Lo pendiente está en la sección 9; lo que sigue después de la W4, en la sección 12 (Fases 17 y 18).
-5. Dinámica obligatoria (sección 11): revisar, proponer con decisiones, **esperar aprobación**, implementar, verificar, tabla de revisión. **Nunca hacer commit**: lo hace Sandra.
+1. Todo lo hecho hasta el **19/10** está **commiteado y subido a GitHub** (rama `reorganizacion-estructura`, último commit `3c22bab`): W1 a W4, migraciones 001 a 011 y backend **0.24.0**. `main` sigue en el punto de partida.
+2. La base de Sandra tiene **aplicadas las migraciones hasta la 011** y Docker corre el backend 0.24.0 (comprobado el 19/10 con `/api/health` y la tabla `auditoria`).
+3. La **preparación de la entrega** (19/10, sin commitear) quitó el panel lateral del barrio, los textos sobre el mapa y código sin uso, y agregó el `README.md` de la raíz (sección 9).
+4. Lo pendiente para considerar el proyecto terminado está en la sección 9; lo que queda para después, en la sección 12.
+5. Dinámica obligatoria (sección 11): revisar, proponer con decisiones, **esperar aprobación**, implementar, verificar, tabla de revisión. **Nunca hacer commit ni push**: lo hace Sandra.
 
 ---
 
@@ -24,7 +24,7 @@ Plataforma inmobiliaria para **S&N Inmobiliaria**, que opera en **Alto Paraná, 
 
 | Parte | Para quién | Qué hace |
 |---|---|---|
-| **Sitio público** (`frontend/`) | Clientes | Buscar propiedades en un mapa por departamento, ciudad y barrio; ver el detalle; asistente virtual con IA (Gemini); páginas Inicio, Servicios, Nosotros y Contacto |
+| **Sitio público** (`frontend/`) | Clientes | Buscar propiedades en un mapa por departamento, ciudad y barrio; ver el detalle; asistente virtual con IA (Gemini); páginas Inicio, Nosotros (con los servicios) y Contacto |
 | **Panel administrativo** (`admin/`) | Equipo de la inmobiliaria | Propiedades, consultas del chat IA, clientes potenciales, usuarios y roles, contenido del sitio y la propia cuenta |
 | **Backend** (`backend/`) + **base** (`database/`) | — | API REST en Java y PostgreSQL con PostGIS |
 
@@ -43,11 +43,12 @@ Plataforma inmobiliaria para **S&N Inmobiliaria**, que opera en **Alto Paraná, 
 C:\Proyectos\sn-inmobiliaria          (rama de trabajo: reorganizacion-estructura; main quedó en el punto de partida)
 ├── frontend/   sitio público
 ├── admin/      panel administrativo (independiente; se sirve en /admin/)
-├── backend/    Java (0.20.0 commiteado; 0.21.0 en la copia local, sin commitear, y desplegado)
-├── database/   schema/, seed/, migraciones/ (001 a 008 commiteadas; 009 sin commitear y aplicada), pruebas/
+├── backend/    Java (0.24.0, commiteado y desplegado)
+├── database/   schema/, seed/, datos/ (INE 2022), migraciones/ (001 a 011, commiteadas y aplicadas en la base de Sandra), pruebas/
 ├── docker/     docker-compose.yml, Dockerfiles, nginx, .env (NUNCA en Git), README
 ├── docs/       contratos de integración para el sitio público
 └── herramientas/, admin/verificacion/, frontend/verificacion/   herramientas de verificación (sin commitear; sección 10)
+README.md       documentación para personas (propósito, requisitos, variables, Docker, pruebas). CLAUDE.md es para Claude Code
 ```
 
 - Volúmenes externos (Compose nunca los crea ni borra): `sn-inmobiliaria_pgdata` (base) y `sn-uploads` (fotos).
@@ -65,7 +66,7 @@ C:\Proyectos\sn-inmobiliaria          (rama de trabajo: reorganizacion-estructur
 | 15A, 15B, 15C | Completas: sitio conectado a la API, panel independiente, 66 fotos migradas a `/uploads` |
 | 16 | Completa: sistema completo con Docker Compose |
 | Mejoras del panel | Completas (sección 6) |
-| Sitio público | W1, W2 y W3 **commiteadas**. **W4 terminada, sin commitear** (secciones 7 y 8) |
+| Sitio público | W1 a W4 **commiteadas** (secciones 7 y 8) |
 | **17 (pruebas)** y **18 (documentación)** | Pendientes (sección 12) |
 
 ## 5. Base de datos: migraciones
@@ -88,9 +89,9 @@ Además se actualizan `schema/` y `seed/`, para que una base nueva nazca igual q
 | 006 | `seccion_sitio` (contenido JSON) y `propiedad_destacada` |
 | 007 | Origen `CONTACTO` para clientes potenciales |
 | 008 | Solo datos: asteriscos en tres títulos del sitio (un único script, documentado así) |
-| **009** | **Solo guaraníes**: USD → PYG con el mismo número, `CHECK (moneda = 'PYG')` y `DEFAULT 'PYG'`. Sin commitear. **Aplicada en la base de desarrollo el 16/10** (sección 8.1) |
+| **009** | **Solo guaraníes**: USD → PYG con el mismo número, `CHECK (moneda = 'PYG')` y `DEFAULT 'PYG'`. **Aplicada en la base de desarrollo el 16/10** (sección 8.1) |
 | **010** | **Barrios oficiales del INE 2022 de todo Alto Paraná**: 22 ciudades y 714 barrios y localidades (urbanos y rurales), los 12 de antes pasan al contorno exacto (< 1 m), sin nombre único por ciudad. Datos en `database/datos/ine2022_alto_parana.sql` (10 MB, generado por `generar_ine2022.mjs`), compartido con `seed/02_ubicacion.sql`. Ensayada (18/10). **Aplicada** en la base de Sandra (comprobado el 19/10 por la API: 217 barrios en las 4 ciudades con propiedades) |
-| **011** | **Auditoría y cierre de sesiones**: `usuario.version_credencial` (sube al restablecer la contraseña: las sesiones abiertas con el número anterior se cierran) y tabla `auditoria` (fecha, acción, quién y a quién; sin contraseñas ni IP). Ensayada (19/10); **pendiente de aplicar** en la base de Sandra. El backend 0.24.0 **necesita** la 011 |
+| **011** | **Auditoría y cierre de sesiones**: `usuario.version_credencial` (sube al restablecer la contraseña: las sesiones abiertas con el número anterior se cierran) y tabla `auditoria` (fecha, acción, quién y a quién; sin contraseñas ni IP). Ensayada (19/10). **Aplicada** en la base de Sandra (comprobado el 19/10: existe `auditoria`). El backend 0.24.0 **necesita** la 011 |
 
 Se aplican con:
 
@@ -133,7 +134,7 @@ En el backend: `seguridad/Permiso.java` (matriz), `seguridad/ReglasAcceso.java` 
 | W1 Identidad visual | ✅ | Logo, íconos Lucide, encabezado legible, variables de color y tipografía, mapa a pantalla completa, filtros centrados |
 | W2 Contenido desde el panel | ✅ | Portada, ofertas, Servicios, Nosotros, pie, Contacto con formulario (canal `CONTACTO`), `*asteriscos*`, aviso de datos provisionales |
 | W3 Chat | ✅ | Saludo, sin códigos visibles, WhatsApp desde el panel, formulario "Dejar mis datos" en el chat (canal `CHAT`) |
-| **W4** Presupuesto y solo guaraníes | ✅ **Terminada, sin commitear** | Ver 7.1 y sección 8 |
+| **W4** Presupuesto y solo guaraníes | ✅ | Ver 7.1 y sección 8 |
 
 ### 7.1 W4: decisiones aprobadas por Sandra
 
@@ -158,8 +159,9 @@ La idea inicial era elegir guaraníes o dólares. **Sandra decidió eliminar el 
 | Servicios dentro de Nosotros (18/10, backend 0.22.0) | La página Servicios se unió a Nosotros: **historia → valores → servicios → invitación a buscar**. `/servicios` redirige a `/nosotros#servicios`; "Servicios" salió del menú y del pie. Se retiraron "Lo que tenemos para vos" (con su carrusel) y "¿Por qué elegir S&N?" (con su imagen). En el panel la pestaña Servicios desapareció (`/sitio/servicios` redirige a Nosotros): Nosotros edita las dos secciones (`NOSOTROS` y `SERVICIOS`) con **un solo botón**, que avisa qué parte se publicó si una falla, y guarda vacíos `razones`, `bloqueTitulo` y `bloqueTexto`. El backend acepta 0 razones |
 | Zonas del mapa (18/10, migración 010 y backend 0.23.0) | Se cargan **todos los barrios y localidades de Alto Paraná del INE 2022** (opción A; dibujar zonas desde el panel queda para más adelante si hace falta). Nombres repetidos permitidos. `/api/barrios` devuelve contornos **simplificados para dibujar** (`TOLERANCIA_DIBUJO` = 0.00003°, unos 3 m; la validación usa el exacto). El sitio pide `conPropiedades=true`: mapa y filtro solo con **ciudades con propiedades Disponibles** y todos sus barrios; el panel pide todo. Otro departamento: descargar su GeoJSON del INE y repetir el procedimiento |
 | Zonas con propiedades (19/10, backend 0.24.0) | El mapa y las listas Ciudad y Barrio muestran **solo los barrios con al menos una propiedad Disponible** y sus ciudades ("N barrio(s)" recalculado). Lo calcula el sitio con la lista de propiedades (`soloConPropiedades` en `useGeoData.ts`), que nunca se guarda en el navegador: un barrio aparece o desaparece al instante. Los contornos con `conPropiedades=true` se guardan **5 minutos** (antes 1 hora); sin ese parámetro (panel), 1 hora |
-| La X del detalle (18/10) | Vuelve al **resultado de la última búsqueda** (filtros al pulsar Buscar, con el mapa completo), no a la ficha del barrio. "Volver al barrio" pasó a "Volver a los resultados" |
-| Tipos de propiedad | Solo **Casa y Terreno**. En el sitio la casa se muestra como **"Vivienda"** (sin "depto"). El chat ya no pregunta "casa o departamento": de "Comprar/Alquilar una propiedad" pasa directo a la ciudad |
+| Barrio sin panel lateral (19/10, reemplaza "La X del detalle" del 18/10) | Se quitó el panel lateral del barrio ("Propiedades que hay en este barrio", con sus contadores y tarjetas). Al elegir un barrio (clic en el mapa, o Ciudad + Barrio y Buscar) el **mapa a pantalla completa** se acerca a esa zona, la resalta y muestra sus marcadores; un marcador abre el detalle. La **X del detalle** vuelve al mapa **como estaba antes de abrir la propiedad**: mismos filtros, barra, barrio, centro y zoom (`antesDelDetalle` y `vistaRestaurada` en `SearchFilter.tsx`; `vistaRestaurada` y `onVistaCambia` en `MapCanvas.tsx`). Si la propiedad se abrió desde un enlace (ofertas de la portada), vuelve al resultado de la última búsqueda. "Volver" en el mapa: barrio → ciudad → mapa general |
+| Textos sobre el mapa (19/10) | Se quitaron "Tenemos propiedades en los barrios de …" y "… barrios/zona: …". Quedan la ruta con "Volver" dentro del mapa ("Alto Paraná › Ciudad › Barrio", nunca debajo de los botones de zoom) y el aviso inferior ("Hacé clic en un marcador…" o "No hay propiedades en este barrio con estos filtros…"). El encuadre mide la ruta y el aviso para no dejar marcadores debajo, y el mapa se vuelve a medir antes de encuadrar (`invalidateSize`): en el celular la barra cambia de alto |
+| Tipos de propiedad | Solo **Casa y Terreno**. En el sitio la casa se muestra como **"Vivienda"** (sin "depto"), también en la etiqueta de las ofertas (`grupoDeCategoria`, 19/10). El chat ya no pregunta "casa o departamento": de "Comprar/Alquilar una propiedad" pasa directo a la ciudad |
 
 Las decisiones D2, D3, D6 y D8 de la propuesta original (moneda inicial, selector de moneda, etc.) quedaron **sin efecto** al no haber dos monedas.
 
@@ -167,7 +169,7 @@ Las decisiones D2, D3, D6 y D8 de la propuesta original (moneda inicial, selecto
 
 ## 8. W4: qué se hizo y cómo se verificó
 
-Parte se hizo en claude.ai (`avance-w4.zip`, en `Downloads`) y el resto en Claude Code el 16/10. Todo está en la copia local, **sin commitear**.
+Parte se hizo en claude.ai (`avance-w4.zip`, en `Downloads`) y el resto en Claude Code el 16/10. Es el registro histórico de la W4: todo quedó **commiteado** después. Las cifras de pruebas de esta sección son las de ese momento; las actuales están en las secciones 9 y 10.
 
 ### 8.1 Base de datos
 
@@ -230,14 +232,35 @@ Quedan **a propósito** con "USD": `AsistenteServiceTest` y `GeminiClientTest` (
 - `herramientas/simulador.mjs`: propiedades en PYG al cargarlas, sin filtro por moneda, respuesta "Gs. 45.000".
 - `docs/integracion-busqueda-presupuesto.md` reescrito; ejemplo de `backend/README.md` corregido.
 
-## 9. Lo que falta para cerrar la W4
+## 9. Entrega: estado al 19/10 y pendientes
 
-| # | Tarea | Detalle |
+### 9.1 Preparación de la entrega (19/10, sin commitear)
+
+| Cambio | Archivos |
+|---|---|
+| A1 · Barrio sin panel lateral, y X que vuelve al mapa como estaba (sección 7.1) | `frontend/src/components/busqueda/SearchFilter.tsx`, `PropertyMap/MapCanvas.tsx` |
+| A2 · Sin textos sobre el mapa; la ruta no pasa debajo del zoom; encuadre que respeta la ruta y el aviso | `SearchFilter.tsx`, `PropertyMap/MapCanvas.tsx`, `PropertyMap/PropertyMap.css` |
+| A3 y L1 · "Vivienda" en las ofertas con `grupoDeCategoria` | `home/OffersSection.tsx` |
+| Limpieza de estilos sin uso (19 clases del panel del barrio y `.sectionHead`) | `busqueda/SearchFilter.module.css`, `nosotros/Nosotros.module.css` |
+| L3 y L4 · Sin `Errores.comoMapa()` ni `UsuarioSesion.conjuntoDePermisos()` (sin referencias; la prueba nueva `elUsuarioDeLaSesionSeEnviaSoloConSusCampos` fija los campos de `/me`) | `Errores.java`, `UsuarioSesion.java`, `JsonUtilTest.java` |
+| L5 · Comentario de los GeoJSON con sus usos reales | `PropertyMap/useGeoData.ts` |
+| L6 · Documentación | `README.md` (nuevo), `CLAUDE.md`, `backend/README.md` |
+| `.gitignore`: `node_modules/` en cualquier carpeta (cubre `herramientas/fuentes/`) | `.gitignore` |
+
+Se conservaron a propósito: `tieneOperacion` (quedó sin uso en la app, pero lo cubre `fase15a.test.tsx`), los `export` que solo se usan en su archivo, las funciones que solo usan las pruebas, las imágenes `inicio_sobre_nosotros.jpg` y `nosotros_page2.jpg` (sin uso, pero no se borran imágenes) y `frontend/public/data/*.geojson` (los usan el simulador y una prueba del backend).
+
+**Verificado el 19/10:** backend `mvn clean package` contra una base de prueba creada desde `schema/` y `seed/` → **326 pruebas, 0 fallas, 2 omitidas**; `verificar.sql` 24 de 24; panel `tsc`, `build` y **92 de 92**; sitio `tsc`, `build` y **83 de 83**; recorridos con el mapa real en el navegador (barrio por clic y por buscador, zoom y posición iguales al cerrar el detalle, "Volver", ofertas) en 1366, 390 y 360 px; `capturar.py` con 0 problemas; las imágenes Docker `backend` y `web` se construyen; el sistema en Docker responde (`/api/health` 0.24.0 con base y PostGIS, 28 propiedades, fotos 200, rutas administrativas 401 sin sesión).
+
+### 9.2 Pendientes para considerar el proyecto completamente listo
+
+| # | Pendiente | Detalle |
 |---|---|---|
-| 1 | Desplegar el cambio de tipos | `docker compose -f docker/docker-compose.yml up -d --build web` (la opción "Vivienda" y el chat sin "departamento" se hicieron después del despliegue) |
-| 2 | Revisión de Sandra en el navegador | `/buscar` (Desde/Hasta, puntos al escribir, Buscar/Enter), chat (Comprar → ciudad → presupuesto escrito, "Omitir"), panel (sin selector de moneda) |
-| 3 | Commit de Sandra | **No incluir** `herramientas/fuentes/` (tiene `node_modules`). `herramientas/`, `admin/verificacion/` y `frontend/verificacion/` se deciden en la Fase 17 |
-| 4 | Contenido (Sandra, desde el panel) | Corregir los 17 precios de la lista reconstruida. **Inferido, a revisar:** alquileres mensuales muy altos cargados a mano: prop-004 Gs. 420.000.000, prop-005 Gs. 100.000.000, prop-006 Gs. 168.000.000, prop-010 Gs. 372.000.000. Siete títulos todavía dicen "Departamento en …" (prop-002, 004, 006, 007, 013, 014 y 015): son datos, se editan desde el panel |
+| 1 | Revisión de Sandra y commit de la 9.1 | Desplegar con `docker compose -f docker/docker-compose.yml up -d --build web` (el backend solo cambió en código sin uso: no hace falta redesplegarlo, aunque se puede) |
+| 2 | Pruebas de interfaz fuera del repositorio | `admin/verificacion`, `frontend/verificacion` y `herramientas/` no están en Git: quien reciba el repositorio no puede correr esas pruebas. Decisión de Sandra (Fase 17) |
+| 3 | Prueba opcional desactualizada | Con `VERIFICAR_DATOS_DEMO=true`, `CompatibilidadFrontendIntegracionTest.losDatosDeDemostracionCoincidenConElGeoJsonOriginal` **falla**: `frontend/public/data/propiedades.geojson` sigue en USD y la base está en PYG desde la 009. Ya fallaba antes; sin esa variable se omite. Arreglarlo implica cambiar el GeoJSON (datos): decisión de Sandra |
+| 4 | Asistente con Gemini real | No se probó con una consulta real (guardaría una fila en el historial de Sandra y usaría su cuota). Sí: configuración (clave definida, modelo `gemini-3.1-flash-lite`), validación de la API y las pruebas con Gemini simulado. Se prueba con `PROBAR_GEMINI_REAL=true` |
+| 5 | Contenido (Sandra, desde el panel) | Corregir los 17 precios que pasaron de USD a PYG sin conversión (lista en `C:\Users\sanie\respaldos-sn\009-verificacion-RECONSTRUIDA-20261016.txt`). **Inferido, a revisar:** alquileres muy altos (prop-004 Gs. 420.000.000, prop-005 Gs. 100.000.000, prop-006 Gs. 168.000.000, prop-010 Gs. 372.000.000) y siete títulos que todavía dicen "Departamento en …" (prop-002, 004, 006, 007, 013, 014 y 015) |
+| 6 | Límite de intentos de inicio de sesión | En Docker el backend ve la IP de nginx, así que el límite funciona por email y no por IP (no hay `RemoteIpValve`). Conocido desde el 19/10, sin cambiar |
 
 ## 10. Herramientas de verificación
 
@@ -246,7 +269,7 @@ Están en la copia local, **sin commitear** (se decide en la Fase 17). Su `READM
 | Carpeta | Contenido |
 |---|---|
 | `admin/verificacion/` | 92 pruebas del panel al 19/10 (Vitest + jsdom + Testing Library) con backend simulado |
-| `frontend/verificacion/` | 77 pruebas del sitio al 19/10, incluidos `w4.test.tsx`, `tipografia.test.tsx` y `zonas.test.tsx` |
+| `frontend/verificacion/` | 83 pruebas del sitio al 19/10, incluidos `w4.test.tsx`, `tipografia.test.tsx`, `zonas.test.tsx` y `volver-resultados.test.tsx` (barrio sin panel y X que vuelve al mapa como estaba) |
 | `herramientas/` | `simulador.mjs` (backend simulado, puerto 8080), `capturar.py` (revisión visual con Playwright), JSON de contenido normal, largo y provisional, y `fuentes/` (fuentes instaladas con npm, hoy se usa **Roboto**; `capturar.py` la sirve en lugar de Google Fonts, para el sitio y el panel, y su lista debe coincidir con `frontend/index.html`) |
 
 ### 10.1 Pruebas de interfaz
@@ -300,7 +323,7 @@ Captura 7 páginas y el chat en 1366 px y 390 px, y escribe `informe.json` con l
 ### Fase 17 (pruebas)
 
 - Incorporar al repositorio las pruebas de interfaz (`admin/verificacion` y `frontend/verificacion`), con `vitest`, `jsdom` y `@testing-library/react` como dependencias de desarrollo y un script `npm test`. Decidir qué hacer con `herramientas/` (sin `fuentes/node_modules`).
-- Backend: 313 pruebas (`mvn package`; las de integración necesitan `DB_URL` y otras variables).
+- Backend: 326 pruebas al 19/10 (`mvn package`; las de integración necesitan `DB_URL` y otras variables).
 - Pruebas de punta a punta con navegador real y una lista de recorridos manuales por rol.
 
 ### Fase 18 (documentación)
@@ -321,7 +344,7 @@ Captura 7 páginas y el chat en 1366 px y 390 px, y escribe `informe.json` con l
 - Límites de envío en nginx (`limit_req`).
 - HTTPS y dominio; Tomcat como usuario no-root.
 - Borrar las imágenes viejas del volumen.
-- Eliminar lo que no se use (por ejemplo, `frontend/public/data/*.geojson`, que todavía tiene precios en USD y solo lo usa el simulador).
+- `frontend/public/data/*.geojson`: no los usa el sitio, pero sí el simulador y una prueba opcional del backend; tienen precios en USD (sección 9.2, pendiente 3). Las imágenes `inicio_sobre_nosotros.jpg` y `nosotros_page2.jpg` no se usan.
 - **Descartados por Sandra:** tipo de cambio y conversión de monedas, estadísticas de visitas, mensajes recibidos y redes sociales.
 
 ## 13. Lecciones aprendidas (evitar repetir)
@@ -344,6 +367,10 @@ Captura 7 páginas y el chat en 1366 px y 390 px, y escribe `informe.json` con l
 | Un cambio de CSS en una clase compartida (`.searchBtn`) movía otro botón | Antes de cambiar una clase, buscar todos sus usos (`grep`) y limitar el cambio con un selector más específico |
 | La revisión automática dio 0 problemas pero había una desalineación | Mirar las capturas además del informe |
 | Con el simulador, la prueba de "solo barrios con propiedades" no distinguía nada (sus 12 barrios tienen propiedades) | Comprobar también con los datos reales, en solo lectura (Vite con `VITE_BACKEND_URL=http://localhost:80`), y probar que la prueba falla sin el cambio |
+| Al hacer clic en el centro de un barrio, la prueba cayó en un marcador y abrió una propiedad | Para hacer clic en una zona del mapa, buscar un punto con `document.elementFromPoint` que sea de ese polígono |
+| En el celular, el barrio se encuadraba más abajo de lo pedido: Leaflet seguía con el alto anterior del mapa (la barra había crecido) | Llamar a `map.invalidateSize()` antes de encuadrar, y medir los elementos que se dibujan sobre el mapa en lugar de usar márgenes fijos |
+| El inicio de sesión con `ADMIN_PASSWORD` de `docker/.env` dio 401 en la base de Sandra | Esa contraseña solo crea el primer administrador: no reintentar (límite de intentos); para pruebas, usar una base de prueba con su propio administrador |
+| Una prueba opcional (`VERIFICAR_DATOS_DEMO`) falló al activarla | Antes de atribuir una falla a un cambio, comprobar si la prueba ya fallaba (aquí: GeoJSON en USD desde la 009) |
 | `python` mezclado con `node` en un solo comando quedó colgado | Usar `py` con `timeout` y no encadenar intérpretes |
 
 ## 14. Comandos de referencia (PowerShell, desde `C:\Proyectos\sn-inmobiliaria`)
@@ -378,4 +405,4 @@ cd admin; npx tsc --noEmit; npm run build; cd ..
 docker compose -f docker/docker-compose.yml up -d --build backend web
 ```
 
-URLs: sitio `http://localhost/` y panel `http://localhost/admin/`. En desarrollo: sitio en `5173` y panel en `5174/admin/`.
+El `README.md` de la raíz tiene la versión para personas (instalación, variables y pruebas). URLs: sitio `http://localhost/` y panel `http://localhost/admin/`. En desarrollo: sitio en `5173` y panel en `5174/admin/`.

@@ -28,8 +28,4 @@ public final class Errores {
             throw new ValidacionException(campos);
         }
     }
-
-    public Map<String, String> comoMapa() {
-        return Map.copyOf(campos);
-    }
 }
