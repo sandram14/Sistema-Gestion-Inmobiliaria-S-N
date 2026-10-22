@@ -1,0 +1,28 @@
+
+> sn-inmobiliaria-admin@1.0.0 test
+> vitest run --config verificacion/vitest.config.ts
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mC:/Users/Sandra Sanchez/Documents/Sistema-Gestion-Inmobiliaria-S-N-git/admin[39m
+
+ [32m✓[39m verificacion/panel.test.tsx [2m([22m[2m94 tests[22m[2m)[22m[33m 10120[2mms[22m[39m
+   [33m[2m✓[22m[39m Sesión y protección[2m > [22msi el backend responde 401 durante el uso, vuelve al login avisando que la sesión expiró [33m348[2mms[22m[39m
+   [33m[2m✓[22m[39m Formulario: operaciones y ubicación[2m > [22mun terreno solo ofrece Venta; una casa puede tener Venta y Alquiler [33m402[2mms[22m[39m
+   [33m[2m✓[22m[39m Opciones según el rol (el backend vuelve a comprobarlo)[2m > [22mel gerente sí abre el editor del sitio [33m346[2mms[22m[39m
+   [33m[2m✓[22m[39m Usuarios[2m > [22mel administrador ve el listado y puede crear usuarios [33m360[2mms[22m[39m
+   [33m[2m✓[22m[39m Usuarios[2m > [22mel alta muestra la contraseña temporal una sola vez en la pantalla del usuario [33m381[2mms[22m[39m
+   [33m[2m✓[22m[39m Mi cuenta y contraseña[2m > [22mcambiar contraseña: las dos nuevas deben coincidir; al guardar vuelve a Mi cuenta [33m403[2mms[22m[39m
+   [33m[2m✓[22m[39m Consultas del chat IA[2m > [22mhistorial sin textos de ayuda redundantes y las antiguas como "No registrado" [33m354[2mms[22m[39m
+   [33m[2m✓[22m[39m Consultas del chat IA[2m > [22mlos filtros se envían al backend [33m392[2mms[22m[39m
+   [33m[2m✓[22m[39m Consultas del chat IA[2m > [22mdetalle de una consulta antigua: sin resultado ni recomendadas inventadas, con su conversación [33m337[2mms[22m[39m
+   [33m[2m✓[22m[39m Consultas del chat IA[2m > [22manálisis técnico: solo los 7 indicadores aprobados, en gráficos circulares con porcentajes [33m419[2mms[22m[39m
+   [33m[2m✓[22m[39m Clientes potenciales[2m > [22mlistado con fichas, estados y responsable [33m385[2mms[22m[39m
+   [33m[2m✓[22m[39m Clientes potenciales[2m > [22mdetalle: cambiar estado y asignar responsable (ADMIN), con la aceptación registrada [33m440[2mms[22m[39m
+   [33m[2m✓[22m[39m Clientes potenciales[2m > [22malta manual: medio de contacto y error si falta teléfono y email [33m423[2mms[22m[39m
+   [33m[2m✓[22m[39m Formularios en filas horizontales[2m > [22musuario nuevo y sitio: los campos van en filas, sin envoltorios extra [33m373[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m94 passed[39m[22m[90m (94)[39m
+[2m   Start at [22m 16:45:04
+[2m   Duration [22m 13.15s[2m (transform 762ms, setup 0ms, collect 1.14s, tests 10.12s, environment 1.20s, prepare 245ms)[22m
+

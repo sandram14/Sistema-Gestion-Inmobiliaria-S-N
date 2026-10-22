@@ -1,0 +1,54 @@
+Pager usage is off.
+
+=== 1. Cantidad de registros cargados ===
+        tabla        | filas 
+---------------------+-------
+ departamento        |     1
+ ciudad              |    22
+ barrio              |   714
+ propiedad           |    28
+ casa                |    16
+ terreno             |    12
+ operacion_propiedad |    28
+ imagen              |    66
+ usuario             |     1
+
+=== 2. Propiedades por tipo y operación ===
+  tipo   | operacion | moneda | cantidad 
+---------+-----------+--------+----------
+ Casa    | Alquiler  | PYG    |        5
+ Casa    | Venta     | PYG    |       11
+ Terreno | Venta     | PYG    |       12
+
+=== 3. Coherencia geográfica (todas deben ser 0) ===
+ propiedades_fuera_de_su_barrio | barrios_con_poligono_invalido | propiedades_sin_una_imagen_principal 
+--------------------------------+-------------------------------+--------------------------------------
+                              0 |                             0 |                                    0
+
+=== 4. Pruebas de reglas (se deshacen al final) ===
+psql:/database/pruebas/verificar.sql:83: NOTICE:  OK: Un terreno no puede tener operación Alquiler
+psql:/database/pruebas/verificar.sql:88: NOTICE:  OK: Una casa puede tener Venta y Alquiler
+psql:/database/pruebas/verificar.sql:93: NOTICE:  OK: Una propiedad no puede repetir la misma operación
+psql:/database/pruebas/verificar.sql:97: NOTICE:  OK: Moneda USD se rechaza (solo guaraníes, migración 009)
+psql:/database/pruebas/verificar.sql:103: NOTICE:  OK: Sin indicar moneda se guarda en PYG
+psql:/database/pruebas/verificar.sql:107: NOTICE:  OK: Moneda distinta de PYG se rechaza
+psql:/database/pruebas/verificar.sql:111: NOTICE:  OK: Precio 0 se rechaza
+psql:/database/pruebas/verificar.sql:115: NOTICE:  OK: Solo puede haber una imagen principal por propiedad
+psql:/database/pruebas/verificar.sql:119: NOTICE:  OK: Se pueden agregar imágenes no principales
+psql:/database/pruebas/verificar.sql:123: NOTICE:  OK: Datos de Casa en una propiedad de tipo Terreno se rechazan
+psql:/database/pruebas/verificar.sql:127: NOTICE:  OK: Datos de Terreno en una propiedad de tipo Casa se rechazan
+psql:/database/pruebas/verificar.sql:131: NOTICE:  OK: Cambiar a Terreno una propiedad con datos de Casa se rechaza
+psql:/database/pruebas/verificar.sql:134: NOTICE:  OK: Ubicación fuera del barrio asignado se rechaza
+psql:/database/pruebas/verificar.sql:141: NOTICE:  OK: Mover la ubicación dentro del mismo barrio funciona
+psql:/database/pruebas/verificar.sql:146: NOTICE:  OK: El código público no puede repetirse
+psql:/database/pruebas/verificar.sql:151: NOTICE:  OK: El código público debe tener el formato prefijo-000
+psql:/database/pruebas/verificar.sql:155: NOTICE:  OK: Crear un usuario con hash BCrypt válido
+psql:/database/pruebas/verificar.sql:159: NOTICE:  OK: El email se repite sin distinguir mayúsculas
+psql:/database/pruebas/verificar.sql:163: NOTICE:  OK: No se acepta una contraseña sin hashear
+psql:/database/pruebas/verificar.sql:167: NOTICE:  OK: Borrado lógico: pasar una propiedad a Inactivo
+psql:/database/pruebas/verificar.sql:170: NOTICE:  OK: Un usuario nuevo nace con version_credencial 0 (migración 011)
+psql:/database/pruebas/verificar.sql:173: NOTICE:  OK: version_credencial no puede ser negativa
+psql:/database/pruebas/verificar.sql:177: NOTICE:  OK: La auditoría registra un restablecimiento de contraseña temporal
+psql:/database/pruebas/verificar.sql:180: NOTICE:  OK: La auditoría no acepta acciones desconocidas
+
+=== Verificación terminada: si no hubo ningún FALLÓ, todo está correcto ===

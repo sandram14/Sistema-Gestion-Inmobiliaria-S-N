@@ -1,0 +1,10 @@
+ version_credencial | auditoria 
+--------------------+-----------
+ existe             | existe
+(1 row)
+
+  rol  | usuarios | activos | con_contrasena_temporal 
+-------+----------+---------+-------------------------
+ ADMIN |        1 |       1 |                       0
+(1 row)
+

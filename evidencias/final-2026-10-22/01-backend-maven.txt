@@ -1,0 +1,310 @@
+[INFO] Scanning for projects...
+[INFO] Loaded 24197 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] 
+[INFO] -------------------< py.sn:sn-inmobiliaria-backend >--------------------
+[INFO] Building S&N Inmobiliaria - Backend 0.25.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ war ]---------------------------------
+[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots.txt)
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ sn-inmobiliaria-backend ---
+[INFO] Deleting C:\Users\Sandra Sanchez\Documents\Sistema-Gestion-Inmobiliaria-S-N-git\backend\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ sn-inmobiliaria-backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ sn-inmobiliaria-backend ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 145 source files with javac [debug release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ sn-inmobiliaria-backend ---
+[INFO] skip non existing resourceDirectory C:\Users\Sandra Sanchez\Documents\Sistema-Gestion-Inmobiliaria-S-N-git\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ sn-inmobiliaria-backend ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 48 source files with javac [debug release 21] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ sn-inmobiliaria-backend ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running py.sn.inmobiliaria.config.AppConfigTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.061 s -- in py.sn.inmobiliaria.config.AppConfigTest
+[INFO] Running py.sn.inmobiliaria.config.AsistenteConfigTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in py.sn.inmobiliaria.config.AsistenteConfigTest
+[INFO] Running py.sn.inmobiliaria.controller.admin.AutenticacionTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.200 s -- in py.sn.inmobiliaria.controller.admin.AutenticacionTest
+[INFO] Running py.sn.inmobiliaria.controller.admin.PropiedadAdminServletTest
+2026-10-22 16:39:16.342 ERROR [main] p.s.i.controller.ApiServlet - Error no controlado en POST /api/admin/propiedades/1/imagenes
+java.lang.IllegalStateException: falla simulada de la base
+	at py.sn.inmobiliaria.controller.admin.PropiedadAdminServletTest$AdminFalso.agregarImagen(PropiedadAdminServletTest.java:107)
+	at py.sn.inmobiliaria.controller.admin.PropiedadAdminServlet.subirImagen(PropiedadAdminServlet.java:157)
+	at py.sn.inmobiliaria.controller.admin.PropiedadAdminServlet.doPost(PropiedadAdminServlet.java:87)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:547)
+	at py.sn.inmobiliaria.controller.ApiServlet.despachar(ApiServlet.java:63)
+	at py.sn.inmobiliaria.controller.ApiServlet.service(ApiServlet.java:43)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:614)
+	at py.sn.inmobiliaria.controller.ServletFalso.ejecutar(ServletFalso.java:216)
+	at py.sn.inmobiliaria.controller.admin.PropiedadAdminServletTest.ejecutar(PropiedadAdminServletTest.java:147)
+	at py.sn.inmobiliaria.controller.admin.PropiedadAdminServletTest.siFallaElRegistroEnLaBaseNoQuedaUnArchivoHuerfano(PropiedadAdminServletTest.java:243)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.201 s -- in py.sn.inmobiliaria.controller.admin.PropiedadAdminServletTest
+[INFO] Running py.sn.inmobiliaria.controller.admin.UbicacionAdminServletTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in py.sn.inmobiliaria.controller.admin.UbicacionAdminServletTest
+[INFO] Running py.sn.inmobiliaria.controller.ApiPublicaServletTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.089 s -- in py.sn.inmobiliaria.controller.ApiPublicaServletTest
+[INFO] Running py.sn.inmobiliaria.controller.AsistenteServletTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in py.sn.inmobiliaria.controller.AsistenteServletTest
+[INFO] Running py.sn.inmobiliaria.integration.GeminiClientTest
+2026-10-22 16:39:16.979 WARN  [main] p.s.i.integration.GeminiClient - Gemini respondi¢ HTTP 503 (modelo gemini-3.1-flash-lite)
+2026-10-22 16:39:16.983 INFO  [main] p.s.i.integration.GeminiClient - Reintentando la consulta a Gemini (modelo gemini-3.1-flash-lite) tras un error temporal
+2026-10-22 16:39:17.011 WARN  [main] p.s.i.integration.GeminiClient - Gemini respondi¢ HTTP 503 (modelo gemini-3.1-flash-lite)
+2026-10-22 16:39:17.033 WARN  [main] p.s.i.integration.GeminiClient - Gemini respondi¢ HTTP 429 (modelo gemini-2.5-flash)
+2026-10-22 16:39:17.070 WARN  [main] p.s.i.integration.GeminiClient - Gemini respondi¢ HTTP 400 (modelo gemini-2.5-flash)
+2026-10-22 16:39:17.109 WARN  [main] p.s.i.integration.GeminiClient - Gemini respondi¢ HTTP 429 (modelo gemini-3.1-flash-lite)
+2026-10-22 16:39:17.117 WARN  [main] p.s.i.integration.GeminiClient - Gemini respondi¢ HTTP 404 (modelo gemini-3.1-flash-lite)
+2026-10-22 16:39:17.138 WARN  [main] p.s.i.integration.GeminiClient - Gemini respondi¢ HTTP 503 (modelo gemini-2.5-flash)
+2026-10-22 16:39:17.138 INFO  [main] p.s.i.integration.GeminiClient - Reintentando la consulta a Gemini (modelo gemini-2.5-flash) tras un error temporal
+2026-10-22 16:39:17.167 WARN  [main] p.s.i.integration.GeminiClient - Gemini respondi¢ HTTP 503 (modelo gemini-2.5-flash)
+2026-10-22 16:39:18.716 WARN  [main] p.s.i.integration.GeminiClient - Gemini respondi¢ HTTP 503 (modelo gemini-3.1-flash-lite)
+2026-10-22 16:39:18.716 INFO  [main] p.s.i.integration.GeminiClient - Reintentando la consulta a Gemini (modelo gemini-3.1-flash-lite) tras un error temporal
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.174 s -- in py.sn.inmobiliaria.integration.GeminiClientTest
+[INFO] Running py.sn.inmobiliaria.mapper.CatalogoMapperTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in py.sn.inmobiliaria.mapper.CatalogoMapperTest
+[INFO] Running py.sn.inmobiliaria.mapper.CompatibilidadFrontendIntegracionTest
+[WARNING] Tests run: 4, Failures: 0, Errors: 0, Skipped: 4, Time elapsed: 0 s -- in py.sn.inmobiliaria.mapper.CompatibilidadFrontendIntegracionTest
+[INFO] Running py.sn.inmobiliaria.mapper.GeoJsonMapperTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in py.sn.inmobiliaria.mapper.GeoJsonMapperTest
+[INFO] Running py.sn.inmobiliaria.mapper.PropiedadAdminMapperTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in py.sn.inmobiliaria.mapper.PropiedadAdminMapperTest
+[INFO] Running py.sn.inmobiliaria.model.ModeloJpaIntegracionTest
+[WARNING] Tests run: 8, Failures: 0, Errors: 0, Skipped: 8, Time elapsed: 0.001 s -- in py.sn.inmobiliaria.model.ModeloJpaIntegracionTest
+[INFO] Running py.sn.inmobiliaria.repository.PropiedadDaoIntegracionTest
+[WARNING] Tests run: 15, Failures: 0, Errors: 0, Skipped: 15, Time elapsed: 0.001 s -- in py.sn.inmobiliaria.repository.PropiedadDaoIntegracionTest
+[INFO] Running py.sn.inmobiliaria.repository.UbicacionDaoIntegracionTest
+[WARNING] Tests run: 11, Failures: 0, Errors: 0, Skipped: 11, Time elapsed: 0.001 s -- in py.sn.inmobiliaria.repository.UbicacionDaoIntegracionTest
+[INFO] Running py.sn.inmobiliaria.seguridad.ContrasenaHasherTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in py.sn.inmobiliaria.seguridad.ContrasenaHasherTest
+[INFO] Running py.sn.inmobiliaria.seguridad.LimitadorIntentosTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in py.sn.inmobiliaria.seguridad.LimitadorIntentosTest
+[INFO] Running py.sn.inmobiliaria.seguridad.PermisoTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in py.sn.inmobiliaria.seguridad.PermisoTest
+[INFO] Running py.sn.inmobiliaria.seguridad.PoliticaContrasenaTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in py.sn.inmobiliaria.seguridad.PoliticaContrasenaTest
+[INFO] Running py.sn.inmobiliaria.seguridad.ReglasAccesoTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in py.sn.inmobiliaria.seguridad.ReglasAccesoTest
+[INFO] Running py.sn.inmobiliaria.service.AlmacenImagenesTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in py.sn.inmobiliaria.service.AlmacenImagenesTest
+[INFO] Running py.sn.inmobiliaria.service.asistente.AsistenteIntegracionTest
+[WARNING] Tests run: 3, Failures: 0, Errors: 0, Skipped: 3, Time elapsed: 0.001 s -- in py.sn.inmobiliaria.service.asistente.AsistenteIntegracionTest
+[INFO] Running py.sn.inmobiliaria.service.asistente.AsistenteServiceTest
+2026-10-22 16:39:18.892 WARN  [main] p.s.i.s.asistente.AsistenteService - Gemini no pudo responder (CUOTA_AGOTADA): 429
+2026-10-22 16:39:18.914 WARN  [main] p.s.i.s.asistente.AsistenteService - Gemini no pudo responder (BLOQUEADA): safety
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.055 s -- in py.sn.inmobiliaria.service.asistente.AsistenteServiceTest
+[INFO] Running py.sn.inmobiliaria.service.asistente.ContextoPropiedadesTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in py.sn.inmobiliaria.service.asistente.ContextoPropiedadesTest
+[INFO] Running py.sn.inmobiliaria.service.asistente.LimitadorAsistenteTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in py.sn.inmobiliaria.service.asistente.LimitadorAsistenteTest
+[INFO] Running py.sn.inmobiliaria.service.asistente.SeguroGeminiRealTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in py.sn.inmobiliaria.service.asistente.SeguroGeminiRealTest
+[INFO] Running py.sn.inmobiliaria.service.AuthIntegracionTest
+[WARNING] Tests run: 2, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 0 s -- in py.sn.inmobiliaria.service.AuthIntegracionTest
+[INFO] Running py.sn.inmobiliaria.service.AuthServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.439 s -- in py.sn.inmobiliaria.service.AuthServiceTest
+[INFO] Running py.sn.inmobiliaria.service.clientes.ClientePotencialServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in py.sn.inmobiliaria.service.clientes.ClientePotencialServiceTest
+[INFO] Running py.sn.inmobiliaria.service.clientes.ClientesIntegracionTest
+[WARNING] Tests run: 3, Failures: 0, Errors: 0, Skipped: 3, Time elapsed: 0.001 s -- in py.sn.inmobiliaria.service.clientes.ClientesIntegracionTest
+[INFO] Running py.sn.inmobiliaria.service.consultas.AnalisisConsultasTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.101 s -- in py.sn.inmobiliaria.service.consultas.AnalisisConsultasTest
+[INFO] Running py.sn.inmobiliaria.service.consultas.ConsultaAdminServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in py.sn.inmobiliaria.service.consultas.ConsultaAdminServiceTest
+[INFO] Running py.sn.inmobiliaria.service.consultas.ConsultasIntegracionTest
+[WARNING] Tests run: 3, Failures: 0, Errors: 0, Skipped: 3, Time elapsed: 0 s -- in py.sn.inmobiliaria.service.consultas.ConsultasIntegracionTest
+[INFO] Running py.sn.inmobiliaria.service.ReglasNegocioTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in py.sn.inmobiliaria.service.ReglasNegocioTest
+[INFO] Running py.sn.inmobiliaria.service.SaludServiceTest
+2026-10-22 16:39:19.545 WARN  [main] p.s.i.service.SaludService - La base de datos no responde: Connection refused: localhost:5433
+2026-10-22 16:39:19.555 ERROR [main] p.s.i.service.SaludService - Hibernate no pudo leer las entidades
+java.lang.IllegalStateException: Schema-validation: missing column
+	at py.sn.inmobiliaria.service.SaludServiceTest.lambda$siHibernateFallaElEstadoEsDegradado$3(SaludServiceTest.java:54)
+	at py.sn.inmobiliaria.service.SaludService.estadoJpa(SaludService.java:68)
+	at py.sn.inmobiliaria.service.SaludService.verificar(SaludService.java:34)
+	at py.sn.inmobiliaria.service.SaludServiceTest.siHibernateFallaElEstadoEsDegradado(SaludServiceTest.java:57)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in py.sn.inmobiliaria.service.SaludServiceTest
+[INFO] Running py.sn.inmobiliaria.service.ServiciosIntegracionTest
+[WARNING] Tests run: 12, Failures: 0, Errors: 0, Skipped: 12, Time elapsed: 0 s -- in py.sn.inmobiliaria.service.ServiciosIntegracionTest
+[INFO] Running py.sn.inmobiliaria.service.sitio.ContenidoSitioServiceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in py.sn.inmobiliaria.service.sitio.ContenidoSitioServiceTest
+[INFO] Running py.sn.inmobiliaria.service.sitio.SitioIntegracionTest
+[WARNING] Tests run: 2, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 0 s -- in py.sn.inmobiliaria.service.sitio.SitioIntegracionTest
+[INFO] Running py.sn.inmobiliaria.service.TraductorErroresBdTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in py.sn.inmobiliaria.service.TraductorErroresBdTest
+[INFO] Running py.sn.inmobiliaria.service.UsuarioServiceTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.487 s -- in py.sn.inmobiliaria.service.UsuarioServiceTest
+[INFO] Running py.sn.inmobiliaria.service.UsuariosIntegracionTest
+[WARNING] Tests run: 4, Failures: 0, Errors: 0, Skipped: 4, Time elapsed: 0.001 s -- in py.sn.inmobiliaria.service.UsuariosIntegracionTest
+[INFO] Running py.sn.inmobiliaria.service.validacion.NormalizadorBusquedaTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in py.sn.inmobiliaria.service.validacion.NormalizadorBusquedaTest
+[INFO] Running py.sn.inmobiliaria.service.validacion.ValidadorPropiedadTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in py.sn.inmobiliaria.service.validacion.ValidadorPropiedadTest
+[INFO] Running py.sn.inmobiliaria.util.JsonUtilTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in py.sn.inmobiliaria.util.JsonUtilTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[WARNING] Tests run: 328, Failures: 0, Errors: 0, Skipped: 67
+[INFO] 
+[INFO] 
+[INFO] --- war:3.4.0:war (default-war) @ sn-inmobiliaria-backend ---
+[INFO] Packaging webapp
+[INFO] Assembling webapp [sn-inmobiliaria-backend] in [C:\Users\Sandra Sanchez\Documents\Sistema-Gestion-Inmobiliaria-S-N-git\backend\target\sn-inmobiliaria]
+[INFO] Processing war project
+[INFO] Copying webapp resources [C:\Users\Sandra Sanchez\Documents\Sistema-Gestion-Inmobiliaria-S-N-git\backend\src\main\webapp]
+[INFO] Building war: C:\Users\Sandra Sanchez\Documents\Sistema-Gestion-Inmobiliaria-S-N-git\backend\target\sn-inmobiliaria.war
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  21.525 s
+[INFO] Finished at: 2026-10-22T16:39:26-03:00
+[INFO] ------------------------------------------------------------------------
