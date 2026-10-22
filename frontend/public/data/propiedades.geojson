@@ -1,0 +1,842 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.63972,
+          -25.51757
+        ]
+      },
+      "properties": {
+        "id": "prop-001",
+        "titulo": "Casa en Area 1",
+        "categoria": "Casa",
+        "tipoOperacion": "Venta",
+        "ciudad": "CIUDAD DEL ESTE",
+        "barrio": "AREA 1",
+        "barrioId": 10011013,
+        "precio": 45000,
+        "moneda": "PYG",
+        "dormitorios": 3,
+        "banos": 2,
+        "m2": 182,
+        "direccion": "Calle Curupayty 519",
+        "fotos": [
+             "/images/propiedades/prop-001/1.png",
+             "/images/propiedades/prop-001/2.png",
+             "/images/propiedades/prop-001/3.png",
+             "/images/propiedades/prop-001/4.png",
+             "/images/propiedades/prop-001/5.png"
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.63752,
+          -25.51581
+        ]
+      },
+      "properties": {
+        "id": "prop-002",
+        "titulo": "Casa en venta en Area 1",
+        "categoria": "Departamento",
+        "tipoOperacion": "Venta",
+        "ciudad": "CIUDAD DEL ESTE",
+        "barrio": "AREA 1",
+        "barrioId": 10011013,
+        "precio": 70000,
+        "moneda": "PYG",
+        "dormitorios": 3,
+        "banos": 1,
+        "m2": 49,
+        "direccion": "Av. Monseñor Rodríguez 995",
+        "fotos": [
+             "/images/propiedades/prop-002/1.png",
+             "/images/propiedades/prop-002/2.png",
+             "/images/propiedades/prop-002/3.png",
+             "/images/propiedades/prop-002/4.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.6458,
+          -25.51391
+        ]
+      },
+      "properties": {
+        "id": "prop-003",
+        "titulo": "Casa en San Jose",
+        "categoria": "Casa",
+        "tipoOperacion": "Venta",
+        "ciudad": "CIUDAD DEL ESTE",
+        "barrio": "SAN JOSE",
+        "barrioId": 10011014,
+        "precio": 120000,
+        "moneda": "PYG",
+        "dormitorios": 2,
+        "banos": 2,
+        "m2": 263,
+        "direccion": "Av. Del Lago 1002",
+        "fotos": [
+             "/images/propiedades/prop-003/1.png",
+             "/images/propiedades/prop-003/2.png",
+             "/images/propiedades/prop-003/3.png",
+             "/images/propiedades/prop-003/4.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.65519,
+          -25.51157
+        ]
+      },
+      "properties": {
+        "id": "prop-004",
+        "titulo": "Alquiler en San Jose",
+        "categoria": "Departamento",
+        "tipoOperacion": "Alquiler",
+        "ciudad": "CIUDAD DEL ESTE",
+        "barrio": "SAN JOSE",
+        "barrioId": 10011014,
+        "precio": 420,
+        "moneda": "PYG",
+        "dormitorios": 2,
+        "banos": 2,
+        "m2": 45,
+        "direccion": "Av. Del Lago 1493",
+        "fotos": [
+             "/images/propiedades/prop-004/1.png",
+             "/images/propiedades/prop-004/2.png",
+             "/images/propiedades/prop-004/3.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.67079,
+          -25.52037
+        ]
+      },
+      "properties": {
+        "id": "prop-005",
+        "titulo": "Casa en Ciudad Nueva",
+        "categoria": "Casa",
+        "tipoOperacion": "Alquiler",
+        "ciudad": "CIUDAD DEL ESTE",
+        "barrio": "CIUDAD NUEVA",
+        "barrioId": 10011024,
+        "precio": 372,
+        "moneda": "PYG",
+        "dormitorios": 3,
+        "banos": 2,
+        "m2": 315,
+        "direccion": "Av. Monseñor Rodríguez 479",
+        "fotos": [
+             "/images/propiedades/prop-005/1.png",
+             "/images/propiedades/prop-005/2.png",
+             "/images/propiedades/prop-005/3.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.66748,
+          -25.507
+        ]
+      },
+      "properties": {
+        "id": "prop-006",
+        "titulo": "Alquiler en Ciudad Nueva",
+        "categoria": "Departamento",
+        "tipoOperacion": "Alquiler",
+        "ciudad": "CIUDAD DEL ESTE",
+        "barrio": "CIUDAD NUEVA",
+        "barrioId": 10011024,
+        "precio": 168,
+        "moneda": "PYG",
+        "dormitorios": 2,
+        "banos": 2,
+        "m2": 89,
+        "direccion": "Av. Kubitschek 1981",
+        "fotos": [
+             "/images/propiedades/prop-006/1.png",
+             "/images/propiedades/prop-006/2.png",
+             "/images/propiedades/prop-006/3.png",
+             "/images/propiedades/prop-006/4.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.67572,
+          -25.48256
+        ]
+      },
+      "properties": {
+        "id": "prop-007",
+        "titulo": "Casa en venta en San Juan",
+        "categoria": "Departamento",
+        "tipoOperacion": "Venta",
+        "ciudad": "CIUDAD DEL ESTE",
+        "barrio": "SAN JUAN",
+        "barrioId": 10011003,
+        "precio": 58000,
+        "moneda": "PYG",
+        "dormitorios": 1,
+        "banos": 2,
+        "m2": 82,
+        "direccion": "Ruta Internacional 384",
+        "fotos": [
+             "/images/propiedades/prop-007/1.png",
+             "/images/propiedades/prop-007/2.png",
+             "/images/propiedades/prop-007/3.png",
+             "/images/propiedades/prop-007/4.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.68288,
+          -25.48446
+        ]
+      },
+      "properties": {
+        "id": "prop-008",
+        "titulo": "Casa en San Juan",
+        "categoria": "Casa",
+        "tipoOperacion": "Venta",
+        "ciudad": "CIUDAD DEL ESTE",
+        "barrio": "SAN JUAN",
+        "barrioId": 10011003,
+        "precio": 150000,
+        "moneda": "PYG",
+        "dormitorios": 3,
+        "banos": 2,
+        "m2": 317,
+        "direccion": "Av. Monseñor Rodríguez 1053",
+        "fotos": [
+             "/images/propiedades/prop-008/1.png",
+             "/images/propiedades/prop-008/2.png",
+             "/images/propiedades/prop-008/3.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.76431,
+          -25.48785
+        ]
+      },
+      "properties": {
+        "id": "prop-009",
+        "titulo": "Casa en Domingo Sabio",
+        "categoria": "Casa",
+        "tipoOperacion": "Venta",
+        "ciudad": "MINGA GUAZÚ",
+        "barrio": "DOMINGO SABIO",
+        "barrioId": 10111016,
+        "precio": 95000,
+        "moneda": "PYG",
+        "dormitorios": 3,
+        "banos": 2,
+        "m2": 236,
+        "direccion": "Calle Curupayty 1616",
+        "fotos": [
+             "/images/propiedades/prop-009/1.png",
+             "/images/propiedades/prop-009/2.png",
+             "/images/propiedades/prop-009/3.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.75711,
+          -25.48553
+        ]
+      },
+      "properties": {
+        "id": "prop-010",
+        "titulo": "Casa en Maria Auxiliadora",
+        "categoria": "Casa",
+        "tipoOperacion": "Alquiler",
+        "ciudad": "MINGA GUAZÚ",
+        "barrio": "MARIA AUXILIADORA",
+        "barrioId": 10111015,
+        "precio": 372,
+        "moneda": "PYG",
+        "dormitorios": 3,
+        "banos": 1,
+        "m2": 299,
+        "direccion": "Calle Curupayty 2287",
+        "fotos": [
+             "/images/propiedades/prop-010/1.png",
+             "/images/propiedades/prop-010/2.png",
+             "/images/propiedades/prop-010/3.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.75835,
+          -25.47525
+        ]
+      },
+      "properties": {
+        "id": "prop-011",
+        "titulo": "Casa en Virgen Del Carmen",
+        "categoria": "Casa",
+        "tipoOperacion": "Venta",
+        "ciudad": "MINGA GUAZÚ",
+        "barrio": "VIRGEN DEL CARMEN",
+        "barrioId": 10111004,
+        "precio": 62000,
+        "moneda": "PYG",
+        "dormitorios": 4,
+        "banos": 2,
+        "m2": 217,
+        "direccion": "Ruta Internacional 1428",
+        "fotos": [
+             "/images/propiedades/prop-011/1.png",
+             "/images/propiedades/prop-011/2.png",
+             "/images/propiedades/prop-011/3.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.74456,
+          -25.54501
+        ]
+      },
+      "properties": {
+        "id": "prop-012",
+        "titulo": "Casa en Calle 14 Monday",
+        "categoria": "Casa",
+        "tipoOperacion": "Venta",
+        "ciudad": "MINGA GUAZÚ",
+        "barrio": "CALLE 14 MONDAY",
+        "barrioId": 10116200,
+        "precio": 62000,
+        "moneda": "PYG",
+        "dormitorios": 2,
+        "banos": 3,
+        "m2": 200,
+        "direccion": "Av. San Blas 371",
+        "fotos": [
+             "/images/propiedades/prop-012/1.png",
+             "/images/propiedades/prop-012/2.png",
+             "/images/propiedades/prop-012/3.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.62177,
+          -25.47921
+        ]
+      },
+      "properties": {
+        "id": "prop-013",
+        "titulo": "Casa disponible en Parana Country Club",
+        "categoria": "Departamento",
+        "tipoOperacion": "Venta",
+        "ciudad": "HERNANDARIAS",
+        "barrio": "PARANA COUNTRY CLUB",
+        "barrioId": 10051023,
+        "precio": 70000,
+        "moneda": "PYG",
+        "dormitorios": 2,
+        "banos": 3,
+        "m2": 72,
+        "direccion": "Av. Del Lago 1979",
+        "fotos": [
+             "/images/propiedades/prop-013/1.png",
+             "/images/propiedades/prop-013/2.png",
+             "/images/propiedades/prop-013/3.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.6431,
+          -25.40076
+        ]
+      },
+      "properties": {
+        "id": "prop-014",
+        "titulo": "Casa en Nuestra Sra De La Asuncion",
+        "categoria": "Departamento",
+        "tipoOperacion": "Venta",
+        "ciudad": "HERNANDARIAS",
+        "barrio": "NUESTRA SRA DE LA ASUNCION",
+        "barrioId": 10051007,
+        "precio": 42000,
+        "moneda": "PYG",
+        "dormitorios": 2,
+        "banos": 2,
+        "m2": 76,
+        "direccion": "Av. Del Lago 2490",
+        "fotos": [
+             "/images/propiedades/prop-014/1.png",
+             "/images/propiedades/prop-014/2.png",
+             "/images/propiedades/prop-014/3.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.60829,
+          -25.55971
+        ]
+      },
+      "properties": {
+        "id": "prop-015",
+        "titulo": "Alquiler Monoambiente en San Antonio",
+        "categoria": "Departamento",
+        "tipoOperacion": "Alquiler",
+        "ciudad": "PRESIDENTE FRANCO",
+        "barrio": "SAN ANTONIO",
+        "barrioId": 10021001,
+        "precio": 252,
+        "moneda": "PYG",
+        "dormitorios": 2,
+        "banos": 3,
+        "m2": 62,
+        "direccion": "Av. Monseñor Rodríguez 292",
+        "fotos": [
+             "/images/propiedades/prop-015/1.png",
+             "/images/propiedades/prop-015/2.png",
+             "/images/propiedades/prop-015/3.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.65128,
+          -25.55538
+        ]
+      },
+      "properties": {
+        "id": "prop-016",
+        "titulo": "Casa en San Miguel",
+        "categoria": "Casa",
+        "tipoOperacion": "Venta",
+        "ciudad": "PRESIDENTE FRANCO",
+        "barrio": "SAN MIGUEL",
+        "barrioId": 10021010,
+        "precio": 62000,
+        "moneda": "PYG",
+        "dormitorios": 3,
+        "banos": 3,
+        "m2": 294,
+        "direccion": "Av. Monseñor Rodríguez 1676",
+        "fotos": [
+             "/images/propiedades/prop-016/1.png",
+             "/images/propiedades/prop-016/2.png",
+             "/images/propiedades/prop-016/3.png"
+
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.640313,
+          -25.40701
+        ]
+      },
+      "properties": {
+        "id": "terr-001",
+        "titulo": "Terreno en NUESTRA SRA DE LA ASUNCION",
+        "categoria": "Terreno",
+        "tipoOperacion": "Venta",
+        "ciudad": "HERNANDARIAS",
+        "barrio": "NUESTRA SRA DE LA ASUNCION",
+        "barrioId": 10051007,
+        "precio": 41000,
+        "moneda": "PYG",
+        "dormitorios": 0,
+        "banos": 0,
+        "m2": 750,
+        "direccion": "NUESTRA SRA DE LA ASUNCION, HERNANDARIAS",
+        "fotos": [
+             "/images/terrenos/terr-001/1.png"
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.640562,
+          -25.56093
+        ]
+      },
+      "properties": {
+        "id": "terr-002",
+        "titulo": "Terreno en SAN MIGUEL",
+        "categoria": "Terreno",
+        "tipoOperacion": "Venta",
+        "ciudad": "PRESIDENTE FRANCO",
+        "barrio": "SAN MIGUEL",
+        "barrioId": 10021010,
+        "precio": 46000,
+        "moneda": "PYG",
+        "dormitorios": 0,
+        "banos": 0,
+        "m2": 1000,
+        "direccion": "SAN MIGUEL, PRESIDENTE FRANCO",
+        "fotos": [
+             "/images/terrenos/terr-002/1.png"
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.61054,
+          -25.560088
+        ]
+      },
+      "properties": {
+        "id": "terr-003",
+        "titulo": "Terreno en SAN ANTONIO",
+        "categoria": "Terreno",
+        "tipoOperacion": "Venta",
+        "ciudad": "PRESIDENTE FRANCO",
+        "barrio": "SAN ANTONIO",
+        "barrioId": 10021001,
+        "precio": 54000,
+        "moneda": "PYG",
+        "dormitorios": 0,
+        "banos": 0,
+        "m2": 1000,
+        "direccion": "SAN ANTONIO, PRESIDENTE FRANCO",
+        "fotos": [
+             "/images/terrenos/terr-003/1.png"
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.762922,
+          -25.484932
+        ]
+      },
+      "properties": {
+        "id": "terr-004",
+        "titulo": "Terreno en DOMINGO SABIO",
+        "categoria": "Terreno",
+        "tipoOperacion": "Venta",
+        "ciudad": "MINGA GUAZÚ",
+        "barrio": "DOMINGO SABIO",
+        "barrioId": 10111016,
+        "precio": 23000,
+        "moneda": "PYG",
+        "dormitorios": 0,
+        "banos": 0,
+        "m2": 300,
+        "direccion": "DOMINGO SABIO, MINGA GUAZÚ",
+        "fotos": [
+             "/images/terrenos/terr-004/1.png"
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.758836,
+          -25.486921
+        ]
+      },
+      "properties": {
+        "id": "terr-005",
+        "titulo": "Terreno en MARIA AUXILIADORA",
+        "categoria": "Terreno",
+        "tipoOperacion": "Venta",
+        "ciudad": "MINGA GUAZÚ",
+        "barrio": "MARIA AUXILIADORA",
+        "barrioId": 10111015,
+        "precio": 38000,
+        "moneda": "PYG",
+        "dormitorios": 0,
+        "banos": 0,
+        "m2": 750,
+        "direccion": "MARIA AUXILIADORA, MINGA GUAZÚ",
+        "fotos": [
+             "/images/terrenos/terr-005/1.png"
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.74545,
+          -25.474217
+        ]
+      },
+      "properties": {
+        "id": "terr-006",
+        "titulo": "Terreno en VIRGEN DEL CARMEN",
+        "categoria": "Terreno",
+        "tipoOperacion": "Venta",
+        "ciudad": "MINGA GUAZÚ",
+        "barrio": "VIRGEN DEL CARMEN",
+        "barrioId": 10111004,
+        "precio": 24000,
+        "moneda": "PYG",
+        "dormitorios": 0,
+        "banos": 0,
+        "m2": 400,
+        "direccion": "VIRGEN DEL CARMEN, MINGA GUAZÚ",
+        "fotos": [
+             "/images/terrenos/terr-006/1.png"
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.67457,
+          -25.523153
+        ]
+      },
+      "properties": {
+        "id": "terr-007",
+        "titulo": "Terreno en CIUDAD NUEVA",
+        "categoria": "Terreno",
+        "tipoOperacion": "Venta",
+        "ciudad": "CIUDAD DEL ESTE",
+        "barrio": "CIUDAD NUEVA",
+        "barrioId": 10011024,
+        "precio": 58000,
+        "moneda": "PYG",
+        "dormitorios": 0,
+        "banos": 0,
+        "m2": 750,
+        "direccion": "CIUDAD NUEVA, CIUDAD DEL ESTE",
+        "fotos": [
+             "/images/terrenos/terr-007/1.png"
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.670143,
+          -25.475909
+        ]
+      },
+      "properties": {
+        "id": "terr-008",
+        "titulo": "Terreno en SAN JUAN",
+        "categoria": "Terreno",
+        "tipoOperacion": "Venta",
+        "ciudad": "CIUDAD DEL ESTE",
+        "barrio": "SAN JUAN",
+        "barrioId": 10011003,
+        "precio": 48000,
+        "moneda": "PYG",
+        "dormitorios": 0,
+        "banos": 0,
+        "m2": 1000,
+        "direccion": "SAN JUAN, CIUDAD DEL ESTE",
+        "fotos": [
+             "/images/terrenos/terr-008/1.png"
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.651267,
+          -25.50749
+        ]
+      },
+      "properties": {
+        "id": "terr-009",
+        "titulo": "Terreno en SAN JOSE",
+        "categoria": "Terreno",
+        "tipoOperacion": "Venta",
+        "ciudad": "CIUDAD DEL ESTE",
+        "barrio": "SAN JOSE",
+        "barrioId": 10011014,
+        "precio": 61000,
+        "moneda": "PYG",
+        "dormitorios": 0,
+        "banos": 0,
+        "m2": 900,
+        "direccion": "SAN JOSE, CIUDAD DEL ESTE",
+        "fotos": [
+             "/images/terrenos/terr-009/1.png"
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.638091,
+          -25.519365
+        ]
+      },
+      "properties": {
+        "id": "terr-010",
+        "titulo": "Terreno en AREA 1",
+        "categoria": "Terreno",
+        "tipoOperacion": "Venta",
+        "ciudad": "CIUDAD DEL ESTE",
+        "barrio": "AREA 1",
+        "barrioId": 10011013,
+        "precio": 32000,
+        "moneda": "PYG",
+        "dormitorios": 0,
+        "banos": 0,
+        "m2": 400,
+        "direccion": "AREA 1, CIUDAD DEL ESTE",
+        "fotos": [
+             "/images/terrenos/terr-010/1.png"
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.601243,
+          -25.492722
+        ]
+      },
+      "properties": {
+        "id": "terr-011",
+        "titulo": "Terreno en PARANA COUNTRY CLUB",
+        "categoria": "Terreno",
+        "tipoOperacion": "Venta",
+        "ciudad": "HERNANDARIAS",
+        "barrio": "PARANA COUNTRY CLUB",
+        "barrioId": 10051023,
+        "precio": 85000,
+        "moneda": "PYG",
+        "dormitorios": 0,
+        "banos": 0,
+        "m2": 1200,
+        "direccion": "PARANA COUNTRY CLUB, HERNANDARIAS",
+        "fotos": [
+             "/images/terrenos/terr-011/1.png"
+            ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.747106,
+          -25.561758
+        ]
+      },
+      "properties": {
+        "id": "terr-012",
+        "titulo": "Terreno en CALLE 14 MONDAY",
+        "categoria": "Terreno",
+        "tipoOperacion": "Venta",
+        "ciudad": "MINGA GUAZÚ",
+        "barrio": "CALLE 14 MONDAY",
+        "barrioId": 10116200,
+        "precio": 43000,
+        "moneda": "PYG",
+        "dormitorios": 0,
+        "banos": 0,
+        "m2": 600,
+        "direccion": "CALLE 14 MONDAY, MINGA GUAZÚ",
+        "fotos": [
+             "/images/terrenos/terr-012/1.png"
+            ]
+      }
+    }
+  ]
+}

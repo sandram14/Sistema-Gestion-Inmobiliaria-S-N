@@ -1,0 +1,179 @@
+.section {
+  background: var(--color-fondo);
+  padding: 90px 40px;
+}
+
+.grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* el bloque "Sobre nosotros" se retiró: las ofertas ocupan todo el ancho */
+  gap: 32px;
+  align-items: stretch;
+}
+
+/* ── Panel de ofertas ─────────────────────────────────────────────────── */
+.ofertasPanel {
+  background: var(--color-blanco);
+  border-radius: 28px;
+  border: 1px solid var(--color-superficie);
+  padding: 52px 48px;
+}
+
+.eyebrow {
+  color: var(--color-verde-medio);
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-family: var(--fuente-titulos);
+  font-size: var(--titulo-seccion);
+  font-weight: 700;
+  color: var(--color-texto);
+  margin: 10px 0 36px;
+  letter-spacing: -0.02em;
+}
+
+.titleAccent {
+  font-style: normal; /* destacado: verde, sin cursiva */
+  color: var(--color-verde-medio);
+}
+
+.loading {
+  color: var(--color-gris);
+  font-family: var(--fuente-texto);
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+/* ── Tarjeta de oferta ────────────────────────────────────────────────── */
+.card {
+  background: var(--color-blanco);
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1.5px solid var(--color-superficie);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sombra-2);
+}
+
+.cardImg {
+  position: relative;
+  height: 160px;
+  background: var(--color-verde-medio);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardImgPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardImgIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-acento);
+}
+
+.cardBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: color-mix(in srgb, var(--color-blanco) 92%, transparent);
+  color: var(--color-verde);
+  font-size: var(--texto-2xs);
+  font-weight: 700;
+  font-family: var(--fuente-texto);
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+
+.cardTag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--color-acento);
+  color: var(--color-verde);
+  font-size: var(--texto-2xs);
+  font-weight: 700;
+  font-family: var(--fuente-texto);
+  padding: 4px 10px;
+  border-radius: 100px;
+  letter-spacing: 0.06em;
+}
+
+.cardBody {
+  padding: 16px 18px;
+}
+
+.cardPrice {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  color: var(--color-verde);
+  margin-bottom: 4px;
+}
+
+.cardTitle {
+  font-size: var(--texto-sm);
+  font-family: var(--fuente-texto);
+  color: var(--color-texto);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.cardSpecs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cardSpec {
+  font-size: var(--texto-xs);
+  color: var(--color-gris);
+  font-family: var(--fuente-texto);
+}
+
+/* ── Panel "Sobre nosotros" ───────────────────────────────────────────── */
+
+
+
+
+
+
+
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding: 56px 1.25rem;
+  }
+  .ofertasPanel {
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+  .cardsGrid {
+    grid-template-columns: 1fr;
+  }
+}

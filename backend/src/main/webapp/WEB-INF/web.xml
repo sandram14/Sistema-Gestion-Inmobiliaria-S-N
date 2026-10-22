@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Los Servlets, filtros y listeners se registran con anotaciones
+    (@WebServlet, @WebFilter, @WebListener). Aquí solo va la configuración
+    de la sesión HTTP usada por la autenticación administrativa.
+-->
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+
+    <display-name>S&amp;N Inmobiliaria - Backend</display-name>
+
+    <session-config>
+        <!-- Minutos de inactividad antes de cerrar la sesión -->
+        <session-timeout>30</session-timeout>
+        <cookie-config>
+            <!-- JavaScript no puede leer la cookie de sesión -->
+            <http-only>true</http-only>
+            <!-- En producción (HTTPS) se activa Secure desde la configuración de Tomcat/Docker -->
+        </cookie-config>
+        <!-- La sesión viaja solo en cookie, nunca en la URL -->
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+</web-app>

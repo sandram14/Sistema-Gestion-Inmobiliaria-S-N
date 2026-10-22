@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
+
+/* Identidad de S&N Inmobiliaria: los mismos colores del sitio público */
+:root {
+  --verde: #23412a;
+  --verde-oscuro: #1a3020;
+  --verde-medio: #3a6b46;
+  --acento: #a8d66f;
+  --acento-suave: #eef4e4;
+
+  --texto: #1a1a1a;
+  --texto-secundario: #4b5563;
+  --gris: #6b7280;
+  --borde: #dfe3dc;
+  --borde-fuerte: #c9cfc6;
+  --fondo: #f4f5ee;
+  --velo-inicio: 55%; /* capa clara sobre la imagen de fondo de Inicio */
+  --superficie: #ffffff;
+  --fila-alterna: #f9faf7;
+
+  --verde-texto: #23412a;      /* verde para textos (títulos, valores, estados) */
+  --enlace: #3a6b46;
+  --encabezado-tabla: #f3f5f0;
+  --inactivo-fondo: #eceeea;
+  --rojo-borde: #efc2bd;
+  --exito-borde: #cddcb8;
+  --comprobado-borde: #b9d3be;
+  --ambar-texto: #7a5b12;
+  color-scheme: light;
+
+  --rojo: #b42318;
+  --rojo-suave: #fdf0ee;
+  --ambar-suave: #fff7e6;
+  --ambar-borde: #ecd49a;
+
+  --fuente: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Gráficos del análisis: paleta categórica de referencia (validada con colores de deuteranopía, protanopía y
+     tritanopía), en orden fijo; "Otras" en gris. En tema oscuro, los mismos tonos ajustados al fondo oscuro */
+  --serie-1: #2a78d6; --serie-2: #eb6834; --serie-3: #1baf7a; --serie-4: #eda100; --serie-5: #e87ba4; --serie-otras: #9ca3af;
+  --pista-grafico: #e8ebe4;
+  --radio: 6px;
+  --radio-chico: 4px;
+  --ancho-menu: 232px;
+}
+
+/* Tema oscuro: elegido en Mi cuenta, o el del sistema operativo si no se eligió ninguno */
+:root[data-tema='oscuro'] {
+  --verde-texto: #a8d66f;
+  --enlace: #a8d66f;
+  --acento-suave: #24301f;
+  --texto: #e6e9e4;
+  --texto-secundario: #b3bbb1;
+  --gris: #8d968b;
+  --borde: #2f3832;
+  --borde-fuerte: #435047;
+  --fondo: #121614;
+  --superficie: #1a201c;
+  --velo-inicio: 80%; /* capa sobre la imagen de Inicio: más cubierta en oscuro para que el texto se lea */
+  --serie-1: #3987e5; --serie-2: #d95926; --serie-3: #199e70; --serie-4: #c98500; --serie-5: #d55181; --serie-otras: #6b7280;
+  --pista-grafico: #2a322d;
+  --fila-alterna: #1f2621;
+  --encabezado-tabla: #222a24;
+  --inactivo-fondo: #2a302c;
+  --rojo: #f0857a;
+  --rojo-suave: #3a1f1c;
+  --rojo-borde: #6e3a33;
+  --exito-borde: #3d5233;
+  --comprobado-borde: #3d5233;
+  --ambar-suave: #352d1d;
+  --ambar-borde: #6b5a2c;
+  --ambar-texto: #e7c879;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema]) {
+  --verde-texto: #a8d66f;
+  --enlace: #a8d66f;
+  --acento-suave: #24301f;
+  --texto: #e6e9e4;
+  --texto-secundario: #b3bbb1;
+  --gris: #8d968b;
+  --borde: #2f3832;
+  --borde-fuerte: #435047;
+  --fondo: #121614;
+  --superficie: #1a201c;
+  --velo-inicio: 80%; /* capa sobre la imagen de Inicio: más cubierta en oscuro para que el texto se lea */
+  --serie-1: #3987e5; --serie-2: #d95926; --serie-3: #199e70; --serie-4: #c98500; --serie-5: #d55181; --serie-otras: #6b7280;
+  --pista-grafico: #2a322d;
+  --fila-alterna: #1f2621;
+  --encabezado-tabla: #222a24;
+  --inactivo-fondo: #2a302c;
+  --rojo: #f0857a;
+  --rojo-suave: #3a1f1c;
+  --rojo-borde: #6e3a33;
+  --exito-borde: #3d5233;
+  --comprobado-borde: #3d5233;
+  --ambar-suave: #352d1d;
+  --ambar-borde: #6b5a2c;
+  --ambar-texto: #e7c879;
+  color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--fuente);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--texto);
+  background: var(--fondo);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--enlace); }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* Foco visible al navegar con teclado */
+:focus-visible {
+  outline: 2px solid var(--verde-medio);
+  outline-offset: 2px;
+}
+
+/* Íconos (lucide-react): trazo uniforme */
+.lucide { stroke-width: 1.75; flex-shrink: 0; }

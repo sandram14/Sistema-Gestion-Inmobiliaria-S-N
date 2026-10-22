@@ -1,0 +1,122 @@
+package py.sn.inmobiliaria.service;
+
+import py.sn.inmobiliaria.config.TxRunner;
+import py.sn.inmobiliaria.exception.DemasiadosIntentosException;
+import py.sn.inmobiliaria.exception.NoAutenticadoException;
+import py.sn.inmobiliaria.model.Usuario;
+import py.sn.inmobiliaria.repository.UsuarioDao;
+import py.sn.inmobiliaria.seguridad.ContrasenaHasher;
+import py.sn.inmobiliaria.seguridad.LimitadorIntentos;
+import py.sn.inmobiliaria.seguridad.Permiso;
+import py.sn.inmobiliaria.seguridad.UsuarioSesion;
+import py.sn.inmobiliaria.service.validacion.Errores;
+
+import java.util.Optional;
+
+/**
+ * Login de administradores.
+ *
+ * <p>Ante un error siempre responde el mismo mensaje ("Email o contraseña incorrectos")
+ * y tarda lo mismo, exista o no el email: así no se puede averiguar qué emails están
+ * registrados.</p>
+ */
+public class AuthService extends ServicioBase {
+
+    static final String CREDENCIALES_INVALIDAS = "Email o contraseña incorrectos";
+
+    private final UsuarioDao usuarioDao;
+    private final ContrasenaHasher hasher;
+    private final LimitadorIntentos limitador;
+
+    public AuthService(TxRunner tx, UsuarioDao usuarioDao, ContrasenaHasher hasher, LimitadorIntentos limitador) {
+        super(tx);
+        this.usuarioDao = usuarioDao;
+        this.hasher = hasher;
+        this.limitador = limitador;
+    }
+
+    /** Datos leídos de la base: el usuario para la sesión y el hash para comparar. */
+    private record Candidato(Acceso acceso, String hash) {
+    }
+
+    /**
+     * Usuario autenticado y la versión de su credencial al momento de leerlo (migración 011). La sesión guarda la
+     * versión con que se abrió: si el administrador restablece la contraseña, la versión sube y la sesión se cierra.
+     */
+    public record Acceso(UsuarioSesion usuario, int versionCredencial) {
+    }
+
+    /**
+     * @param ip dirección del cliente (para el límite de intentos)
+     * @return el usuario autenticado, para guardar en la sesión
+     * @throws NoAutenticadoException       si las credenciales no son válidas (401)
+     * @throws DemasiadosIntentosException  si hubo demasiados fallos recientes (429)
+     */
+    public UsuarioSesion login(String email, String contrasena, String ip) {
+        return iniciarSesion(email, contrasena, ip).usuario();
+    }
+
+    /** Como {@link #login}, pero devuelve también la versión de la credencial para guardarla en la sesión. */
+    public Acceso iniciarSesion(String email, String contrasena, String ip) {
+        Errores errores = new Errores();
+        if (email == null || email.isBlank()) {
+            errores.agregar("email", "Ingrese su email");
+        }
+        if (contrasena == null || contrasena.isEmpty()) {
+            errores.agregar("password", "Ingrese su contraseña");
+        }
+        errores.lanzarSiHay();
+        String emailLimpio = email.trim();
+
+        long minutos = limitador.minutosDeBloqueo(ip, emailLimpio);
+        if (minutos > 0) {
+            throw new DemasiadosIntentosException(minutos);
+        }
+
+        // Solo la lectura ocurre dentro de la transacción; la comparación BCrypt (lenta, a
+        // propósito) se hace después, para no retener una conexión de la base.
+        Optional<Candidato> candidato = leer(em -> usuarioDao.buscarActivoPorEmail(em, emailLimpio)
+                .map(u -> new Candidato(aAcceso(u), u.getPasswordHash())));
+
+        boolean valido;
+        if (candidato.isPresent()) {
+            // Solo los roles del panel (ADMIN, GERENTE, VENDEDOR) pueden ingresar
+            valido = hasher.verificar(contrasena, candidato.get().hash())
+                    && Permiso.esRolValido(candidato.get().acceso().usuario().rol());
+        } else {
+            hasher.verificarFicticio(contrasena); // mismo tiempo de respuesta que con un email existente
+            valido = false;
+        }
+
+        if (!valido) {
+            limitador.registrarFallo(ip, emailLimpio);
+            throw new NoAutenticadoException(CREDENCIALES_INVALIDAS);
+        }
+        limitador.registrarExito(ip, emailLimpio);
+        return candidato.get().acceso();
+    }
+
+    /**
+     * Vuelve a leer el usuario de la base (lo usa AuthFilter en cada petición administrativa).
+     *
+     * @return vacío si ya no existe, está desactivado o su rol no puede usar el panel
+     */
+    public Optional<UsuarioSesion> recargar(int idUsuario) {
+        return recargarAcceso(idUsuario).map(Acceso::usuario);
+    }
+
+    /** Como {@link #recargar}, con la versión actual de la credencial (AuthFilter la compara con la de la sesión). */
+    public Optional<Acceso> recargarAcceso(int idUsuario) {
+        return leer(em -> usuarioDao.buscarActivoPorId(em, idUsuario).map(AuthService::aAcceso))
+                .filter(a -> Permiso.esRolValido(a.usuario().rol()));
+    }
+
+    static Acceso aAcceso(Usuario u) {
+        return new Acceso(aSesion(u), u.getVersionCredencial());
+    }
+
+    static UsuarioSesion aSesion(Usuario u) {
+        return new UsuarioSesion(u.getId(), u.getNombre(), u.getApellido(), u.getEmail(), u.getRol().getNombre(),
+                u.isDebeCambiarPassword());
+    }
+}

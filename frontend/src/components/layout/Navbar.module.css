@@ -1,0 +1,176 @@
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.navScrolled {
+  background-color: color-mix(in srgb, var(--color-verde-oscuro) 97%, transparent);
+  backdrop-filter: blur(24px);
+  box-shadow: var(--sombra-linea);
+}
+
+.inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 72px;
+}
+
+/* ── Logo ─────────────────────────────────────────────────────────────── */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logoBadge {
+  /* Ancho adaptable al texto "S&N" (con un ancho fijo, las letras se salían de la insignia) */
+  min-width: 36px;
+  padding: 0 7px;
+  height: 36px;
+  background: var(--color-acento);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logoBadgeText {
+  color: var(--color-verde);
+  font-size: var(--texto-base);
+  font-weight: 700;
+  font-family: var(--fuente-titulos);
+  line-height: 1;
+}
+
+.logoText {
+  color: var(--color-blanco);
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.logoAccent {
+  color: var(--color-acento);
+}
+
+/* ── Links (desktop) ──────────────────────────────────────────────────── */
+.links {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  justify-self: center;
+}
+
+.link {
+  color: color-mix(in srgb, var(--color-blanco) 80%, transparent);
+  font-size: var(--texto-md);
+  font-family: var(--fuente-texto);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  transition: color 0.2s;
+}
+
+.link:hover {
+  color: var(--color-acento);
+}
+
+.linkActive {
+  color: var(--color-acento);
+  font-weight: 600;
+}
+
+/* ── Botón hamburguesa (oculto en desktop) ───────────────────────────── */
+.hamburger {
+  display: none;
+  justify-self: end;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+}
+
+.hamburgerBar {
+  width: 22px;
+  height: 2px;
+  background: var(--color-blanco);
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+.hamburgerBarTop {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburgerBarHidden {
+  opacity: 0;
+}
+
+.hamburgerBarBottom {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── Menú desplegable (oculto en desktop) ────────────────────────────── */
+.mobileMenu {
+  display: none;
+}
+
+.mobileLink {
+  color: color-mix(in srgb, var(--color-blanco) 85%, transparent);
+  font-size: var(--texto-base);
+  font-family: var(--fuente-texto);
+  font-weight: 400;
+  padding: 14px 2rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-blanco) 8%, transparent);
+}
+
+.mobileLink:first-child {
+  border-top: none;
+}
+
+/* ── Responsive: por debajo de 860px pasa a menú hamburguesa ─────────── */
+@media (max-width: 860px) {
+  .inner {
+    grid-template-columns: 1fr auto;
+  }
+
+  .links {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .mobileMenu {
+    display: flex;
+    flex-direction: column;
+    max-height: 0;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-verde-oscuro) 98%, transparent);
+    backdrop-filter: blur(24px);
+    transition: max-height 0.3s ease;
+  }
+
+  .mobileMenuOpen {
+    max-height: 420px;
+  }
+}

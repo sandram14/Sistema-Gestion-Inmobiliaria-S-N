@@ -1,0 +1,232 @@
+/* ── 1. Intro ─────────────────────────────────────────────────────────── */
+.intro {
+  background: var(--color-verde-oscuro);
+  padding: 128px 2rem 56px;
+  text-align: center;
+}
+
+.eyebrow {
+  display: block;
+  color: color-mix(in srgb, var(--color-acento) 75%, transparent);
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--fuente-titulos);
+  font-size: var(--titulo-pagina);
+  font-weight: 700;
+  color: var(--color-blanco);
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+}
+
+.introText {
+  color: color-mix(in srgb, var(--color-blanco) 65%, transparent);
+  font-size: var(--texto-base);
+  font-family: var(--fuente-texto);
+  line-height: 1.75;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ── Shared section heading ──────────────────────────────────────────── */
+.h2 {
+  font-family: var(--fuente-titulos);
+  font-size: var(--titulo-seccion);
+  font-weight: 700;
+  color: var(--color-texto);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 18px;
+}
+
+.h2Accent {
+  font-style: normal; /* destacado: verde, sin cursiva */
+  color: var(--color-verde-medio);
+}
+
+.body {
+  color: var(--color-gris);
+  font-size: var(--texto-base);
+  font-family: var(--fuente-texto);
+  line-height: 1.8;
+  margin: 0 0 32px;
+}
+
+/* ── 2. Quiénes somos ─────────────────────────────────────────────────── */
+.quienes {
+  background: var(--color-blanco);
+  padding: 100px 2rem;
+}
+
+.quienesGrid {
+  max-width: 1160px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.quienesImg {
+  width: 100%;
+  border-radius: 24px;
+  border: 1px solid var(--color-superficie);
+}
+
+.quienesStats {
+  display: flex;
+  flex-wrap: wrap; /* con varias cifras o descripciones largas, pasan a otra línea en lugar de salirse */
+  gap: 20px 36px;
+  border-top: 1px solid var(--color-superficie);
+  padding-top: 28px;
+}
+
+.quienesStat {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.quienesStatValue {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-2xl);
+  color: var(--color-verde);
+}
+
+.quienesStatLabel {
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
+  color: var(--color-gris);
+  margin-top: 4px;
+}
+
+/* ── 3. Nuestros valores (a todo el ancho) ─────────────────────────────── */
+/* Mismo fondo que "Quiénes somos", los servicios y el CTA, para que las secciones del
+   medio fluyan sin cortes de color (solo el intro y el footer son distintos). */
+.valores {
+  background: var(--color-blanco);
+  padding: 100px 2rem 72px;
+}
+
+.valoresContenido {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.valoresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.valorCard {
+  background: var(--color-fondo);
+  border: 1px solid var(--color-superficie);
+  border-radius: 20px;
+  padding: 26px 20px;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.valorCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sombra-2);
+}
+
+.valorIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--color-blanco);
+  color: var(--color-verde-medio);
+  margin-bottom: 14px;
+}
+
+.valorTitle {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  color: var(--color-verde);
+  margin: 0 0 8px;
+}
+
+.valorText {
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
+  color: var(--color-gris);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── 4. CTA ───────────────────────────────────────────────────────────── */
+.cta {
+  background: var(--color-blanco);
+  padding: 100px 2rem 120px;
+  text-align: center;
+  border-top: 1px solid var(--color-superficie);
+}
+
+.ctaTitle {
+  font-family: var(--fuente-titulos);
+  font-size: var(--titulo-seccion);
+  font-weight: 700;
+  color: var(--color-texto);
+  letter-spacing: -0.02em;
+  margin: 0 0 32px;
+}
+
+.ctaBtn {
+  padding: 15px 34px;
+  background: var(--color-verde);
+  border: none;
+  border-radius: 12px;
+  color: var(--color-acento);
+  font-size: var(--texto-base);
+  font-weight: 700;
+  font-family: var(--fuente-texto);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ctaBtn:hover {
+  background: var(--color-verde-medio);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .quienesGrid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .intro {
+    padding: 108px 1.25rem 44px;
+  }
+  .quienes,
+  .valores,
+  .cta {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+  .valoresGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Las columnas de las grillas no se ensanchan por su contenido (textos largos cargados desde el panel) */
+.quienesGrid > *,
+.valoresGrid > * {
+  min-width: 0;
+}

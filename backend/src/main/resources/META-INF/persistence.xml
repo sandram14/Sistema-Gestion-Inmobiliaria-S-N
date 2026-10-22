@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Unidad de persistencia JPA.
+    La conexión (DataSource del pool HikariCP) NO se configura aquí: la entrega
+    JpaProvider en tiempo de ejecución, con los datos de las variables de entorno.
+-->
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+
+    <persistence-unit name="sn-inmobiliaria" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <class>py.sn.inmobiliaria.model.Rol</class>
+        <class>py.sn.inmobiliaria.model.Usuario</class>
+        <class>py.sn.inmobiliaria.model.Departamento</class>
+        <class>py.sn.inmobiliaria.model.Ciudad</class>
+        <class>py.sn.inmobiliaria.model.Barrio</class>
+        <class>py.sn.inmobiliaria.model.TipoPropiedad</class>
+        <class>py.sn.inmobiliaria.model.EstadoPropiedad</class>
+        <class>py.sn.inmobiliaria.model.Operacion</class>
+        <class>py.sn.inmobiliaria.model.Propiedad</class>
+        <class>py.sn.inmobiliaria.model.Casa</class>
+        <class>py.sn.inmobiliaria.model.Terreno</class>
+        <class>py.sn.inmobiliaria.model.Imagen</class>
+        <class>py.sn.inmobiliaria.model.OperacionPropiedad</class>
+        <class>py.sn.inmobiliaria.model.Consulta</class>
+        <class>py.sn.inmobiliaria.model.ClientePotencial</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <properties>
+            <!-- El esquema lo crean los scripts de /database: Hibernate solo lo VALIDA al arrancar
+                 y se niega a iniciar si una entidad no coincide con las tablas. Nunca lo modifica. -->
+            <property name="hibernate.hbm2ddl.auto" value="validate"/>
+
+            <!-- Carga en lotes: al recorrer imágenes u operaciones de varias propiedades,
+                 Hibernate las trae de a 32 con una sola consulta (evita el problema "N+1") -->
+            <property name="hibernate.default_batch_fetch_size" value="32"/>
+
+            <!-- Poner en true temporalmente para ver en el log el SQL que genera Hibernate -->
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.format_sql" value="true"/>
+        </properties>
+    </persistence-unit>
+</persistence>

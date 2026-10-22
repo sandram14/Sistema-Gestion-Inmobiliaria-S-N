@@ -1,0 +1,810 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { LatLngBounds } from 'leaflet'
+import { useSearchParams } from 'react-router-dom'
+import styles from './SearchFilter.module.css'
+import MapCanvas, { type VistaMapa } from '../PropertyMap/MapCanvas'
+import { ChevronLeft, ChevronRight, Home, LandPlot, MapPin, MessageCircle, X } from 'lucide-react'
+import { useGeoData } from '../PropertyMap/useGeoData'
+import { ApiError, apiGet, esCancelacion } from '../../services/api'
+import { conPuntosDeMiles, montoDeCampo, textoDeCampo, textoPrecioOperacion } from '../../services/guaranies'
+import { abrirAsistenteConPropiedad } from '../chat/AssistantWidget'
+import {
+  boundsForBarrio,
+  boundsForCiudad,
+  boundsForPoint,
+  boundsFromFeatures,
+} from '../PropertyMap/mapUtils'
+import {
+  FILTROS_VACIOS,
+  operacionesDe,
+  type Filtros,
+  type GeoFeatureCollection,
+  type OperacionPrecio,
+  type PropiedadFeature,
+} from '../PropertyMap/types'
+
+
+export function iconoCategoria(categoria: PropiedadFeature['properties']['categoria']) {
+  if (categoria === 'Casa') return <Home size={40} strokeWidth={1.5} aria-hidden="true" />
+  return <LandPlot size={40} strokeWidth={1.5} aria-hidden="true" />
+}
+
+// ─── Fotos de las propiedades ────────────────────────────────────────────
+// Cada propiedad trae su campo `fotos` desde la API (la principal primero). Los
+// archivos están en el almacenamiento compartido del backend (/uploads/...) y se
+// cargan o cambian desde el panel administrativo.
+export function fotosPara(props: PropiedadFeature['properties']): string[] {
+  return props.fotos ?? []
+}
+
+/** "Gs. 450.000.000" o "Gs. 4.000.000 / mes" (alquiler). Todo el sistema trabaja en guaraníes. */
+function textoPrecio(op: OperacionPrecio): string {
+  return textoPrecioOperacion(op.operacion, op.precio)
+}
+
+/** Búsqueda con filtros contra la API: el backend aplica y valida las reglas. */
+function usePropiedadesFiltradas(filtros: Filtros, habilitado: boolean) {
+  const [estado, setEstado] = useState<{
+    datos: PropiedadFeature[]
+    cargando: boolean
+    error: string | null
+    /** Errores por campo que devuelve el backend (por ejemplo, presupuestoMin). */
+    campos: Record<string, string>
+  }>({
+    datos: [],
+    cargando: true,
+    error: null,
+    campos: {},
+  })
+
+  useEffect(() => {
+    if (!habilitado) return
+    const control = new AbortController()
+    setEstado((e) => ({ ...e, cargando: true, error: null, campos: {} }))
+    apiGet<GeoFeatureCollection<PropiedadFeature>>(
+      '/api/propiedades',
+      {
+        departamentoId: filtros.departamentoId,
+        ciudadId: filtros.ciudadId,
+        barrioId: filtros.barrioId,
+        categoria: filtros.categoria === 'Todos' ? null : filtros.categoria,
+        operacion: filtros.tipoOperacion === 'Todos' ? null : filtros.tipoOperacion,
+        // En guaraníes: el backend asume PYG, la única moneda del sistema, así que no se envía moneda
+        presupuestoMin: filtros.presupuestoMin,
+        presupuestoMax: filtros.presupuestoMax,
+      },
+      control.signal
+    )
+      .then((fc) => setEstado({ datos: fc.features, cargando: false, error: null, campos: {} }))
+      .catch((e: unknown) => {
+        if (esCancelacion(e)) return
+        setEstado((s) => ({
+          ...s,
+          cargando: false,
+          error: e instanceof Error ? e.message : 'No se pudieron cargar las propiedades.',
+          campos: e instanceof ApiError ? e.campos : {},
+        }))
+      })
+    return () => control.abort() // si cambian los filtros, se descarta la búsqueda anterior
+  }, [
+    habilitado,
+    filtros.departamentoId,
+    filtros.ciudadId,
+    filtros.barrioId,
+    filtros.categoria,
+    filtros.tipoOperacion,
+    filtros.presupuestoMin,
+    filtros.presupuestoMax,
+  ])
+
+  return estado
+}
+
+// ─── Galería de fotos deslizable ─────────────────────────────────────────
+
+export function ImageCarousel({ images }: { images: string[] }) {
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [index, setIndex] = useState(0)
+
+  function goTo(i: number, e?: React.MouseEvent) {
+    e?.stopPropagation()
+    const el = trackRef.current
+    if (!el) return
+    const clamped = (i + images.length) % images.length
+    el.scrollTo({ left: clamped * el.clientWidth, behavior: 'smooth' })
+    setIndex(clamped)
+  }
+
+  function handleScroll() {
+    const el = trackRef.current
+    if (!el || el.clientWidth === 0) return
+    const i = Math.round(el.scrollLeft / el.clientWidth)
+    setIndex(Math.min(Math.max(i, 0), images.length - 1))
+  }
+
+  return (
+    <div className={styles.carousel}>
+      <div ref={trackRef} className={styles.carouselTrack} onScroll={handleScroll}>
+        {images.map((src, i) => (
+          <img key={i} src={src} alt="" className={styles.carouselImg} draggable={false} />
+        ))}
+      </div>
+
+      {images.length > 1 && (
+        <>
+          <button
+            className={`${styles.carouselArrow} ${styles.carouselArrowLeft}`}
+            onClick={(e) => goTo(index - 1, e)}
+            aria-label="Foto anterior"
+          >
+            <ChevronLeft size={22} aria-hidden="true" />
+          </button>
+          <button
+            className={`${styles.carouselArrow} ${styles.carouselArrowRight}`}
+            onClick={(e) => goTo(index + 1, e)}
+            aria-label="Foto siguiente"
+          >
+            <ChevronRight size={22} aria-hidden="true" />
+          </button>
+          <div className={styles.carouselDots}>
+            {images.map((_, i) => (
+              <button
+                key={i}
+                className={`${styles.carouselDot} ${i === index ? styles.carouselDotActive : ''}`}
+                onClick={(e) => goTo(i, e)}
+                aria-label={`Ir a foto ${i + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+export default function SearchFilter() {
+  const { ciudades, barrios, propiedades, loading, error } = useGeoData()
+  // filtros: lo aplicado (mapa y resultados). borrador: lo elegido en la barra, que se aplica recién al
+  // pulsar Buscar (o Enter en el presupuesto). Los clics en el mapa sí se aplican al instante.
+  const [filtros, setFiltros] = useState<Filtros>(FILTROS_VACIOS)
+  const [borrador, setBorrador] = useState<Filtros>(FILTROS_VACIOS)
+  // Lo aplicado en la última búsqueda (Buscar o un enlace con filtros): la X del detalle vuelve a ese resultado,
+  // con el mapa completo, aunque después se haya entrado a una ciudad o un barrio con clics en el mapa
+  const [filtrosBuscados, setFiltrosBuscados] = useState<Filtros>(FILTROS_VACIOS)
+  const [extraBounds, setExtraBounds] = useState<LatLngBounds | null>(null)
+  const [propiedadId, setPropiedadId] = useState<string | null>(null)
+  // Al abrir una propiedad se guarda dónde estaba el cliente (filtros, barra y vista del mapa) y la X lo devuelve ahí,
+  // con el mismo centro y zoom. vistaRestaurada se usa una sola vez: cualquier otro movimiento la descarta.
+  const ultimaVista = useRef<VistaMapa | null>(null)
+  const antesDelDetalle = useRef<{
+    filtros: Filtros; borrador: Filtros; desdeTexto: string; hastaTexto: string; extraBounds: LatLngBounds | null; vista: VistaMapa | null
+  } | null>(null)
+  const [vistaRestaurada, setVistaRestaurada] = useState<VistaMapa | null>(null)
+  const recordarVista = useCallback((v: VistaMapa) => { ultimaVista.current = v }, [])
+  const [searchParams] = useSearchParams()
+  // Presupuesto en guaraníes: se aplica con Buscar, como el resto de la barra.
+  const [desdeTexto, setDesdeTexto] = useState('')
+  const [hastaTexto, setHastaTexto] = useState('')
+  const [errorPresupuesto, setErrorPresupuesto] = useState<string | null>(null)
+
+  // Permite deep-link desde el home/footer: /buscar?ciudad=01&barrio=10011013
+  // y también /buscar?categoria=Terreno&tipoOperacion=Venta
+  // y /buscar?propiedad=prop-005 (abre directo el detalle de esa propiedad,
+  // usado por las tarjetas de "Ofertas" del inicio)
+  useEffect(() => {
+    if (loading) return
+    const ciudadParam = searchParams.get('ciudad')
+    const barrioParam = searchParams.get('barrio')
+    const categoriaParam = searchParams.get('categoria')
+    const tipoOperacionParam = searchParams.get('tipoOperacion')
+    const propiedadParam = searchParams.get('propiedad')
+
+    const categoriasValidas: Filtros['categoria'][] = ['Todos', 'Vivienda', 'Terreno']
+    const operacionesValidas: Filtros['tipoOperacion'][] = ['Todos', 'Venta', 'Alquiler']
+    const categoria = categoriasValidas.find((c) => c === categoriaParam)
+    const tipoOperacion = operacionesValidas.find((t) => t === tipoOperacionParam)
+    const propiedad = propiedadParam ? propiedades.find((p) => p.properties.id === propiedadParam) : undefined
+
+    if (!ciudadParam && !barrioParam && !categoria && !tipoOperacion && !propiedad) return
+
+    if (propiedad) {
+      const ciudadDeLaProp = ciudades.find((c) => c.properties.ciudad === propiedad.properties.ciudad)
+      patch({
+        ciudadId: ciudadDeLaProp?.properties.id ?? filtros.ciudadId,
+        barrioId: propiedad.properties.barrioId,
+      })
+      setPropiedadId(propiedad.properties.id)
+      return
+    }
+
+    const desdeEnlace: Partial<Filtros> = {
+      ciudadId: ciudadParam ?? filtros.ciudadId,
+      barrioId: barrioParam ? Number(barrioParam) : filtros.barrioId,
+      categoria: categoria ?? filtros.categoria,
+      tipoOperacion: tipoOperacion ?? filtros.tipoOperacion,
+    }
+    patch(desdeEnlace)
+    setFiltrosBuscados(conReglas({ ...filtros, ...desdeEnlace }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading])
+
+  /** Un terreno sólo se compra: si eligen "Terreno" y había "Alquiler" cargado, se limpia. */
+  function conReglas(f: Filtros): Filtros {
+    return f.categoria === 'Terreno' && f.tipoOperacion === 'Alquiler' ? { ...f, tipoOperacion: 'Todos' } : f
+  }
+
+  /** Aplica al instante (clics en el mapa, "Volver", enlaces) y refleja la ubicación en la barra. */
+  function patch(p: Partial<Filtros>) {
+    const next = conReglas({ ...filtros, ...p })
+    setFiltros(next)
+    setBorrador((b) =>
+      conReglas({ ...b, ...p, departamentoId: next.departamentoId, ciudadId: next.ciudadId, barrioId: next.barrioId })
+    )
+    setExtraBounds(null)
+    setPropiedadId(null)
+    setVistaRestaurada(null)
+  }
+
+  /** Lo que se elige en la barra: no busca hasta pulsar Buscar. */
+  function cambiarBorrador(p: Partial<Filtros>) {
+    setBorrador((b) => conReglas({ ...b, ...p }))
+  }
+
+  // Departamentos disponibles, a partir de las ciudades que entrega la API
+  const departamentos = useMemo(() => {
+    const vistos = new Map<number, string>()
+    ciudades.forEach((c) => {
+      if (c.properties.departamentoId != null) vistos.set(c.properties.departamentoId, c.properties.departamento)
+    })
+    return [...vistos.entries()].map(([id, nombre]) => ({ id, nombre }))
+  }, [ciudades])
+
+  const ciudadesVisibles = useMemo(
+    () =>
+      filtros.departamentoId == null
+        ? ciudades
+        : ciudades.filter((c) => c.properties.departamentoId === filtros.departamentoId),
+    [ciudades, filtros.departamentoId]
+  )
+
+  const barriosDeLaCiudad = useMemo(
+    () => barrios.filter((b) => b.properties.distritoCod === filtros.ciudadId),
+    [barrios, filtros.ciudadId]
+  )
+
+  // Las listas de la barra dependen de lo elegido en ella (aunque todavía no se haya buscado)
+  const ciudadesDelBorrador = useMemo(
+    () =>
+      borrador.departamentoId == null
+        ? ciudades
+        : ciudades.filter((c) => c.properties.departamentoId === borrador.departamentoId),
+    [ciudades, borrador.departamentoId]
+  )
+
+  const barriosDelBorrador = useMemo(
+    () => barrios.filter((b) => b.properties.distritoCod === borrador.ciudadId),
+    [barrios, borrador.ciudadId]
+  )
+
+  const ciudadSeleccionada = ciudades.find((c) => c.properties.id === filtros.ciudadId)
+  const barrioSeleccionado = barriosDeLaCiudad.find((b) => b.properties.id === filtros.barrioId)
+  const nivel = filtros.barrioId ? 'barrio' : filtros.ciudadId ? 'ciudad' : 'departamento'
+
+  // Los filtros los aplica el backend (/api/propiedades?...): ciudad, barrio, tipo, operación,
+  // presupuesto en guaraníes (desde/hasta) y departamento. Aquí solo se muestran los resultados.
+  const busqueda = usePropiedadesFiltradas(filtros, !loading && !error)
+  const propiedadesFiltradas = busqueda.datos
+  const resultados = propiedadesFiltradas
+
+  const propiedadSeleccionada = useMemo(
+    () => propiedades.find((p) => p.properties.id === propiedadId) ?? null,
+    [propiedades, propiedadId]
+  )
+
+  const barrioDeLaPropiedad = propiedadSeleccionada
+    ? barrios.find((b) => b.properties.id === propiedadSeleccionada.properties.barrioId)
+    : undefined
+
+  const flyToBounds: LatLngBounds | null = useMemo(() => {
+    if (propiedadSeleccionada) {
+      const [lng, lat] = propiedadSeleccionada.geometry.coordinates
+      return boundsForPoint(lat, lng)
+    }
+    if (filtros.barrioId) return boundsForBarrio(barrios, filtros.barrioId)
+    if (filtros.ciudadId) return boundsForCiudad(barrios, filtros.ciudadId)
+    if (extraBounds) return extraBounds
+    // Vista general: el mapa se encuadra en todas las propiedades (antes usaba un centro fijo, desplazado al oeste)
+    return propiedades.length > 0 ? boundsFromFeatures(propiedades) : null
+  }, [barrios, propiedades, filtros.ciudadId, filtros.barrioId, extraBounds, propiedadSeleccionada])
+
+  // Al buscar sin ciudad, el mapa se encuadra en los resultados nuevos cuando llegan (no en los anteriores)
+  const [encuadrarResultados, setEncuadrarResultados] = useState(false)
+  const datosAlBuscar = useRef(busqueda.datos)
+  useEffect(() => {
+    if (!encuadrarResultados || busqueda.cargando) return
+    if (busqueda.datos === datosAlBuscar.current && !busqueda.error) return
+    setEncuadrarResultados(false)
+    if (!filtros.ciudadId && busqueda.datos.length > 0) setExtraBounds(boundsFromFeatures(busqueda.datos))
+  }, [encuadrarResultados, busqueda.cargando, busqueda.datos, busqueda.error, filtros.ciudadId])
+
+  function alPresionarTecla(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') handleBuscar()
+  }
+
+  /** Aplica todo lo elegido en la barra, incluido el presupuesto ("Desde" no puede superar a "Hasta"). */
+  function handleBuscar() {
+    const desde = montoDeCampo(desdeTexto)
+    const hasta = montoDeCampo(hastaTexto)
+    if (desde != null && hasta != null && desde > hasta) {
+      setErrorPresupuesto('"Desde" no puede ser mayor que "Hasta".')
+      return
+    }
+    setErrorPresupuesto(null)
+    const next = conReglas({ ...borrador, presupuestoMin: desde, presupuestoMax: hasta })
+    setFiltrosBuscados(next)
+    aplicarBusqueda(next)
+  }
+
+  /** Aplica unos filtros a la barra y al mapa, y encuadra el mapa en sus resultados (Buscar y la X del detalle). */
+  function aplicarBusqueda(next: Filtros) {
+    const sinCambios = JSON.stringify(next) === JSON.stringify(filtros)
+    setFiltros(next)
+    setBorrador(next)
+    setPropiedadId(null)
+    setExtraBounds(null)
+    setVistaRestaurada(null)
+    if (next.ciudadId) return
+    if (sinCambios) {
+      // No hay búsqueda nueva: se encuadra en los resultados que ya están
+      if (propiedadesFiltradas.length > 0) setExtraBounds(boundsFromFeatures(propiedadesFiltradas))
+    } else {
+      datosAlBuscar.current = busqueda.datos
+      setEncuadrarResultados(true)
+    }
+  }
+
+  // Errores del presupuesto: primero la comprobación local; si no, los que devuelve el backend
+  const errorDesde = errorPresupuesto ?? busqueda.campos.presupuestoMin ?? null
+  const errorHasta = busqueda.campos.presupuestoMax ?? null
+  const hayErrorDePresupuesto = Boolean(busqueda.campos.presupuestoMin || busqueda.campos.presupuestoMax)
+  const hayPresupuesto = filtros.presupuestoMin != null || filtros.presupuestoMax != null
+  const textoRango =
+    filtros.presupuestoMin != null && filtros.presupuestoMax != null
+      ? `entre Gs. ${conPuntosDeMiles(filtros.presupuestoMin)} y Gs. ${conPuntosDeMiles(filtros.presupuestoMax)}`
+      : filtros.presupuestoMin != null
+        ? `desde Gs. ${conPuntosDeMiles(filtros.presupuestoMin)}`
+        : `hasta Gs. ${conPuntosDeMiles(filtros.presupuestoMax ?? 0)}`
+
+  function seleccionarPropiedad(p: PropiedadFeature) {
+    antesDelDetalle.current = { filtros, borrador, desdeTexto, hastaTexto, extraBounds, vista: ultimaVista.current }
+    const props = p.properties
+    // Si tocan un pin fuera del contexto actual, ubicamos ciudad/barrio para
+    // que el botón "volver" funcione de forma coherente.
+    if (props.barrioId !== filtros.barrioId) {
+      const ciudadDeLaProp = ciudades.find((c) => c.properties.ciudad === props.ciudad)
+      patch({ ciudadId: ciudadDeLaProp?.properties.id ?? filtros.ciudadId, barrioId: props.barrioId })
+    }
+    setPropiedadId(props.id)
+  }
+
+  /**
+   * La X del detalle vuelve al mapa tal como estaba antes de abrir la propiedad: mismos filtros, barra, barrio,
+   * centro y zoom. Si la propiedad se abrió desde un enlace (por ejemplo, una oferta del inicio), no hay un mapa
+   * anterior: vuelve al resultado de la última búsqueda.
+   */
+  function volverDesdeDetalle() {
+    const antes = antesDelDetalle.current
+    antesDelDetalle.current = null
+    if (antes) {
+      setFiltros(antes.filtros)
+      setBorrador(antes.borrador)
+      setDesdeTexto(antes.desdeTexto)
+      setHastaTexto(antes.hastaTexto)
+      setErrorPresupuesto(null)
+      setExtraBounds(antes.extraBounds)
+      setPropiedadId(null)
+      setVistaRestaurada(antes.vista)
+      return
+    }
+    const { presupuestoMin, presupuestoMax } = filtrosBuscados
+    setDesdeTexto(presupuestoMin != null ? conPuntosDeMiles(presupuestoMin) : '')
+    setHastaTexto(presupuestoMax != null ? conPuntosDeMiles(presupuestoMax) : '')
+    setErrorPresupuesto(null)
+    aplicarBusqueda(filtrosBuscados)
+  }
+
+  function volverDesdeBarrio() {
+    patch({ barrioId: null })
+  }
+
+  function volverDesdeCiudad() {
+    patch({ ciudadId: null, barrioId: null })
+  }
+
+  if (loading) {
+    return (
+      <section className={styles.page}>
+        <div className={styles.centeredMsg}>Cargando mapa…</div>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className={styles.page}>
+        <div className={`${styles.centeredMsg} ${styles.centeredMsgError}`}>{error}</div>
+      </section>
+    )
+  }
+
+  return (
+    <section className={styles.page}>
+      {/* ── Barra de filtros (sin barrio hasta elegir ciudad) ───────────── */}
+      <div className={styles.filterBar}>
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Departamento</label>
+          <select
+            className={styles.filterSelect}
+            value={borrador.departamentoId ?? ''}
+            onChange={(e) =>
+              cambiarBorrador({ departamentoId: e.target.value ? Number(e.target.value) : null, ciudadId: null, barrioId: null })
+            }
+          >
+            <option value="">Todos</option>
+            {departamentos.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Ciudad</label>
+          <select
+            className={styles.filterSelect}
+            value={borrador.ciudadId ?? ''}
+            onChange={(e) => cambiarBorrador({ ciudadId: e.target.value || null, barrioId: null })}
+          >
+            <option value="">Todas</option>
+            {ciudadesDelBorrador.map((c) => (
+              <option key={c.properties.id} value={c.properties.id}>
+                {c.properties.ciudad}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {borrador.ciudadId && (
+          <div className={styles.filterGroup}>
+            <label className={styles.filterLabel}>Barrio</label>
+            <select
+              className={styles.filterSelect}
+              value={borrador.barrioId ?? ''}
+              onChange={(e) => cambiarBorrador({ barrioId: e.target.value ? Number(e.target.value) : null })}
+            >
+              <option value="">Todos</option>
+              {barriosDelBorrador.map((b) => (
+                <option key={b.properties.id} value={b.properties.id}>
+                  {b.properties.barrio}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Tipo de propiedad</label>
+          <select
+            className={styles.filterSelect}
+            value={borrador.categoria}
+            onChange={(e) => cambiarBorrador({ categoria: e.target.value as Filtros['categoria'] })}
+          >
+            <option value="Todos">Todos</option>
+            <option value="Vivienda">Vivienda</option>
+            <option value="Terreno">Terreno</option>
+          </select>
+        </div>
+
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Operación</label>
+          <select
+            className={styles.filterSelect}
+            value={borrador.tipoOperacion}
+            onChange={(e) => cambiarBorrador({ tipoOperacion: e.target.value as Filtros['tipoOperacion'] })}
+          >
+            <option value="Todos">Todos</option>
+            <option value="Venta">Venta</option>
+            {borrador.categoria !== 'Terreno' && <option value="Alquiler">Alquiler</option>}
+          </select>
+        </div>
+
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel} htmlFor="presupuesto-desde">
+            Desde (Gs.)
+          </label>
+          <input
+            id="presupuesto-desde"
+            className={`${styles.filterInput} ${errorDesde ? styles.filterInputError : ''}`}
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="Sin mínimo"
+            value={desdeTexto}
+            aria-invalid={errorDesde ? true : undefined}
+            aria-describedby={errorDesde ? 'presupuesto-desde-error' : undefined}
+            onChange={(e) => setDesdeTexto(textoDeCampo(e.target.value))}
+            onKeyDown={alPresionarTecla}
+          />
+          {errorDesde && (
+            <span id="presupuesto-desde-error" className={styles.filterError}>
+              {errorDesde}
+            </span>
+          )}
+        </div>
+
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel} htmlFor="presupuesto-hasta">
+            Hasta (Gs.)
+          </label>
+          <input
+            id="presupuesto-hasta"
+            className={`${styles.filterInput} ${errorHasta ? styles.filterInputError : ''}`}
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="Sin máximo"
+            value={hastaTexto}
+            aria-invalid={errorHasta ? true : undefined}
+            aria-describedby={errorHasta ? 'presupuesto-hasta-error' : undefined}
+            onChange={(e) => setHastaTexto(textoDeCampo(e.target.value))}
+            onKeyDown={alPresionarTecla}
+          />
+          {errorHasta && (
+            <span id="presupuesto-hasta-error" className={styles.filterError}>
+              {errorHasta}
+            </span>
+          )}
+        </div>
+
+        <button className={styles.searchBtn} onClick={handleBuscar}>
+          Buscar
+        </button>
+      </div>
+
+      {busqueda.error && !hayErrorDePresupuesto && (
+        <p className={styles.emptyText} role="alert">
+          {busqueda.error}
+        </p>
+      )}
+
+      {hayPresupuesto && !busqueda.cargando && !busqueda.error && resultados.length === 0 && (
+        <p className={styles.avisoFiltro} role="status">
+          No hay propiedades publicadas {textoRango}. Probá ampliar el presupuesto o quitar algún filtro.
+        </p>
+      )}
+
+      {/* ── Escenario principal: mapa a pantalla completa ───────────────── */}
+      <div className={styles.stage}>
+        {propiedadSeleccionada ? (
+          <DetalleView
+            propiedad={propiedadSeleccionada}
+            barrio={barrioDeLaPropiedad}
+            flyToBounds={flyToBounds}
+            onVolver={volverDesdeDetalle}
+          />
+        ) : (
+          <MapaGeneralView
+            ciudades={ciudadesVisibles}
+            barriosVisibles={barriosDeLaCiudad}
+            propiedades={resultados}
+            nivel={nivel === 'barrio' && !barrioSeleccionado ? 'ciudad' : nivel}
+            ciudadSeleccionada={ciudadSeleccionada}
+            barrioSeleccionado={barrioSeleccionado}
+            cargando={busqueda.cargando}
+            flyToBounds={flyToBounds}
+            vistaRestaurada={vistaRestaurada}
+            onVistaCambia={recordarVista}
+            onVolver={nivel === 'barrio' ? volverDesdeBarrio : volverDesdeCiudad}
+            onSelectCiudad={(id) => patch({ ciudadId: id, barrioId: null })}
+            onSelectBarrio={(id) => patch({ barrioId: id })}
+            onSelectPropiedad={seleccionarPropiedad}
+          />
+        )}
+      </div>
+    </section>
+  )
+}
+
+// ─── Mapa a pantalla completa: departamento, ciudad o barrio ─────────────
+// En el barrio, el mapa se acerca a esa zona y muestra sus marcadores; un marcador abre el detalle.
+
+function MapaGeneralView({
+  ciudades,
+  barriosVisibles,
+  propiedades,
+  nivel,
+  ciudadSeleccionada,
+  barrioSeleccionado,
+  cargando,
+  flyToBounds,
+  vistaRestaurada,
+  onVistaCambia,
+  onVolver,
+  onSelectCiudad,
+  onSelectBarrio,
+  onSelectPropiedad,
+}: {
+  ciudades: ReturnType<typeof useGeoData>['ciudades']
+  barriosVisibles: ReturnType<typeof useGeoData>['barrios']
+  propiedades: PropiedadFeature[]
+  nivel: 'departamento' | 'ciudad' | 'barrio'
+  ciudadSeleccionada: ReturnType<typeof useGeoData>['ciudades'][number] | undefined
+  barrioSeleccionado: ReturnType<typeof useGeoData>['barrios'][number] | undefined
+  cargando: boolean
+  flyToBounds: LatLngBounds | null
+  vistaRestaurada: VistaMapa | null
+  onVistaCambia: (vista: VistaMapa) => void
+  onVolver: () => void
+  onSelectCiudad: (id: string) => void
+  onSelectBarrio: (id: number) => void
+  onSelectPropiedad: (p: PropiedadFeature) => void
+}) {
+  const barrioId = nivel === 'barrio' ? barrioSeleccionado?.properties.id ?? null : null
+  const sinPropiedades = nivel === 'barrio' && !cargando && propiedades.length === 0
+  return (
+    <div className={styles.mapOnly}>
+      {nivel !== 'departamento' && (
+        <div className="pm-breadcrumb">
+          <button className="pm-back-btn" onClick={onVolver}>
+            <ChevronLeft size={16} aria-hidden="true" /> Volver
+          </button>
+          <span>
+            Alto Paraná › {ciudadSeleccionada?.properties.ciudad}
+            {nivel === 'barrio' && ` › ${barrioSeleccionado?.properties.barrio}`}
+          </span>
+        </div>
+      )}
+      <MapCanvas
+        ciudades={ciudades}
+        barriosVisibles={barriosVisibles}
+        propiedadesVisibles={propiedades}
+        showCiudades={nivel === 'departamento'}
+        showBarrios={nivel !== 'departamento'}
+        showPropiedades
+        // La clave cambia con el barrio elegido para que el resaltado se vuelva a pintar
+        barriosLayerKey={`sf-${ciudadSeleccionada?.properties.id ?? 'none'}-${barrioId ?? 'todos'}`}
+        selectedBarrioId={barrioId}
+        flyToBounds={flyToBounds}
+        vistaRestaurada={vistaRestaurada}
+        onVistaCambia={onVistaCambia}
+        onSelectCiudad={onSelectCiudad}
+        onSelectBarrio={(id) => onSelectBarrio(id)}
+        onSelectPropiedad={(id) => {
+          const p = propiedades.find((x) => x.properties.id === id)
+          if (p) onSelectPropiedad(p)
+        }}
+      />
+      <p className={styles.mapHint} data-aviso-mapa>
+        {nivel === 'departamento'
+          ? 'Hacé clic en una ciudad, o filtrá por zona, para ver sus barrios'
+          : nivel === 'ciudad'
+            ? 'Hacé clic en un barrio pintado para ver sus propiedades'
+            : sinPropiedades
+              ? 'No hay propiedades en este barrio con estos filtros. Probá quitando algún filtro.'
+              : 'Hacé clic en un marcador para ver la propiedad'}
+      </p>
+    </div>
+  )
+}
+
+// ─── Detalle de propiedad: ubicación exacta + fotos/especificaciones ───────
+
+function DetalleView({
+  propiedad,
+  barrio,
+  flyToBounds,
+  onVolver,
+}: {
+  propiedad: PropiedadFeature
+  barrio: ReturnType<typeof useGeoData>['barrios'][number] | undefined
+  flyToBounds: LatLngBounds | null
+  onVolver: () => void
+}) {
+  const props = propiedad.properties
+  const esTerreno = props.categoria === 'Terreno'
+  const fotos = fotosPara(props)
+  const operaciones = operacionesDe(props)
+
+  return (
+    <div className={styles.splitStage}>
+      {/* Ubicación exacta de la propiedad */}
+      <div className={styles.mapPane}>
+        <div className="pm-breadcrumb">
+          <button className="pm-back-btn" onClick={onVolver}>
+            <ChevronLeft size={16} aria-hidden="true" /> Volver a los resultados
+          </button>
+          <span>{props.direccion}</span>
+        </div>
+        <MapCanvas
+          ciudades={[]}
+          barriosVisibles={barrio ? [barrio] : []}
+          propiedadesVisibles={[propiedad]}
+          showCiudades={false}
+          showBarrios={false}
+          showPropiedades
+          barriosLayerKey={`sf-detalle-${props.id}`}
+          selectedBarrioId={null}
+          flyToBounds={flyToBounds}
+          onSelectCiudad={() => {}}
+          onSelectBarrio={() => {}}
+        />
+      </div>
+
+      {/* Título, fotos, precio y detalles (deslizable) */}
+      <div className={styles.sidePanel}>
+        <div className={styles.detailHeader}>
+          <h3 className={styles.detailTitle}>{props.titulo}</h3>
+          <button className={styles.detailCloseBtn} onClick={onVolver} aria-label="Volver a los resultados">
+            <X size={20} aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className={styles.detailPhotos}>
+          {fotos.length > 0 ? (
+            <ImageCarousel images={fotos} />
+          ) : (
+            <span className={styles.detailPhotosIcon}>{iconoCategoria(props.categoria)}</span>
+          )}
+          <span className={styles.detailPhotosTag}>
+            {operaciones.map((o) => o.operacion.toUpperCase()).join(' · ')}
+          </span>
+        </div>
+
+        <div className={styles.sidePanelScroll}>
+          {operaciones.map((op) => (
+            <div key={op.operacion} className={styles.detailPrice}>
+              {operaciones.length > 1 ? `${op.operacion}: ` : ''}
+              {textoPrecio(op)}
+            </div>
+          ))}
+
+          <span className={`${styles.sidePanelScrollLabel} ${styles.detailLabel}`}>Detalles</span>
+
+          <div className={styles.specGrid}>
+            {!esTerreno && (
+              <>
+                <SpecTile label="Dormitorios" value={props.dormitorios} />
+                <SpecTile label="Baños" value={props.banos} />
+              </>
+            )}
+            <SpecTile label="Superficie" value={`${props.m2} m²`} />
+            <SpecTile label="Operación" value={operaciones.map((o) => o.operacion).join(' y ')} />
+            <SpecTile label="Barrio" value={props.barrio} />
+            <SpecTile label="Ciudad" value={props.ciudad} />
+          </div>
+
+          {props.descripcion && <p className={styles.detailAddress}>{props.descripcion}</p>}
+
+          <p className={styles.detailAddress}><MapPin size={16} aria-hidden="true" /> {props.direccion}</p>
+
+          <button
+            className={styles.searchBtn}
+            onClick={() => abrirAsistenteConPropiedad({ codigo: props.id, titulo: props.titulo })}
+          >
+            <MessageCircle size={18} aria-hidden="true" /> Consultar sobre esta propiedad
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SpecTile({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className={styles.specTile}>
+      <div className={styles.specValue}>{value}</div>
+      <div className={styles.specLabel}>{label}</div>
+    </div>
+  )
+}

@@ -1,0 +1,114 @@
+@import 'tailwindcss';
+
+/* =====================================================================
+   Identidad visual de S&N Inmobiliaria
+   Todos los componentes toman colores, tipografía y sombras de aquí.
+   ===================================================================== */
+:root {
+  /* Colores de la marca (valores originales del sitio) */
+  --color-verde: #23412A;
+  --color-verde-oscuro: #1A3020;
+  --color-verde-medio: #3A6B46;
+  --color-acento: #A8D66F;
+  --color-acento-claro: #BDE688;   /* acento al pasar el cursor */
+  --color-acento-oscuro: #7CAE4E;  /* acento sobre fondos claros (mapa) */
+  --color-acento-suave: #EAF0DE;   /* fondo tenue con el tono del acento */
+
+  /* Neutros */
+  --color-fondo: #F4F5EE;
+  --color-superficie: #ECECE3;
+  --color-blanco: #FFFFFF;
+  --color-negro: #000000;
+  --color-texto: #1A1A1A;
+  --color-gris: #6B7280;
+  --color-borde: #E5E7EB;
+
+  /* Funcionales */
+  --color-whatsapp: #25D366;
+  --color-whatsapp-hover: #1FB959;
+  --color-error-suave: #E0A0A0;
+  --color-error: #B42318;          /* mensajes de error de formularios */
+  --color-error-fondo: #FDF0EE;
+
+  /* Tipografía: Roboto en todo el sitio (se carga en index.html); los títulos importantes van en negrita (700) */
+  --fuente-titulos: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fuente-texto: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Escala de tamaños */
+  --texto-2xs: 11px;
+  --texto-xs: 12px;
+  --texto-sm: 13px;
+  --texto-md: 14px;
+  --texto-base: 16px;
+  --texto-lg: 18px;
+  --texto-xl: 22px;
+  --texto-2xl: 28px;
+  --titulo-bloque: clamp(22px, 2.5vw, 30px);
+  --titulo-seccion: clamp(26px, 3.3vw, 40px);
+  --titulo-pagina: clamp(30px, 4.2vw, 46px);
+  --titulo-portada: clamp(38px, 6vw, 78px);
+
+  /* Elevación: dos niveles, más dos sombras funcionales */
+  --sombra-1: 0 2px 8px color-mix(in srgb, var(--color-verde-oscuro) 10%, transparent);
+  --sombra-2: 0 14px 30px color-mix(in srgb, var(--color-verde) 16%, transparent);
+  --sombra-linea: 0 1px 0 color-mix(in srgb, var(--color-acento) 12%, transparent);
+  --sombra-marcador: 0 1px 4px color-mix(in srgb, var(--color-negro) 45%, transparent);
+  --anillo-foco: 0 0 0 2px color-mix(in srgb, var(--color-acento) 40%, transparent);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--fuente-texto);
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Foco visible solo al navegar con teclado (el clic con el mouse no lo muestra) */
+button:focus {
+  outline: none;
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role='button']:focus-visible {
+  outline: 2px solid var(--color-acento-oscuro);
+  outline-offset: 2px;
+}
+
+/* Íconos (lucide-react): mismo grosor de trazo en todo el sitio, alineados con el texto.
+   La base de Tailwind muestra todo SVG como bloque (display: block), lo que empujaba el texto a otra línea
+   y lo sacaba de su recuadro: los íconos van EN LÍNEA con el texto. */
+.lucide {
+  display: inline-block;
+  stroke-width: 1.75;
+  flex-shrink: 0;
+  vertical-align: -0.15em;
+}
+
+/* Botones y enlaces con ícono y texto: alineados y centrados en una sola línea */
+button:has(> .lucide),
+a:has(> .lucide) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+}

@@ -1,0 +1,91 @@
+/* Estilos globales (no-module) porque Leaflet inyecta el HTML de los
+   íconos como string — necesitan nombres de clase reales, no hasheados. */
+
+.pm-map {
+  /* Anclado a los cuatro bordes de su zona: ocupa todo el espacio en cualquier navegador
+     (con height: 100% algunos navegadores lo dejaban más bajo y quedaba una franja vacía debajo) */
+  position: absolute;
+  inset: 0;
+  background: var(--color-superficie);
+}
+
+.pm-ciudad-icon-wrapper,
+.pm-propiedad-icon-wrapper {
+  background: transparent;
+  border: none;
+}
+
+.pm-ciudad-icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-acento);
+  border: 3px solid var(--color-verde);
+  box-shadow: var(--anillo-foco);
+}
+
+.pm-propiedad-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(45deg);
+  background: var(--color-acento);
+  box-shadow: var(--sombra-marcador);
+}
+.pm-propiedad-icon svg {
+  transform: rotate(-45deg);
+}
+
+/* Terreno: mismo pin, tono verde más profundo (dentro de la paleta) para
+   diferenciarlo de las viviendas sin salir de los verdes de la marca. */
+.pm-propiedad-icon--terreno {
+  background: var(--color-acento-oscuro);
+}
+
+.pm-tooltip {
+  font-family: var(--fuente-texto)!important;
+  font-size: var(--texto-xs) !important;
+  border-radius: 8px !important;
+  background: var(--color-verde) !important;
+  color: var(--color-blanco) !important;
+  border: 1px solid color-mix(in srgb, var(--color-acento) 30%, transparent) !important;
+}
+.pm-tooltip::before {
+  border-top-color: var(--color-verde) !important;
+}
+
+.pm-breadcrumb {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  max-width: calc(100% - 88px); /* nunca debajo de los botones de zoom (arriba a la derecha) */
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: color-mix(in srgb, var(--color-verde) 90%, transparent);
+  backdrop-filter: blur(4px);
+  color: var(--color-blanco);
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
+}
+.pm-back-btn {
+  border: none;
+  background: color-mix(in srgb, var(--color-blanco) 15%, transparent);
+  color: var(--color-acento);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: var(--texto-2xs);
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--fuente-texto);
+}
+.pm-back-btn:hover {
+  background: color-mix(in srgb, var(--color-blanco) 28%, transparent);
+}

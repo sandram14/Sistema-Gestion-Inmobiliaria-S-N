@@ -1,0 +1,34 @@
+{
+  "name": "sn-inmobiliaria-admin",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Panel administrativo de S&N Inmobiliaria (aplicación independiente del sitio público)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run --config verificacion/vitest.config.ts"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "lucide-react": "^1.34.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.18.2"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/leaflet": "^1.9.22",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.7.0",
+    "vite": "^8.0.0",
+    "vitest": "^2.1.9"
+  }
+}

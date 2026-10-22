@@ -1,0 +1,157 @@
+package py.sn.inmobiliaria.config;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * Configuración de la aplicación.
+ *
+ * <p>Los valores que cambian entre entornos (desarrollo, Docker, producción)
+ * y los secretos se leen de variables de entorno; nunca se escriben en el código.
+ * Los datos fijos del artefacto (nombre, versión) se leen de {@code app.properties},
+ * que Maven completa al compilar.</p>
+ *
+ * <p>Variables reconocidas:</p>
+ * <ul>
+ *   <li>{@code APP_ENV}: desarrollo | produccion (por defecto: desarrollo)</li>
+ *   <li>{@code DB_URL}, {@code DB_USER}, {@code DB_PASSWORD}: conexión a PostgreSQL.
+ *       Si falta alguna, la aplicación arranca igual y /api/health lo informa.</li>
+ *   <li>{@code GEMINI_API_KEY}, {@code GEMINI_MODEL} y {@code ASISTENTE_*}: asistente de IA
+ *       (ver {@link AsistenteConfig}). Sin clave, el asistente responde 503.</li>
+ *   <li>{@code UPLOAD_DIR}: carpeta donde se guardan las imágenes subidas desde el panel
+ *       (en Docker, un volumen montado en /data/uploads). Por defecto, una carpeta temporal.</li>
+ *   <li>{@code APP_ORIGENES_PERMITIDOS}: orígenes extra (separados por coma) desde los que se
+ *       aceptan peticiones que modifican datos, por ejemplo {@code http://localhost:5174}.
+ *       El propio sitio siempre está permitido.</li>
+ * </ul>
+ */
+public final class AppConfig {
+
+    /** Nombre del atributo con el que se guarda en el ServletContext. */
+    public static final String ATRIBUTO_CONTEXTO = AppConfig.class.getName();
+
+    private final String nombre;
+    private final String version;
+    private final String entorno;
+    private final BaseDatosConfig baseDatos; // null si no está configurada
+    private final Set<String> origenesPermitidos;
+    private final Path directorioUploads;
+    private final AsistenteConfig asistente;
+
+    private AppConfig(String nombre, String version, String entorno, BaseDatosConfig baseDatos,
+                      Set<String> origenesPermitidos, Path directorioUploads, AsistenteConfig asistente) {
+        this.nombre = nombre;
+        this.version = version;
+        this.entorno = entorno;
+        this.baseDatos = baseDatos;
+        this.origenesPermitidos = origenesPermitidos;
+        this.directorioUploads = directorioUploads;
+        this.asistente = asistente;
+    }
+
+    /** Crea la configuración real: variables de entorno del sistema + app.properties. */
+    public static AppConfig cargar() {
+        return desde(System.getenv(), leerPropiedades());
+    }
+
+    /**
+     * Crea la configuración a partir de valores explícitos.
+     * Permite probarla sin depender de las variables de entorno de la máquina.
+     */
+    public static AppConfig desde(Map<String, String> entorno, Properties propiedades) {
+        Objects.requireNonNull(entorno, "entorno");
+        Objects.requireNonNull(propiedades, "propiedades");
+        String nombre = propiedades.getProperty("app.nombre", "sn-inmobiliaria-backend");
+        String version = propiedades.getProperty("app.version", "desconocida");
+        String appEnv = valorOPorDefecto(entorno.get("APP_ENV"), "desarrollo");
+        return new AppConfig(nombre, version, appEnv, leerBaseDatos(entorno), leerOrigenes(entorno.get("APP_ORIGENES_PERMITIDOS")),
+                Path.of(valorOPorDefecto(entorno.get("UPLOAD_DIR"),
+                        Path.of(System.getProperty("java.io.tmpdir"), "sn-inmobiliaria-uploads").toString())),
+                AsistenteConfig.desde(entorno));
+    }
+
+    private static BaseDatosConfig leerBaseDatos(Map<String, String> entorno) {
+        String url = limpio(entorno.get("DB_URL"));
+        String usuario = limpio(entorno.get("DB_USER"));
+        String contrasena = entorno.get("DB_PASSWORD"); // la contraseña no se recorta
+        if (url == null || usuario == null || contrasena == null || contrasena.isEmpty()) {
+            return null;
+        }
+        return new BaseDatosConfig(url, usuario, contrasena);
+    }
+
+    private static Set<String> leerOrigenes(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return Set.of();
+        }
+        return java.util.Arrays.stream(valor.split(","))
+                .map(String::trim)
+                .filter(o -> !o.isEmpty())
+                .map(o -> o.toLowerCase(java.util.Locale.ROOT))
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private static Properties leerPropiedades() {
+        Properties props = new Properties();
+        try (InputStream in = AppConfig.class.getClassLoader().getResourceAsStream("app.properties")) {
+            if (in != null) {
+                props.load(in);
+            }
+        } catch (IOException e) {
+            // Sin app.properties se usan los valores por defecto; no es un error fatal.
+        }
+        return props;
+    }
+
+    private static String limpio(String valor) {
+        return (valor == null || valor.isBlank()) ? null : valor.trim();
+    }
+
+    private static String valorOPorDefecto(String valor, String porDefecto) {
+        String v = limpio(valor);
+        return v == null ? porDefecto : v;
+    }
+
+    public String nombre() {
+        return nombre;
+    }
+
+    public String version() {
+        return version;
+    }
+
+    public String entorno() {
+        return entorno;
+    }
+
+    public boolean esProduccion() {
+        return "produccion".equalsIgnoreCase(entorno);
+    }
+
+    /** Configuración del asistente de IA (GEMINI_API_KEY, GEMINI_MODEL, límites). */
+    public AsistenteConfig asistente() {
+        return asistente;
+    }
+
+    /** Carpeta de imágenes subidas (UPLOAD_DIR). */
+    public Path directorioUploads() {
+        return directorioUploads;
+    }
+
+    /** Orígenes adicionales permitidos (en minúsculas), según APP_ORIGENES_PERMITIDOS. */
+    public Set<String> origenesPermitidos() {
+        return origenesPermitidos;
+    }
+
+    /** Conexión a la base de datos, si las tres variables DB_* están definidas. */
+    public Optional<BaseDatosConfig> baseDatos() {
+        return Optional.ofNullable(baseDatos);
+    }
+}

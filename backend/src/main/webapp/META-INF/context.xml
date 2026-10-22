@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Configuración específica de Tomcat para esta aplicación -->
+<Context>
+    <!-- SameSite=Lax: la cookie de sesión no se envía en peticiones iniciadas por otros sitios (protección CSRF) -->
+    <CookieProcessor sameSiteCookies="lax"/>
+
+    <!--
+      IP real del visitante detrás de nginx: sin esto, el backend ve siempre la IP de nginx y el límite de
+      intentos de inicio de sesión (y el de formularios) funciona solo por email.
+      - Se usa X-Real-IP, que nginx REEMPLAZA con la IP que ve ($remote_addr): un visitante no puede
+        inventarla. No se usa X-Forwarded-For porque nginx le agrega lo que manda el visitante.
+      - Solo se cree a peticiones que llegan desde las redes internas de Docker (172.16.0.0/12), es decir,
+        desde nginx. Una petición directa desde otra dirección conserva su IP y se ignora la cabecera.
+      - protocolHeader vacío: no cambia el esquema ni el puerto de la petición (igual que antes).
+    -->
+    <Valve className="org.apache.catalina.valves.RemoteIpValve"
+           remoteIpHeader="X-Real-IP"
+           internalProxies="172\.(1[6-9]|2[0-9]|3[0-1])\.\d{1,3}\.\d{1,3}"
+           trustedProxies=""
+           protocolHeader=""/>
+</Context>

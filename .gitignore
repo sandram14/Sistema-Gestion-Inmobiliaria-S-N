@@ -1,13 +1,20 @@
+# Secretos (nunca versionar)
+.env
+.env.*
+!.env.example
+# Dependencias instaladas con npm (cada proyecto las reinstala con npm ci; incluye herramientas/fuentes)
 node_modules/
-dist/
-build/
-.cache/
-.env*
-.vite/
-vite.config.*.timestamp-*
-*.tsbuildinfo
-*-debug.log*
-logs/
-*.log
-.claude-replay.*
-.tmp-*
+# Capturas de la revisión visual (herramientas/capturar.py)
+/capturas/
+# Java / Maven
+backend/target/
+# IDEs
+.idea/
+.vscode/
+*.iml
+.settings/
+.project
+.classpath
+# Sistema operativo
+.DS_Store
+Thumbs.db

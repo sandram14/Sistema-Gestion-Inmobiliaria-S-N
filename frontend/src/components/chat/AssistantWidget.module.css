@@ -1,0 +1,367 @@
+/* ── Botón flotante ───────────────────────────────────────────────────── */
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px 14px 16px;
+  background: var(--color-verde);
+  border: none;
+  border-radius: 100px;
+  box-shadow: var(--sombra-2);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.fab:hover {
+  transform: translateY(-2px);
+  background: var(--color-verde-medio);
+}
+
+.fabIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fabLabel {
+  color: var(--color-acento);
+  font-size: var(--texto-md);
+  font-weight: 700;
+  font-family: var(--fuente-texto);
+}
+
+/* ── Ventana del chat ─────────────────────────────────────────────────── */
+.window {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2000;
+  width: 400px;
+  height: 600px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 48px);
+  background: var(--color-blanco);
+  border-radius: 18px;
+  box-shadow: var(--sombra-2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: height 0.2s ease;
+}
+
+.windowMinimized {
+  height: auto;
+}
+
+/* ── Encabezado ───────────────────────────────────────────────────────── */
+.header {
+  flex-shrink: 0;
+  background: var(--color-verde);
+  color: var(--color-blanco);
+  padding: 16px 14px 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.windowMinimized .header {
+  cursor: pointer;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  font-size: var(--texto-md);
+}
+
+.headerDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-acento);
+  flex-shrink: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 4px;
+}
+
+.headerBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: color-mix(in srgb, var(--color-blanco) 10%, transparent);
+  color: var(--color-blanco);
+  font-size: var(--texto-base);
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.headerBtn:hover {
+  background: color-mix(in srgb, var(--color-blanco) 22%, transparent);
+}
+
+/* ── Cuerpo (mensajes) ────────────────────────────────────────────────── */
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--color-fondo);
+}
+
+.bubbleBot {
+  align-self: flex-start;
+  max-width: 85%;
+  background: var(--color-blanco);
+  border: 1px solid var(--color-superficie);
+  color: var(--color-texto);
+  padding: 10px 14px;
+  border-radius: 14px 14px 14px 4px;
+  font-size: var(--texto-md);
+  font-family: var(--fuente-texto);
+  line-height: 1.55;
+}
+
+.bubbleUser {
+  align-self: flex-end;
+  max-width: 85%;
+  background: var(--color-verde);
+  color: var(--color-blanco);
+  padding: 10px 14px;
+  border-radius: 14px 14px 4px 14px;
+  font-size: var(--texto-md);
+  font-family: var(--fuente-texto);
+  line-height: 1.55;
+}
+
+.summaryCard {
+  align-self: stretch;
+  background: var(--color-blanco);
+  border: 1px solid var(--color-superficie);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
+  color: var(--color-gris);
+}
+
+.summaryRow strong {
+  color: var(--color-verde);
+  text-align: right;
+  /* El presupuesto lo escribe el visitante (hasta 150 caracteres): que corte y no se salga del recuadro */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ── Acciones (respuestas rápidas / formulario) ───────────────────────── */
+.actions {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--color-superficie);
+  background: var(--color-blanco);
+}
+
+.chip {
+  padding: 9px 14px;
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 100px;
+  color: var(--color-verde);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  font-family: var(--fuente-texto);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.chip:hover {
+  background: var(--color-acento-suave);
+  border-color: var(--color-acento);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.input {
+  padding: 10px 12px;
+  border: 1.5px solid var(--color-borde);
+  border-radius: 10px;
+  font-size: var(--texto-md);
+  font-family: var(--fuente-texto);
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--color-acento);
+}
+
+.sendBtn {
+  padding: 10px;
+  background: var(--color-verde);
+  border: none;
+  border-radius: 10px;
+  color: var(--color-acento);
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  font-family: var(--fuente-texto);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sendBtn:hover {
+  background: var(--color-verde-medio);
+}
+
+.whatsappBtn {
+  width: 100%;
+  text-align: center;
+  padding: 12px;
+  background: var(--color-whatsapp);
+  border-radius: 10px;
+  color: var(--color-blanco);
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  font-family: var(--fuente-texto);
+  transition: background 0.2s;
+}
+
+.whatsappBtn:hover {
+  background: var(--color-whatsapp-hover);
+}
+
+.restartBtn {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 1.5px solid var(--color-borde);
+  border-radius: 10px;
+  color: var(--color-gris);
+  font-size: var(--texto-xs);
+  font-family: var(--fuente-texto);
+  cursor: pointer;
+}
+
+.restartBtn:hover {
+  border-color: var(--color-acento);
+  color: var(--color-verde);
+}
+
+/* ── Responsive: casi pantalla completa en mobile ─────────────────────── */
+@media (max-width: 480px) {
+  /* En el teléfono, el chat ocupa todo el ancho como panel inferior */
+  .window {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    height: min(85vh, 640px);
+    max-height: 85vh;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .windowMinimized {
+    height: auto;
+  }
+
+  .fab {
+    bottom: 16px;
+    right: 16px;
+    padding: 13px 18px 13px 14px;
+  }
+
+  .fabLabel {
+    display: none;
+  }
+
+  /* 16 px evita que el teléfono amplíe la página al escribir */
+  .input {
+    font-size: var(--texto-base);
+  }
+}
+
+/* ── Dejar mis datos (formulario dentro del chat) ───────────────────── */
+.contactoAbrir {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-verde-medio);
+  border-radius: 12px;
+  background: var(--color-blanco);
+  color: var(--color-verde);
+  font-family: var(--fuente-texto);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.contactoAbrir:hover { background: var(--color-acento-suave); }
+.contactoForm {
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: 12px;
+  background: var(--color-blanco);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.contactoCampo { display: flex; flex-direction: column; gap: 4px; font-size: var(--texto-xs); font-weight: 600; color: var(--color-texto); min-width: 0; }
+.contactoCampo .input { width: 100%; }
+.contactoCampo textarea.input { resize: vertical; }
+.contactoAcepta { display: flex; gap: 8px; align-items: flex-start; font-size: var(--texto-xs); color: var(--color-gris); line-height: 1.45; }
+.contactoAcepta input { margin-top: 2px; flex-shrink: 0; accent-color: var(--color-verde); }
+.contactoEnviar {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-verde);
+  color: var(--color-blanco);
+  font-family: var(--fuente-texto);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.contactoEnviar:disabled { opacity: 0.6; cursor: not-allowed; }
+.contactoError { color: var(--color-error); font-size: var(--texto-xs); }
+.contactoExito {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--color-acento-suave);
+  color: var(--color-verde);
+  font-size: var(--texto-sm);
+}

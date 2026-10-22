@@ -1,0 +1,588 @@
+/* ── Página completa ─────────────────────────────────────────────────── */
+/* La búsqueda vive debajo del navbar fijo (72px) y ocupa el resto del
+   viewport; sólo los paneles laterales scrollean, la página en sí no.
+   Margen verde alrededor de la barra, el mapa y el panel: ahí se puede dejar el mouse para
+   bajar la página con la rueda (sobre el mapa, la rueda hace zoom). */
+.page {
+  height: 100vh;
+  padding: calc(72px + 24px) 40px 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--color-verde-oscuro);
+  overflow: hidden;
+}
+
+.centeredMsg {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--color-blanco) 55%, transparent);
+  font-family: var(--fuente-texto);
+  font-size: var(--texto-md);
+}
+
+.centeredMsgError {
+  color: var(--color-error-suave);
+}
+
+/* ── Barra de filtros ─────────────────────────────────────────────────── */
+.filterBar {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  /* Arriba: si un error del presupuesto ocupa más líneas que otro, etiquetas y campos siguen alineados */
+  align-items: flex-start;
+  justify-content: center; /* filtros y botón Buscar centrados, juntos */
+  gap: 14px;
+  background: var(--color-blanco);
+  border-radius: 12px;
+  padding: 16px 32px;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filterLabel {
+  font-size: var(--texto-2xs);
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  color: var(--color-verde-medio);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 16px; /* fija: el botón Buscar se alinea con los campos usando esta altura */
+}
+
+.filterSelect {
+  padding: 10px 32px 10px 12px;
+  border: 1.5px solid var(--color-borde);
+  border-radius: 10px;
+  background: var(--color-blanco);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  font-family: var(--fuente-texto);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2323412A' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.filterSelect:focus {
+  border-color: var(--color-acento);
+}
+
+/* Presupuesto en guaraníes: campos de texto con el mismo aspecto que los desplegables */
+.filterInput {
+  width: 160px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--color-borde);
+  border-radius: 10px;
+  background: var(--color-blanco);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  font-family: var(--fuente-texto);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.filterInput::placeholder {
+  color: var(--color-gris);
+}
+
+.filterInput:focus {
+  border-color: var(--color-acento);
+}
+
+.filterInputError,
+.filterInputError:focus {
+  border-color: var(--color-error);
+}
+
+.filterError {
+  max-width: 160px;
+  color: var(--color-error);
+  font-size: var(--texto-2xs);
+  font-family: var(--fuente-texto);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* Aviso bajo la barra cuando el presupuesto no tiene resultados */
+.avisoFiltro {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 10px 32px;
+  background: var(--color-blanco);
+  border-radius: 12px;
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  font-family: var(--fuente-texto);
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.searchBtn {
+  padding: 11px 22px;
+  background: var(--color-verde);
+  border: none;
+  border-radius: 10px;
+  color: var(--color-acento);
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  font-family: var(--fuente-texto);
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+  height: 40px;
+}
+
+/* Solo en la barra (la clase también la usa "Consultar sobre esta propiedad" en el detalle):
+   altura de la etiqueta (16px) + separación del grupo (6px) + 1px para centrarlo (mide 40px; los campos, 42px) */
+.filterBar > .searchBtn {
+  margin-top: 23px;
+}
+
+.searchBtn:hover {
+  background: var(--color-verde-medio);
+}
+
+/* ── Escenario (mapa a pantalla completa) ────────────────────────────── */
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--color-verde-oscuro);
+}
+
+.mapOnly {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.mapHint {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  background: color-mix(in srgb, var(--color-verde-oscuro) 85%, transparent);
+  color: color-mix(in srgb, var(--color-blanco) 75%, transparent);
+  font-family: var(--fuente-texto);
+  font-size: var(--texto-xs);
+  padding: 8px 18px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+/* ── Layout partido: mapa + panel lateral deslizable ─────────────────── */
+.splitStage {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.mapPane {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.sidePanel {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-blanco);
+  border-radius: 12px;
+  /* Todo el panel (encabezado, foto y detalles) es una sola zona que se desplaza: la rueda del mouse
+     funciona en cualquier parte del panel, no solo sobre los datos. Al llegar al final sigue la página. */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.sidePanelScroll {
+  flex: none; /* ya no se desplaza por separado: lo hace el panel completo */
+  padding: 18px 26px 30px;
+}
+
+.sidePanelScrollLabel {
+  display: block;
+  font-size: var(--texto-2xs);
+  font-family: var(--fuente-texto);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-verde-medio);
+  margin-bottom: 14px;
+}
+
+.emptyText {
+  color: var(--color-gris);
+  font-size: var(--texto-sm);
+  font-family: var(--fuente-texto);
+  line-height: 1.6;
+}
+
+/* ── Galería de fotos deslizable ──────────────────────────────────────── */
+.carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.carouselTrack {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.carouselTrack::-webkit-scrollbar {
+  display: none;
+}
+
+.carouselImg {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  scroll-snap-align: start;
+  user-select: none;
+}
+
+.carouselArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: color-mix(in srgb, var(--color-negro) 40%, transparent);
+  color: var(--color-blanco);
+  font-size: var(--texto-base);
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  transition: background 0.2s;
+}
+
+.carouselArrow:hover {
+  background: color-mix(in srgb, var(--color-negro) 65%, transparent);
+}
+
+.carouselArrowLeft {
+  left: 8px;
+}
+
+.carouselArrowRight {
+  right: 8px;
+}
+
+.carouselDots {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  z-index: 3;
+}
+
+.carouselDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: color-mix(in srgb, var(--color-blanco) 55%, transparent);
+  padding: 0;
+  cursor: pointer;
+  transition: width 0.2s, background 0.2s;
+}
+
+.carouselDotActive {
+  background: var(--color-acento);
+  width: 16px;
+  border-radius: 4px;
+}
+
+/* ── Detalle de propiedad ─────────────────────────────────────────────── */
+/* Orden: título (con el botón de cerrar), fotos, precio y "Detalles" */
+.detailHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 26px 14px;
+  /* Al bajar por el detalle, el título y la X quedan visibles arriba (por encima de la foto y sus flechas) */
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--color-blanco);
+}
+
+/* La foto se muestra completa: el espacio que sobra queda blanco como el panel (antes era verde) */
+.detailPhotos {
+  position: relative;
+  flex-shrink: 0;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-blanco);
+}
+
+/* Sobre el blanco, los puntos del carrusel necesitan un tono oscuro para verse */
+.detailPhotos .carouselDot {
+  background: color-mix(in srgb, var(--color-negro) 25%, transparent);
+}
+
+.detailPhotos .carouselDotActive {
+  background: var(--color-verde-medio);
+}
+
+.detailPhotosIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-verde-medio);
+  opacity: 0.9;
+}
+
+.detailLabel {
+  margin-top: 16px;
+}
+
+.detailLabel + .specGrid {
+  margin-top: 0;
+}
+
+.detailPhotosTag {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  background: var(--color-acento);
+  color: var(--color-verde);
+  font-size: var(--texto-2xs);
+  font-weight: 700;
+  font-family: var(--fuente-texto);
+  padding: 4px 12px;
+  border-radius: 100px;
+  letter-spacing: 0.08em;
+}
+
+/* En la fila del título, fuera de la foto */
+.detailCloseBtn {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--texto-base);
+  transition: background 0.2s;
+}
+
+.detailCloseBtn:hover {
+  background: var(--color-superficie);
+}
+
+.detailTitle {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-2xl);
+  font-weight: 700;
+  color: var(--color-texto);
+  letter-spacing: -0.02em;
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere; /* títulos largos: cortan y no empujan la X fuera del panel */
+}
+
+.detailPrice {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-2xl);
+  font-weight: 400;
+  color: var(--color-verde);
+  margin-bottom: 6px;
+}
+
+.specGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.specTile {
+  background: var(--color-fondo);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.specValue {
+  font-family: var(--fuente-titulos);
+  font-size: var(--texto-base);
+  color: var(--color-verde);
+  font-weight: 400;
+}
+
+.specLabel {
+  font-size: var(--texto-2xs);
+  color: var(--color-gris);
+  font-family: var(--fuente-texto);
+  margin-top: 3px;
+}
+
+.detailAddress {
+  font-size: var(--texto-sm);
+  color: var(--color-gris);
+  font-family: var(--fuente-texto);
+  margin-top: 12px;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+/* En mobile abandonamos el layout "app" (todo encerrado en 100vh, con
+   scroll solo dentro de paneles internos) y pasamos a una página normal
+   que fluye de arriba a abajo: filtros → mapa → info del barrio →
+   propiedades, todo en una sola columna, con la página entera scrolleando.
+   Esto evita que el panel de info quede "atrapado" con altura 0 cuando el
+   contenido no entra en el porcentaje fijo que usa el layout de escritorio. */
+@media (max-width: 900px) {
+  .page {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+    padding: calc(72px + 20px) 20px 20px;
+    gap: 16px;
+  }
+
+  .stage {
+    flex: 1 0 auto; /* deja crecer al mapa de la vista general hasta el final de la pantalla */
+    overflow: visible;
+  }
+
+  .mapOnly {
+    /* En el celular, la vista general llena el resto de la pantalla (sin franja vacía debajo) */
+    flex: 1 0 320px;
+    height: auto;
+  }
+
+  .splitStage {
+    display: block;
+  }
+
+  .mapPane {
+    height: 52vh;
+    min-height: 280px;
+  }
+
+  .sidePanel {
+    height: auto;
+    margin-top: 16px; /* mapa y panel, uno debajo del otro, separados por el margen verde */
+  }
+
+  .sidePanel {
+    overflow: hidden; /* en el celular el panel crece con su contenido y se baja con la página */
+  }
+
+  .detailHeader {
+    position: static; /* pegado arriba quedaría detrás del menú fijo */
+  }
+
+  .filterBar {
+    padding: 14px 16px;
+  }
+  .sidePanelScroll,
+  .detailHeader {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding-top: calc(64px + 20px);
+  }
+  .filterBar {
+    gap: 10px;
+    padding: 12px;
+  }
+  .filterGroup {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 130px;
+  }
+  .filterSelect {
+    width: 100%;
+    font-size: var(--texto-xs);
+    padding: 9px 28px 9px 10px;
+  }
+  .filterInput {
+    width: 100%;
+    font-size: var(--texto-xs);
+    padding: 9px 10px;
+  }
+  .filterError {
+    max-width: none;
+  }
+  .avisoFiltro {
+    padding: 10px 12px;
+    font-size: var(--texto-xs);
+  }
+  .searchBtn {
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+  .filterBar > .searchBtn {
+    margin-top: 0; /* en su propia fila: no necesita alinearse con los campos */
+  }
+  .detailPhotos {
+    height: 220px;
+  }
+  .specGrid {
+    gap: 8px;
+    margin: 14px 0;
+  }
+  .mapHint {
+    /* Por encima del botón del asistente, y en dos líneas si no entra */
+    font-size: var(--texto-2xs);
+    padding: 6px 14px;
+    bottom: 84px;
+    white-space: normal;
+    text-align: center;
+    width: max-content;
+    max-width: calc(100% - 32px);
+  }
+}

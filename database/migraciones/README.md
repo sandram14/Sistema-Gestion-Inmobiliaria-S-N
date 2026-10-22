@@ -1,0 +1,223 @@
+# Migraciones de la base de datos
+
+Scripts que se aplican **una sola vez** a una base existente. Una base creada desde cero
+(`docker compose up` con el volumen vacío) ya nace con estos cambios por la carga inicial de
+`database/seed/`, así que no necesita ejecutarlos.
+
+## 001 — Fotos de demostración al almacenamiento compartido (Fase 15C)
+
+Las 66 fotos de demostración estaban en `frontend/public/images/{propiedades,terrenos}` y la
+tabla `imagen` las referenciaba como `/images/...`. Esta migración las lleva al almacenamiento
+compartido del backend (el volumen Docker `sn-uploads`, montado como `UPLOAD_DIR`) con el mismo
+formato que las fotos subidas desde el panel: `/uploads/<codigo>/<uuid>.png`.
+
+No cambia la estructura de la tabla ni el backend: solo el texto de `imagen.url`. La relación con
+la propiedad (`id_propiedad`), el `orden`, la imagen principal y la descripción se conservan, y
+la transacción lo verifica.
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `database/seed/imagenes/MAPEO.csv` | Para cada foto: código, orden, principal, URL anterior, URL nueva, SHA-256 y tamaño | — |
+| `database/seed/imagenes/SHA256SUMS` | Huellas en el formato de `sha256sum -c` | — |
+| `database/seed/imagenes/<codigo>/<uuid>.png` | Copias de los originales (fuente de la carga inicial) | — |
+| `001_verificar_originales.ps1` | Originales del frontend = copias = huellas del mapeo | No |
+| `001_copiar_al_volumen.sh` | Copia al volumen **sin sobrescribir** y verifica las 66 huellas dentro | Solo agrega archivos |
+| `001_verificar_imagenes.sql` | Estado de la base frente al mapeo, con la lista de diferencias | No (ROLLBACK) |
+| `001_imagenes_a_uploads.sql` | Actualiza las 66 URLs en **una transacción** con verificaciones | Sí, todo o nada |
+| `001_verificar_http.ps1` | Cada URL de la base responde 200 y las 66 llegan con su huella | No |
+| `001_revertir_imagenes.sql` | Devuelve las 66 URLs a `/images/...`, con las mismas verificaciones | Sí, todo o nada |
+
+### Cuándo se detiene (sin modificar nada)
+
+- El mapeo no tiene 66 filas, o las URLs de destino ya existen (la migración ya fue aplicada).
+- Alguna imagen no coincide en URL, propiedad, orden o principal (por ejemplo, porque se cambió
+  la principal o se eliminó una foto de demostración desde el panel). `001_verificar_imagenes.sql`
+  muestra exactamente cuáles.
+- Una copia o un archivo del volumen no coincide con su huella. Nunca se sobrescribe nada: hay que
+  revisar ese archivo antes de continuar.
+
+### Reversión
+
+| Situación | Cómo volver atrás |
+|-----------|-------------------|
+| Mientras las fotos sigan en `frontend/public/images` | Ejecutar `001_revertir_imagenes.sql`. Las copias en el volumen pueden quedar: no molestan |
+| En cualquier momento | Restaurar los respaldos tomados antes de migrar: `pg_restore` de la base y el `.tgz` del volumen |
+| Después de retirar las fotos del frontend | Recuperarlas desde Git (siguen en el historial) o desde `database/seed/imagenes` con `MAPEO.csv`, y luego revertir |
+
+El procedimiento completo, paso a paso, está en la entrega de la Fase 15C.
+
+## 002 — Roles GERENTE y VENDEDOR, contraseña temporal y responsable (panel, etapa 2A)
+
+Agrega, sin modificar ni borrar datos: los roles `GERENTE` y `VENDEDOR`, la columna
+`usuario.debe_cambiar_password` (false para las cuentas existentes) y la columna opcional
+`propiedad.id_responsable` (las propiedades existentes quedan sin responsable).
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `002_verificar_roles.sql` | Estructura real de `rol`, roles, columnas nuevas, usuarios y cantidad de propiedades | No |
+| `002_roles_y_responsable.sql` | La migración, en una transacción que comprueba la estructura antes y los datos después | Sí, todo o nada |
+| `002_revertir_roles.sql` | Quita lo agregado; se detiene si algún usuario tiene rol GERENTE o VENDEDOR | Sí, todo o nada |
+
+**Orden obligatorio:** aplicar la migración **antes** de desplegar el backend 0.13.0, porque
+Hibernate valida al arrancar que exista la columna `debe_cambiar_password`.
+
+## 003 — Resultado, revisión interna y recomendaciones de las consultas del chat IA (panel, etapa 3)
+
+Agrega, sin modificar ni borrar datos: en `consulta`, `resultado` (RESPONDIDA, DERIVADA_ASESOR,
+SIN_SERVICIO o BLOQUEADA), `estado_revision` (PENDIENTE o REVISADA), `revisada_por` y `revisada_en`;
+y la tabla `consulta_recomendacion` (consulta ↔ propiedad recomendada).
+
+Las consultas existentes conservan exactamente su pregunta, respuesta, propiedad, sesión y fecha
+(la transacción lo comprueba). Quedan **sin resultado y sin recomendaciones**: en su momento no se
+registraban, y no se deducen ni se inventan. El panel las muestra como "No registrado".
+
+La revisión es **interna**: indica si alguien del equipo leyó la conversación, no si el cliente fue atendido.
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `003_verificar_consultas.sql` | Estructura real de `consulta`, columnas nuevas y cantidades | No |
+| `003_consultas_revision.sql` | La migración (requiere la 002), con comprobación consulta por consulta | Sí, todo o nada |
+| `003_revertir_consultas.sql` | Quita lo agregado; las consultas no se tocan (se pierden resultados, revisiones y recomendaciones registrados) | Sí, todo o nada |
+
+**Orden obligatorio:** aplicar la migración antes de desplegar el backend 0.15.0 (Hibernate valida las columnas al arrancar).
+
+## 004 — Resultado FUERA_DE_AMBITO (panel, etapa 3, entrega 1)
+
+Amplía la restricción `ck_consulta_resultado` con `FUERA_DE_AMBITO`, que el asistente registra desde
+ahora cuando la pregunta no trata sobre propiedades ni sobre la inmobiliaria. **No modifica datos**:
+las consultas anteriores no se reclasifican y en el análisis figuran como "No registrado".
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `004_verificar_fuera_ambito.sql` | Muestra la restricción actual y los conteos | No |
+| `004_resultado_fuera_ambito.sql` | La migración (requiere la 003), comprobando que ningún resultado cambie | Sí, todo o nada |
+| `004_revertir_fuera_ambito.sql` | Restaura la restricción; se detiene si ya hay consultas FUERA_DE_AMBITO | Sí, todo o nada |
+
+Aplicarla antes de desplegar el backend 0.16.0.
+
+## 005 — Clientes potenciales (panel, etapa 3, entrega 2)
+
+Crea la tabla `cliente_potencial`. **No modifica ninguna tabla ni dato existente.** Datos personales mínimos:
+nombre, teléfono y/o email (al menos uno) y el detalle del interés; no se guarda la IP. Si el registro viene
+del chat, la base exige la fecha y la versión del texto de aceptación del tratamiento.
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `005_verificar_clientes.sql` | Comprueba que la tabla no exista y que la 004 esté aplicada | No |
+| `005_clientes_potenciales.sql` | Crea la tabla (requiere la 004) y comprueba que no cambie ningún dato | Sí, todo o nada |
+| `005_revertir_clientes.sql` | Elimina la tabla; se detiene si tiene registros (son datos personales reales) | Sí, todo o nada |
+
+Aplicarla antes de desplegar el backend 0.17.0.
+
+## 006 — Gestión del sitio web (contenido editable y propiedades destacadas)
+
+Crea `seccion_sitio` (contenido JSON de Inicio, Servicios, Nosotros y Contacto, validado por la base con
+`IS JSON OBJECT`) y `propiedad_destacada` (selección y orden de la portada; solo referencia propiedades).
+**No modifica ninguna tabla ni dato existente.** El contenido inicial es el que el sitio muestra hoy;
+Contacto arranca con valores provisionales (dominio `.example` y `+595 000 000 000`). Sin destacadas: la
+portada sigue mostrando 6 al azar. Es la única migración de todo el módulo (también para Servicios y Nosotros).
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `006_verificar_sitio.sql` | Comprueba que las tablas no existan y que la 005 esté aplicada | No |
+| `006_gestion_sitio.sql` | Crea las tablas con el contenido actual y comprueba que no cambien otros datos | Sí, todo o nada |
+| `006_revertir_sitio.sql` | Elimina ambas tablas (se pierden los textos editados desde el panel) | Sí, todo o nada |
+
+Aplicarla antes de desplegar el backend 0.18.0.
+
+## 007 — Origen CONTACTO para clientes potenciales (formulario de la página Contacto)
+
+Amplía `ck_cliente_origen` con `CONTACTO` y exige la aceptación del tratamiento también para ese origen,
+igual que en el chat (el propio visitante deja sus datos). **No modifica ningún registro.**
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `007_verificar_origen_contacto.sql` | Muestra las restricciones actuales y la cantidad de registros | No |
+| `007_origen_contacto.sql` | La migración (requiere la 005), comprobando que ningún registro cambie | Sí, todo o nada |
+| `007_revertir_origen_contacto.sql` | Restaura las restricciones; se detiene si ya hay registros con origen CONTACTO | Sí, todo o nada |
+
+Aplicarla antes de desplegar el backend 0.20.0.
+
+## 008 — Palabras destacadas en tres títulos del sitio (solo datos)
+
+El sitio muestra en verde e itálica lo que está entre asteriscos (`*así*`). `008_titulos_destacados.sql`
+marca las mismas palabras que el diseño destacaba antes en el título de la portada, el bloque de Servicios
+y la historia de Nosotros, **solo si esos títulos conservan su texto original** (si ya se editaron desde el
+panel, no se tocan). No cambia la estructura y se puede ejecutar más de una vez sin efecto adicional.
+
+## 009 — Solo guaraníes (sitio, etapa W4)
+
+El sistema pasa a trabajar solo en guaraníes. Los precios en USD pasan a PYG **con el mismo número, sin
+conversión** (45.000 USD queda Gs. 45.000) y se corrigen después a mano desde el panel. La columna `moneda`
+se conserva, limitada a `CHECK (moneda = 'PYG')` y con `DEFAULT 'PYG'`. No cambia ningún precio, ninguna
+operación ni ninguna propiedad (la transacción lo comprueba). Las consultas guardadas del chat que mencionan
+USD no se tocan: son un registro.
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `009_verificar_solo_guaranies.sql` | Restricción y valor por defecto actuales, y la **lista de precios en USD con cómo quedarán**. Guardar su salida: es el registro de qué estaba en dólares | No |
+| `009_solo_guaranies.sql` | La migración, con comprobaciones antes y después; se detiene si ya está aplicada | Sí, todo o nada |
+| `009_revertir_solo_guaranies.sql` | Vuelve a aceptar PYG y USD y quita el valor por defecto. **No devuelve ningún precio a USD**: para eso está el respaldo | Sí, todo o nada |
+
+**Orden obligatorio al desplegar:** respaldo (`pg_dump`) → `009_verificar` (guardar la salida) →
+`009_solo_guaranies` → backend 0.21.0. El backend 0.21.0 **no arranca bien contra una base sin migrar**: Hibernate
+falla al leer un `'USD'` porque el enum `Moneda` ya no lo tiene. El backend 0.20.0 sí funciona con la base migrada.
+
+Ensayo (base de prueba creada desde `schema/` y `seed/` anteriores): migrar, repetir (se detiene con "ya está
+aplicada"), revertir, revertir otra vez (se detiene) y volver a migrar; la base migrada es igual a una creada desde
+los `schema/` y `seed/` nuevos, y las pruebas de `database/pruebas/verificar.sql` pasan.
+
+## 010 — Barrios y localidades oficiales de todo Alto Paraná (INE 2022)
+
+Antes había 4 ciudades y 12 barrios (los de las propiedades de ejemplo): una propiedad fuera de ellos no se podía
+cargar ("El punto marcado está fuera de las zonas registradas"). La 010 carga la **cartografía censal 2022 del INE**
+de Alto Paraná: **22 ciudades (distritos) y 714 barrios y localidades**, urbanos y rurales, con su código oficial
+`CLAVE_BAR`. Los datos están en `database/datos/ine2022_alto_parana.sql` (10 MB), generado por
+`database/datos/generar_ine2022.mjs` desde la descarga del INE; lo usan esta migración y `seed/02_ubicacion.sql`.
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `010_verificar_barrios_ine.sql` | Ciudades y barrios actuales, qué agregaría por ciudad (urbanos y rurales) y si cada propiedad queda dentro de su barrio con el contorno oficial, con su distancia al borde | No (ROLLBACK) |
+| `010_barrios_ine.sql` | Agrega las 18 ciudades y los 702 barrios que faltan, pasa los 12 de antes al contorno exacto del INE (estaban con 5 decimales: se mueven menos de 1 m) y quita la regla de nombre único por ciudad (el INE repite nombres entre la parte urbana y la rural de un distrito) | Sí, todo o nada |
+| `010_revertir_barrios_ine.sql` | Vuelve a 4 ciudades y 12 barrios y restaura la regla de nombre único. **Se detiene** si alguna propiedad ya está en un barrio agregado. Los 12 barrios quedan con el contorno del INE: para volver exactamente al estado previo, restaurar el respaldo | Sí, todo o nada |
+
+Se detiene sin modificar nada si: los datos del INE no son los esperados; ya está aplicada; alguna ciudad o barrio
+actual no coincide con el INE (código, nombre o distrito); o alguna propiedad quedaría fuera de su barrio con el
+contorno oficial. Después comprueba que queden 22 ciudades y 714 barrios válidos, que las ciudades y barrios de
+antes conserven id, nombre, ciudad y centro, y que ninguna propiedad cambie ni quede fuera de su barrio.
+
+**Orden al desplegar:** respaldo (`pg_dump`) → `010_verificar` (guardar la salida) → `010_barrios_ine` →
+backend 0.23.0 y sitio. El backend 0.22.0 también funciona con la base migrada, pero enviaría los 714 contornos
+completos (unos 6 MB) al sitio y al panel; el 0.23.0 los simplifica para dibujar y el sitio pide solo las
+ciudades con propiedades. El 0.23.0 también funciona con una base sin migrar.
+
+Ensayo (base de prueba creada desde `schema/` y `seed/` anteriores): migrar, repetir (se detiene con "ya está
+aplicada"), revertir, revertir otra vez (se detiene) y volver a migrar; con una propiedad movida a Yguazú, la
+reversión se negó. La base migrada es **idéntica** a una creada desde los `schema/` y `seed/` nuevos (estructura,
+ciudades, barrios y propiedades) y las 20 pruebas de `database/pruebas/verificar.sql` pasan. En los datos del INE no
+hay contornos inválidos ni barrios superpuestos.
+
+## 011 — Auditoría de accesos y cierre de sesiones al restablecer una contraseña
+
+Cuando el administrador genera una contraseña temporal para otro usuario (por ejemplo, un vendedor que perdió el
+acceso), la 011 permite: **cerrar las sesiones que ese usuario tenía abiertas** y **dejar registro** de quién lo hizo,
+a quién y cuándo. La recuperación por correo ("Olvidé mi contraseña") quedó postergada: no hay tablas para eso.
+
+| Archivo | Qué hace | ¿Modifica? |
+|---------|----------|------------|
+| `011_verificar_auditoria_y_sesiones.sql` | Si ya existen `usuario.version_credencial` y `auditoria`, y cuántos usuarios hay por rol (activos y con contraseña temporal) | No |
+| `011_auditoria_y_sesiones.sql` | Agrega `usuario.version_credencial` (0 para todos; sube al restablecer la contraseña y la sesión con el número anterior se cierra) y crea la tabla `auditoria` (fecha, acción, quién y a quién; **sin contraseñas ni IP**) con sus índices | Sí, todo o nada |
+| `011_revertir_auditoria_y_sesiones.sql` | Quita la tabla y la columna. **Se detiene** si la auditoría ya tiene registros (es un historial) | Sí, todo o nada |
+
+Se detiene sin modificar nada si ya está aplicada o si falta la 002. Después comprueba que ningún usuario cambió
+(email, contraseña, rol, estado y contraseña temporal) y que todos quedaron con `version_credencial = 0`.
+
+**Orden al desplegar:** respaldo (`pg_dump`) → `011_verificar` (guardar la salida) → `011_auditoria_y_sesiones` →
+backend 0.24.0. El backend 0.24.0 **no funciona con una base sin migrar** (lee `version_credencial` al iniciar
+sesión). El 0.23.0 sí funciona con la base migrada. Al desplegar el 0.24.0 hay que volver a iniciar sesión.
+
+Ensayo (base de prueba creada desde `schema/` anteriores y los `seed/` actuales, que no cambiaron): migrar, repetir
+(se detiene), revertir, revertir otra vez (se detiene), volver a migrar; con un registro en la auditoría, la
+reversión se negó. La base migrada es **idéntica** a una creada desde los `schema/` nuevos (`pg_dump --schema-only`)
+y las 24 pruebas de `database/pruebas/verificar.sql` pasan (4 nuevas: valor inicial 0, no negativo, la auditoría
+acepta su acción y rechaza otras).

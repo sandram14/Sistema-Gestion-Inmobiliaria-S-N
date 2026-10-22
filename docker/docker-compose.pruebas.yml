@@ -1,0 +1,98 @@
+# =====================================================================
+# S&N Inmobiliaria - Entorno de PRUEBAS (Fase 17)
+# =====================================================================
+# Sistema completo y descartable para las pruebas de integración del backend,
+# la prueba con Gemini real y los recorridos de punta a punta (Playwright).
+#
+# Está separado del sistema real a propósito:
+#   - otro proyecto de Compose (sn-prueba): otros contenedores y redes;
+#   - la base vive en memoria (tmpfs): nace vacía en cada "up" y desaparece con "down";
+#   - las fotos van a un volumen propio (sn-prueba_imagenes), nunca a sn-uploads;
+#   - otros puertos: sitio en 8081 y base en 5434 (los reales son 80 y 5433);
+#   - otras etiquetas de imagen (:prueba): no reemplaza las imágenes :local.
+# Este archivo no hace referencia a los volúmenes reales (sn-inmobiliaria_pgdata, sn-uploads).
+#
+# Uso (desde la raíz del repositorio; detalle en docs/pruebas.md):
+#   Copy-Item docker\pruebas.env.example docker\.env.pruebas   # y cambiar las contraseñas
+#   docker compose -f docker/docker-compose.pruebas.yml --env-file docker/.env.pruebas up -d --build
+#   docker compose -f docker/docker-compose.pruebas.yml --env-file docker/.env.pruebas down -v
+# =====================================================================
+name: sn-prueba
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: sn_prueba
+      POSTGRES_USER: sn_app
+      POSTGRES_PASSWORD: ${PRUEBA_DB_PASSWORD:?Definir PRUEBA_DB_PASSWORD en docker/.env.pruebas}
+      ADMIN_EMAIL: ${PRUEBA_ADMIN_EMAIL:?Definir PRUEBA_ADMIN_EMAIL en docker/.env.pruebas}
+      ADMIN_PASSWORD: ${PRUEBA_ADMIN_PASSWORD:?Definir PRUEBA_ADMIN_PASSWORD en docker/.env.pruebas}
+      TZ: America/Asuncion
+      PGTZ: America/Asuncion
+    ports:
+      - "${PRUEBA_DB_PORT:-5434}:5432"
+    tmpfs:
+      # Base en memoria: se crea desde database/schema y database/seed en cada inicio
+      - /var/lib/postgresql/data
+    volumes:
+      - ../database:/database:ro
+      - ./db/00_init.sh:/docker-entrypoint-initdb.d/00_init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sn_app -d sn_prueba"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  imagenes-init:
+    image: alpine:3.20
+    command: ["sh", "/database/migraciones/001_copiar_al_volumen.sh"]
+    volumes:
+      - imagenes:/destino
+      - ../database:/database:ro
+    restart: "no"
+
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/backend.Dockerfile
+    image: sn-inmobiliaria-backend:prueba
+    environment:
+      APP_ENV: produccion
+      DB_URL: jdbc:postgresql://db:5432/sn_prueba
+      DB_USER: sn_app
+      DB_PASSWORD: ${PRUEBA_DB_PASSWORD}
+      UPLOAD_DIR: /data/uploads
+      TZ: America/Asuncion
+      LOG_LEVEL: INFO
+      # Sin clave de Gemini: el asistente responde que no está disponible y no consume cuota.
+      # La prueba con Gemini real se hace aparte, con mvn (ver docs/pruebas.md).
+      GEMINI_API_KEY: ""
+    volumes:
+      - imagenes:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      imagenes-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://localhost:8080/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+  web:
+    build:
+      context: ..
+      dockerfile: docker/web.Dockerfile
+    image: sn-inmobiliaria-web:prueba
+    ports:
+      - "${PRUEBA_WEB_PORT:-8081}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  # Fotos del entorno de pruebas (propio de este proyecto: "down -v" lo borra)
+  imagenes:
