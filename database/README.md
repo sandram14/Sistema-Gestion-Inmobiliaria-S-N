@@ -50,7 +50,8 @@ PostgreSQL la recalcula sola y nunca queda desincronizada.
 ## Datos de demostración: supuestos a revisar
 
 - Las 7 propiedades que el frontend clasificaba como "Departamento" se cargaron como **Casa**
-  (prop-002, 004, 006, 007, 013, 014, 015); sus títulos todavía dicen "Departamento en …".
+  (prop-002, 004, 006, 007, 013, 014, 015). Desde octubre de 2026 sus títulos ya no dicen "Departamento en …"
+  (por ejemplo, "Alquiler en San Jose"), igual que en `frontend/public/data/propiedades.geojson`.
 - El GeoJSON no tenía estos datos, por lo que se cargaron valores supuestos:
   `casa.sala/comedor/cocina = true` y `terreno.tiene_titulo = false`.
 - Todos los precios están en guaraníes (PYG), la única moneda del sistema desde la migración 009. Son los mismos

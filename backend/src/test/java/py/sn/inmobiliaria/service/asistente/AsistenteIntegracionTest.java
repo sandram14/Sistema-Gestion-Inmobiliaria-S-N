@@ -36,12 +36,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   <li>Por defecto usa un cliente de IA simulado: verifica el contexto leído de la base y el
  *       registro en CONSULTA sin consumir la cuota de Gemini.</li>
  *   <li>La prueba con Gemini REAL solo se ejecuta si además GEMINI_API_KEY está definida y
- *       PROBAR_GEMINI_REAL=true: hace una única consulta.</li>
+ *       PROBAR_GEMINI_REAL=true: hace una única consulta. Nunca contra la base sn_inmobiliaria
+ *       (se omite): se ejecuta en el entorno de pruebas (docs/pruebas.md).</li>
  * </ul>
  * Al terminar borra las consultas que creó.
  */
 @EnabledIfEnvironmentVariable(named = "DB_URL", matches = ".+")
 class AsistenteIntegracionTest {
+
+    /** Nombre de la base del sistema real (DB_NAME de docker/.env.example). */
+    static final String BASE_REAL = "sn_inmobiliaria";
 
     private static HikariDataSource dataSource;
     private static JpaProvider jpa;
@@ -76,6 +80,12 @@ class AsistenteIntegracionTest {
         AsistenteConfig config = AsistenteConfig.desde(System.getenv());
         return new AsistenteService(tx, new JpaPropiedadDao(), new JpaConsultaDao(), cliente,
                 new LimitadorAsistente(100, 100, 100, 100, Clock.systemUTC()), config);
+    }
+
+    /** Nombre de la base de una URL JDBC (jdbc:postgresql://host:puerto/base?opciones → base). */
+    static String baseDeDatos(String url) {
+        String sinOpciones = url.split("\\?", 2)[0];
+        return sinOpciones.substring(sinOpciones.lastIndexOf('/') + 1);
     }
 
     private long consultasDelVisitante() {
@@ -138,6 +148,10 @@ class AsistenteIntegracionTest {
     @EnabledIfEnvironmentVariable(named = "PROBAR_GEMINI_REAL", matches = "(?i)true")
     @EnabledIfEnvironmentVariable(named = "GEMINI_API_KEY", matches = ".+")
     void unaConsultaRealAGemini() {
+        // Consume cuota de Gemini y escribe (y luego borra) una fila en CONSULTA: nunca contra la base real
+        String base = baseDeDatos(System.getenv("DB_URL"));
+        Assumptions.assumeFalse(BASE_REAL.equalsIgnoreCase(base), () -> "La prueba con Gemini real no se ejecuta contra la base "
+                + BASE_REAL + ": usar la base del entorno de pruebas (docs/pruebas.md).");
         AsistenteConfig config = AsistenteConfig.desde(System.getenv());
         GeminiClient gemini = new GeminiClient(config.apiKey(), config.modelo(),
                 config.nivelRazonamiento(), Duration.ofSeconds(config.timeoutSegundos()));

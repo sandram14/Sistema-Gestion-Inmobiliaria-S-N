@@ -34,9 +34,9 @@ SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-001/7dd2e726-6743-433c-b0f5-7ee56c6ccffd.png', false, 4)
 ) AS v(url, es_principal, orden) WHERE p.codigo = 'prop-001';
 
--- prop-002: Departamento en Area 1 (Departamento / Venta)
+-- prop-002: Casa en venta en Area 1 (Casa / Venta; antes "Departamento")
 INSERT INTO propiedad (codigo, titulo, direccion, latitud, longitud, id_tipo_propiedad, id_estado, id_barrio)
-SELECT 'prop-002', 'Departamento en Area 1', 'Av. Monseñor Rodríguez 995', -25.51581, -54.63752, tp.id_tipo_propiedad, e.id_estado, 10011013
+SELECT 'prop-002', 'Casa en venta en Area 1', 'Av. Monseñor Rodríguez 995', -25.51581, -54.63752, tp.id_tipo_propiedad, e.id_estado, 10011013
   FROM tipo_propiedad tp, estado_propiedad e WHERE tp.nombre = 'Casa' AND e.nombre = 'Disponible';
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 3, 1, true, true, true, 49 FROM propiedad WHERE codigo = 'prop-002';
@@ -66,9 +66,9 @@ SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-003/24188424-0ca9-4388-a95c-39009118e65e.png', false, 3)
 ) AS v(url, es_principal, orden) WHERE p.codigo = 'prop-003';
 
--- prop-004: Departamento en San Jose (Departamento / Alquiler)
+-- prop-004: Alquiler en San Jose (Casa / Alquiler; antes "Departamento")
 INSERT INTO propiedad (codigo, titulo, direccion, latitud, longitud, id_tipo_propiedad, id_estado, id_barrio)
-SELECT 'prop-004', 'Departamento en San Jose', 'Av. Del Lago 1493', -25.51157, -54.65519, tp.id_tipo_propiedad, e.id_estado, 10011014
+SELECT 'prop-004', 'Alquiler en San Jose', 'Av. Del Lago 1493', -25.51157, -54.65519, tp.id_tipo_propiedad, e.id_estado, 10011014
   FROM tipo_propiedad tp, estado_propiedad e WHERE tp.nombre = 'Casa' AND e.nombre = 'Disponible';
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 2, 2, true, true, true, 45 FROM propiedad WHERE codigo = 'prop-004';
@@ -96,9 +96,9 @@ SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-005/64cbdc3b-e105-40d6-827a-85d0a5f3ab8e.png', false, 2)
 ) AS v(url, es_principal, orden) WHERE p.codigo = 'prop-005';
 
--- prop-006: Departamento en Ciudad Nueva (Departamento / Alquiler)
+-- prop-006: Alquiler en Ciudad Nueva (Casa / Alquiler; antes "Departamento")
 INSERT INTO propiedad (codigo, titulo, direccion, latitud, longitud, id_tipo_propiedad, id_estado, id_barrio)
-SELECT 'prop-006', 'Departamento en Ciudad Nueva', 'Av. Kubitschek 1981', -25.507, -54.66748, tp.id_tipo_propiedad, e.id_estado, 10011024
+SELECT 'prop-006', 'Alquiler en Ciudad Nueva', 'Av. Kubitschek 1981', -25.507, -54.66748, tp.id_tipo_propiedad, e.id_estado, 10011024
   FROM tipo_propiedad tp, estado_propiedad e WHERE tp.nombre = 'Casa' AND e.nombre = 'Disponible';
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 2, 2, true, true, true, 89 FROM propiedad WHERE codigo = 'prop-006';
@@ -112,9 +112,9 @@ SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-006/c470bb83-7db2-4a27-917c-db03ad51fa3c.png', false, 3)
 ) AS v(url, es_principal, orden) WHERE p.codigo = 'prop-006';
 
--- prop-007: Departamento en San Juan (Departamento / Venta)
+-- prop-007: Casa en venta en San Juan (Casa / Venta; antes "Departamento")
 INSERT INTO propiedad (codigo, titulo, direccion, latitud, longitud, id_tipo_propiedad, id_estado, id_barrio)
-SELECT 'prop-007', 'Departamento en San Juan', 'Ruta Internacional 384', -25.48256, -54.67572, tp.id_tipo_propiedad, e.id_estado, 10011003
+SELECT 'prop-007', 'Casa en venta en San Juan', 'Ruta Internacional 384', -25.48256, -54.67572, tp.id_tipo_propiedad, e.id_estado, 10011003
   FROM tipo_propiedad tp, estado_propiedad e WHERE tp.nombre = 'Casa' AND e.nombre = 'Disponible';
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 1, 2, true, true, true, 82 FROM propiedad WHERE codigo = 'prop-007';
@@ -203,9 +203,9 @@ SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-012/fc7a9014-25ee-4cf1-9e08-b0bf227ac0c9.png', false, 2)
 ) AS v(url, es_principal, orden) WHERE p.codigo = 'prop-012';
 
--- prop-013: Departamento en Parana Country Club (Departamento / Venta)
+-- prop-013: Casa disponible en Parana Country Club (Casa / Venta; antes "Departamento")
 INSERT INTO propiedad (codigo, titulo, direccion, latitud, longitud, id_tipo_propiedad, id_estado, id_barrio)
-SELECT 'prop-013', 'Departamento en Parana Country Club', 'Av. Del Lago 1979', -25.47921, -54.62177, tp.id_tipo_propiedad, e.id_estado, 10051023
+SELECT 'prop-013', 'Casa disponible en Parana Country Club', 'Av. Del Lago 1979', -25.47921, -54.62177, tp.id_tipo_propiedad, e.id_estado, 10051023
   FROM tipo_propiedad tp, estado_propiedad e WHERE tp.nombre = 'Casa' AND e.nombre = 'Disponible';
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 2, 3, true, true, true, 72 FROM propiedad WHERE codigo = 'prop-013';
@@ -218,9 +218,9 @@ SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-013/5941fd9c-3aad-47e7-98b2-7d2aedeb09d7.png', false, 2)
 ) AS v(url, es_principal, orden) WHERE p.codigo = 'prop-013';
 
--- prop-014: Departamento en Nuestra Sra De La Asuncion (Departamento / Venta)
+-- prop-014: Casa en Nuestra Sra De La Asuncion (Casa / Venta; antes "Departamento")
 INSERT INTO propiedad (codigo, titulo, direccion, latitud, longitud, id_tipo_propiedad, id_estado, id_barrio)
-SELECT 'prop-014', 'Departamento en Nuestra Sra De La Asuncion', 'Av. Del Lago 2490', -25.40076, -54.6431, tp.id_tipo_propiedad, e.id_estado, 10051007
+SELECT 'prop-014', 'Casa en Nuestra Sra De La Asuncion', 'Av. Del Lago 2490', -25.40076, -54.6431, tp.id_tipo_propiedad, e.id_estado, 10051007
   FROM tipo_propiedad tp, estado_propiedad e WHERE tp.nombre = 'Casa' AND e.nombre = 'Disponible';
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 2, 2, true, true, true, 76 FROM propiedad WHERE codigo = 'prop-014';
@@ -233,9 +233,9 @@ SELECT p.id_propiedad, v.url, v.es_principal, v.orden FROM propiedad p, (VALUES
     ('/uploads/prop-014/86bc6d27-3c42-4f86-995e-2030c721ea69.png', false, 2)
 ) AS v(url, es_principal, orden) WHERE p.codigo = 'prop-014';
 
--- prop-015: Departamento en San Antonio (Departamento / Alquiler)
+-- prop-015: Alquiler Monoambiente en San Antonio (Casa / Alquiler; antes "Departamento")
 INSERT INTO propiedad (codigo, titulo, direccion, latitud, longitud, id_tipo_propiedad, id_estado, id_barrio)
-SELECT 'prop-015', 'Departamento en San Antonio', 'Av. Monseñor Rodríguez 292', -25.55971, -54.60829, tp.id_tipo_propiedad, e.id_estado, 10021001
+SELECT 'prop-015', 'Alquiler Monoambiente en San Antonio', 'Av. Monseñor Rodríguez 292', -25.55971, -54.60829, tp.id_tipo_propiedad, e.id_estado, 10021001
   FROM tipo_propiedad tp, estado_propiedad e WHERE tp.nombre = 'Casa' AND e.nombre = 'Disponible';
 INSERT INTO casa (id_propiedad, habitaciones, banos, sala, comedor, cocina, superficie_construida)
 SELECT id_propiedad, 2, 3, true, true, true, 62 FROM propiedad WHERE codigo = 'prop-015';

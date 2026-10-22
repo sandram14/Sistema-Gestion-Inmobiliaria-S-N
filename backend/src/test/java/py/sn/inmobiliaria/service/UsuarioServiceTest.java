@@ -160,7 +160,7 @@ class UsuarioServiceTest {
 
     @Test
     void misDatosNoIncluyenRolNiEmail() {
-        var r = servicio.actualizarMisDatos(7, new CuentaRequest.Datos("Sandra", "Gómez", "4444444", "0985"));
+        var r = servicio.actualizarMisDatos(7, new CuentaRequest.Datos("Paula", "Gómez", "4444444", "0985"));
         assertEquals("Gómez", r.apellido());
         assertEquals("ADMIN", r.rol());
         assertEquals("admin@sn.local", r.email());

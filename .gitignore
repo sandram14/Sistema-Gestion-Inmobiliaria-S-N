@@ -4,6 +4,8 @@
 !.env.example
 # Dependencias instaladas con npm (cada proyecto las reinstala con npm ci; incluye herramientas/fuentes)
 node_modules/
+# Capturas de la revisión visual (herramientas/capturar.py)
+/capturas/
 # Java / Maven
 backend/target/
 # IDEs

@@ -35,14 +35,18 @@ GeoJSON original del frontend es opcional: se activa con `VERIFICAR_DATOS_DEMO=t
 | `PropiedadDaoIntegracionTest` | Búsqueda pública con filtros, catálogos, imágenes, usuarios |
 | `UbicacionDaoIntegracionTest` | Consultas PostGIS: ciudades, polígonos GeoJSON, punto dentro de barrio y detección del barrio de un punto |
 | `ServiciosIntegracionTest` | Crear/editar/eliminar propiedades, cambio de tipo, imágenes, búsqueda. Borra al final lo que crea |
-| `AsistenteIntegracionTest` | Contexto desde la base y registro en `consulta` con IA simulada; con `PROBAR_GEMINI_REAL=true`, una consulta real a Gemini |
+| `AsistenteIntegracionTest` | Contexto desde la base y registro en `consulta` con IA simulada; con `PROBAR_GEMINI_REAL=true` y `GEMINI_API_KEY`, una consulta real a Gemini (se omite si `DB_URL` apunta a la base `sn_inmobiliaria`) |
 | `AuthIntegracionTest` | Login con el administrador real (requiere además `ADMIN_EMAIL` y `ADMIN_PASSWORD`) |
 | `CompatibilidadFrontendIntegracionTest` | Cada propiedad de la API tiene los campos y tipos de `PropiedadProps` (types.ts); con `VERIFICAR_DATOS_DEMO=true`, además coincide con `frontend/public/data/propiedades.geojson` |
 
+Se ejecutan contra el **entorno de pruebas** (`docker/docker-compose.pruebas.yml`, base `sn_prueba` en el
+puerto 5434), que nace de `database/schema` y `database/seed` y no comparte datos con el sistema real.
+Comandos, variables y resultados esperados: [`docs/pruebas.md`](../docs/pruebas.md).
+
 ```powershell
-$env:DB_URL = "jdbc:postgresql://localhost:5433/sn_inmobiliaria"
+$env:DB_URL = "jdbc:postgresql://localhost:5434/sn_prueba"
 $env:DB_USER = "sn_app"
-$env:DB_PASSWORD = "<la de docker/.env>"
+$env:DB_PASSWORD = "<PRUEBA_DB_PASSWORD de docker/.env.pruebas>"
 mvn -f backend/pom.xml test
 ```
 
@@ -76,7 +80,7 @@ Probar: `curl.exe -i http://localhost:8080/api/health`
 | `APP_ORIGENES_PERMITIDOS` | Orígenes extra que pueden modificar datos (coma) | — |
 | `UPLOAD_DIR` | Carpeta de imágenes subidas (en Docker: un volumen en `/data/uploads`) | carpeta temporal |
 | `GEMINI_API_KEY` | Clave de Gemini (solo en `docker/.env`) | — (asistente 503) |
-| `GEMINI_MODEL` | Modelo de Gemini | `gemini-3.1-flash-lite` |
+| `GEMINI_MODEL` | Modelo de Gemini | `gemini-3.5-flash-lite` |
 | `GEMINI_THINKING_LEVEL` | Razonamiento interno en Gemini 3 (`minimal`, `low`…; `ninguno` = no enviar) | `minimal` |
 | `ASISTENTE_LIMITE_*` | Límites por minuto/día, por visitante y global | 10, 30, 8, 200 |
 
@@ -152,6 +156,12 @@ La sesión expira tras 30 minutos sin actividad.
 | POST | `/api/admin/auth/login` | Cuerpo `{"email","password"}` → 200 `{"usuario": {...}}` y cookie de sesión |
 | POST | `/api/admin/auth/logout` | 204, cierra la sesión |
 | GET | `/api/admin/auth/me` | 200 `{"usuario": {...}}` o 401 |
+
+Tras 5 contraseñas incorrectas, el inicio de sesión de ese email se bloquea 15 minutos para esa IP (429).
+Detrás de nginx, la IP real llega en `X-Real-IP` (nginx la reemplaza siempre con la que ve) y Tomcat solo la
+acepta de las redes internas de Docker (`RemoteIpValve` en `src/main/webapp/META-INF/context.xml`). En el
+Tomcat de desarrollo con `docker run`, las peticiones de la PC también llegan desde una red interna de Docker:
+ahí la cabecera se podría inventar, lo que solo importa en desarrollo.
 
 El filtro `AuthFilter` protege todo `/api/admin/*`:
 

@@ -23,7 +23,7 @@ class JsonUtilTest {
      */
     @Test
     void elUsuarioDeLaSesionSeEnviaSoloConSusCampos() throws Exception {
-        var usuario = new py.sn.inmobiliaria.seguridad.UsuarioSesion(7, "Sandra", "P", "s@sn.local", "ADMIN", true);
+        var usuario = new py.sn.inmobiliaria.seguridad.UsuarioSesion(7, "Paula", "P", "s@sn.local", "ADMIN", true);
         JsonNode json = JsonUtil.mapper().readTree(JsonUtil.mapper().writeValueAsString(usuario));
         var campos = new java.util.TreeSet<String>();
         json.fieldNames().forEachRemaining(campos::add);

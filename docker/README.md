@@ -58,6 +58,14 @@ la base (`db`), el Tomcat de desarrollo con `docker run` y `npm run dev` en `fro
 (`http://localhost:5173`) y en `admin/` (`http://localhost:5174/admin/`). Puede convivir con el
 sistema completo: el backend de Compose no publica puertos en la PC.
 
+## Entorno de pruebas
+
+`docker-compose.pruebas.yml` levanta una copia descartable del sistema para las pruebas de
+integración y los recorridos de punta a punta. Es otro proyecto (`sn-prueba`), con la base en memoria,
+sus propias fotos y los puertos 8081 (sitio) y 5434 (base). No usa los volúmenes reales y puede
+funcionar al mismo tiempo que el sistema. Sus variables van en `docker/.env.pruebas`, que se copia
+de `pruebas.env.example` y no se sube a Git. Uso: [`docs/pruebas.md`](../docs/pruebas.md), sección 3.
+
 ---
 
 ## Respaldar

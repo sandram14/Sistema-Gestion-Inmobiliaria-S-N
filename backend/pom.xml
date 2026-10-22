@@ -6,7 +6,7 @@
 
     <groupId>py.sn</groupId>
     <artifactId>sn-inmobiliaria-backend</artifactId>
-    <version>0.24.0</version>
+    <version>0.25.0</version>
     <packaging>war</packaging>
 
     <name>S&amp;N Inmobiliaria - Backend</name>

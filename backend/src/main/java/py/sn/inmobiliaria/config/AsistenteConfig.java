@@ -9,7 +9,7 @@ import java.util.Map;
  * ni en el frontend. {@link #toString()} la oculta.</p>
  *
  * @param apiKey               GEMINI_API_KEY; null si no está configurada (el asistente responde 503)
- * @param modelo               GEMINI_MODEL (por defecto gemini-3.1-flash-lite, con nivel gratuito)
+ * @param modelo               GEMINI_MODEL (por defecto gemini-3.5-flash-lite, con nivel gratuito)
  * @param nivelRazonamiento    GEMINI_THINKING_LEVEL para modelos Gemini 3 (por defecto "minimal": no gasta
  *                             cuota en razonar); "ninguno" para no enviar el parámetro
  * @param timeoutSegundos      tiempo máximo de espera de la respuesta de Gemini
@@ -31,10 +31,11 @@ public record AsistenteConfig(
         int maxPropiedadesContexto) {
 
     /**
-     * Verificado con la clave del proyecto (octubre de 2026): gemini-2.5-flash ya no está disponible para
-     * claves nuevas; gemini-3.1-flash-lite responde completo y con thinkingLevel=minimal no usa razonamiento.
+     * Verificado con la clave del proyecto (octubre de 2026): los modelos gemini-2.5 ya no están disponibles
+     * para claves nuevas (HTTP 404) y gemini-3.1-flash-lite respondió "saturado" (HTTP 503) de forma sostenida;
+     * gemini-3.5-flash-lite responde completo y con thinkingLevel=minimal no usa razonamiento.
      */
-    public static final String MODELO_POR_DEFECTO = "gemini-3.1-flash-lite";
+    public static final String MODELO_POR_DEFECTO = "gemini-3.5-flash-lite";
     public static final String NIVEL_RAZONAMIENTO_POR_DEFECTO = "minimal";
 
     /** Lee las variables ASISTENTE_* y GEMINI_*, con valores por defecto pensados para el nivel gratuito. */

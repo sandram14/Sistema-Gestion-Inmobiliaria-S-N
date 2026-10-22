@@ -46,7 +46,7 @@ public class AuthServiceTest {
 
     static Usuario admin() {
         Rol rol = Entidades.crear(Rol.class, Map.of("id", 1, "nombre", "ADMIN"));
-        Usuario u = new Usuario("Sandra", "Admin", "admin@sn.local", HASHER.hashear("Clave-Correcta"), rol);
+        Usuario u = new Usuario("Paula", "Admin", "admin@sn.local", HASHER.hashear("Clave-Correcta"), rol);
         Entidades.asignar(u, "id", 7);
         return u;
     }
@@ -140,7 +140,7 @@ public class AuthServiceTest {
         UsuarioSesion u = auth.login("  ADMIN@sn.local ", "Clave-Correcta", "10.0.0.1");
 
         assertEquals(7, u.id());
-        assertEquals("Sandra", u.nombre());
+        assertEquals("Paula", u.nombre());
         assertEquals("ADMIN", u.rol());
         assertTrue(u.esAdmin());
     }

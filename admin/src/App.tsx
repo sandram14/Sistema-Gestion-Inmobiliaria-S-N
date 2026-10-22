@@ -1,5 +1,6 @@
 import { lazy } from 'react'
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
+import RutaConPermiso from './auth/RutaConPermiso'
 import RutaProtegida from './auth/RutaProtegida'
 import Layout from './componentes/Layout'
 import Login from './paginas/Login'
@@ -45,12 +46,14 @@ export default function App() {
           <Route path="/consultas/clientes/:id" element={<DetalleClientePotencial />} />
           <Route path="/consultas/:id" element={<DetalleConsulta />} />
           <Route path="/sitio" element={<Navigate to="/sitio/inicio" replace />} />
-          <Route path="/sitio/inicio" element={<SitioInicio />} />
           <Route path="/sitio/ofertas" element={<Navigate to="/sitio/inicio" replace />} />
           {/* Los servicios se editan ahora en la pestaña Nosotros */}
           <Route path="/sitio/servicios" element={<Navigate to="/sitio/nosotros" replace />} />
-          <Route path="/sitio/nosotros" element={<SitioNosotros />} />
-          <Route path="/sitio/contacto" element={<SitioContacto />} />
+          <Route element={<RutaConPermiso permiso="CONTENIDO_EDITAR" aviso="No tiene permisos para gestionar el sitio web." />}>
+            <Route path="/sitio/inicio" element={<SitioInicio />} />
+            <Route path="/sitio/nosotros" element={<SitioNosotros />} />
+            <Route path="/sitio/contacto" element={<SitioContacto />} />
+          </Route>
           <Route path="/usuarios" element={<Usuarios />} />
           <Route path="/usuarios/nuevo" element={<UsuarioConClave />} />
           <Route path="/usuarios/:id" element={<UsuarioConClave />} />

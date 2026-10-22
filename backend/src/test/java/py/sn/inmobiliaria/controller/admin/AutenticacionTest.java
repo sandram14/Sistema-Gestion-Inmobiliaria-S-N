@@ -108,7 +108,7 @@ class AutenticacionTest {
         ServletFalso.ejecutar(servlet, login(LOGIN_OK));
         var conSesion = ServletFalso.ejecutar(servlet, me());
         assertEquals(200, conSesion.estado);
-        assertEquals("Sandra", conSesion.json().get("usuario").get("nombre").asText());
+        assertEquals("Paula", conSesion.json().get("usuario").get("nombre").asText());
 
         var logout = ServletFalso.ejecutar(servlet, Peticion.de("POST", "/api/admin/auth", "/logout").navegador(navegador));
         assertEquals(204, logout.estado);

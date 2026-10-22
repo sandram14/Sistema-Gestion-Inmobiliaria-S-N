@@ -17,7 +17,7 @@ class AsistenteConfigTest {
 
         assertNull(c.apiKey());
         assertFalse(c.configurado());
-        assertEquals("gemini-3.1-flash-lite", c.modelo());
+        assertEquals("gemini-3.5-flash-lite", c.modelo());
         assertEquals("minimal", c.nivelRazonamiento());
         assertEquals(10, c.limiteMinutoSesion());
         assertEquals(8, c.limiteMinutoGlobal());

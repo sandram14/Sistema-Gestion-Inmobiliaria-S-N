@@ -1,0 +1,10 @@
+{
+  "name": "fuentes",
+  "version": "1.0.0",
+  "scripts": {},
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@fontsource/roboto": "^5.3.0"
+  }
+}

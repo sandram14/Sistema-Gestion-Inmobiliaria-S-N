@@ -34,8 +34,9 @@ los usuarios y el contenido del sitio.
 │   ├── datos/        cartografía del INE (generada) y el script que la genera
 │   ├── migraciones/  cambios para bases existentes (001 a 011), cada uno con verificación previa, migración y reversión
 │   └── pruebas/      verificar.sql: reglas de la base
-├── docker/       docker-compose.yml, Dockerfiles, nginx, .env.example y su README
-└── docs/         contratos de integración del sitio con la API
+├── docker/       docker-compose.yml, entorno de pruebas (docker-compose.pruebas.yml), Dockerfiles, nginx, plantillas de variables y su README
+├── docs/         guía de pruebas, recorridos manuales y contratos de integración del sitio con la API
+└── herramientas/ backend simulado, revisión visual y recorridos de punta a punta (Playwright)
 ```
 
 ## Requisitos
@@ -45,6 +46,7 @@ los usuarios y el contenido del sitio.
 | Ejecutar el sistema completo | **Docker** con Docker Compose v2 (en Windows, Docker Desktop iniciado). Puertos libres: **80** (sitio y panel; se puede cambiar con `WEB_PORT`) y **5433** (base; `DB_PORT`) |
 | Desarrollar y probar el backend | JDK 21 y Maven 3.9 o posterior |
 | Desarrollar el sitio o el panel | Node.js 22 (la versión que usan las imágenes) y npm |
+| Recorridos de punta a punta y revisión visual | Python 3 con Playwright (`py -m pip install playwright` y `py -m playwright install chromium`) |
 | Usar el asistente de IA | Una clave de la API de Gemini (Google AI Studio). Sin clave, el sistema funciona y el asistente responde que no está disponible |
 
 ## Configuración
@@ -67,7 +69,7 @@ y se editan, como mínimo, `DB_PASSWORD`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` y (opc
 | `LOG_LEVEL` | No | Nivel de registro del backend | `INFO` |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Primera vez | Administrador inicial: se crea **solo** al inicializar una base vacía. Después, las contraseñas se cambian desde el panel | a cambiar |
 | `GEMINI_API_KEY` | No | Clave del asistente de IA | vacía |
-| `GEMINI_MODEL`, `GEMINI_THINKING_LEVEL` | No | Modelo y razonamiento interno de Gemini | `gemini-3.1-flash-lite`, `minimal` |
+| `GEMINI_MODEL`, `GEMINI_THINKING_LEVEL` | No | Modelo y razonamiento interno de Gemini | `gemini-3.5-flash-lite`, `minimal` |
 | `ASISTENTE_LIMITE_MINUTO_SESION`, `ASISTENTE_LIMITE_DIA_SESION`, `ASISTENTE_LIMITE_MINUTO_GLOBAL`, `ASISTENTE_LIMITE_DIA_GLOBAL` | No | Límites de uso del asistente | `10`, `30`, `8`, `200` |
 | `GEMINI_TIMEOUT_SEGUNDOS`, `APP_ORIGENES_PERMITIDOS` | No | Tiempo máximo de espera de Gemini y orígenes extra que pueden modificar datos (separados por coma). No están en la plantilla: se agregan solo si hacen falta | — |
 
@@ -109,7 +111,7 @@ Respaldos, recuperación y solución de problemas: [`docker/README.md`](docker/R
 Una base creada desde cero ya incluye todas las migraciones. Una base anterior se actualiza con los
 scripts de `database/migraciones/`, en orden y siempre con un respaldo previo: verificación previa
 (solo lectura), migración y, si hiciera falta, reversión. El detalle de cada una está en
-[`database/migraciones/README.md`](database/migraciones/README.md). El backend 0.24.0 necesita la
+[`database/migraciones/README.md`](database/migraciones/README.md). Desde el backend 0.24.0 se necesita la
 migración 011.
 
 ## Desarrollo
@@ -125,23 +127,19 @@ En desarrollo, Vite reenvía `/api` y `/uploads` al backend de `http://localhost
 
 ## Pruebas
 
-| Módulo | Comando | Qué comprueba |
+La guía completa, con cada comando y su resultado esperado, está en [`docs/pruebas.md`](docs/pruebas.md).
+
+| Nivel | Comando | Qué comprueba |
 |---|---|---|
-| Backend | `mvn -f backend/pom.xml clean package` | Pruebas unitarias. Las de integración se ejecutan si se definen `DB_URL`, `DB_USER` y `DB_PASSWORD` (y `ADMIN_EMAIL`/`ADMIN_PASSWORD` para la de inicio de sesión); sin ellas se omiten |
-| Base de datos | `docker compose -f docker/docker-compose.yml exec db psql -U sn_app -d sn_inmobiliaria -f /database/pruebas/verificar.sql` | Cada regla de la base rechaza lo inválido (todo dentro de una transacción que se deshace) |
-| Sitio y panel | `npx tsc --noEmit` y `npm run build` en `frontend/` y en `admin/` | Tipos y compilación |
+| Backend (unitarias) | `mvn -f backend/pom.xml clean package` | Reglas, validaciones, permisos, servlets y Gemini simulado. Sin base, las de integración se omiten |
+| Panel y sitio | `npm ci` y `npm test` en `admin/` y en `frontend/` | Pantallas, formularios, filtros y mapa, con un backend simulado (Vitest + Testing Library) |
+| Backend (integración) y base | `mvn` con `DB_URL` apuntando al **entorno de pruebas**, y `verificar.sql` | Las mismas pruebas contra PostgreSQL + PostGIS real, y cada regla de la base |
+| Punta a punta | `py herramientas/recorridos_e2e.py` | Búsqueda, detalle, chat, inicio de sesión en el panel y alta de una propiedad, en un navegador real |
+| Manual | [`docs/recorridos-manuales.md`](docs/recorridos-manuales.md) | Pasos y resultados esperados para Administrador, Gerente y Vendedor |
 
-Ejemplo de las pruebas del backend con la base de Docker (PowerShell):
-
-```powershell
-$env:DB_URL = "jdbc:postgresql://localhost:5433/sn_inmobiliaria"
-$env:DB_USER = "sn_app"
-$env:DB_PASSWORD = "<la de docker/.env>"
-mvn -f backend/pom.xml clean package
-```
-
-Las pruebas de integración limpian lo que crean, pero escriben en la base indicada: para no tocar datos
-reales, conviene apuntar `DB_URL` a una base de prueba creada desde `database/schema` y `database/seed`.
+Las pruebas que necesitan base de datos se hacen en un **entorno de pruebas separado**
+(`docker/docker-compose.pruebas.yml`): otro proyecto de Compose, con la base en memoria y sus propios
+puertos (sitio en 8081, base en 5434). Así nunca escriben en los datos reales.
 
 ## Usuarios y permisos
 
@@ -171,4 +169,7 @@ hash BCrypt; nadie puede verlas.
 | [`docker/README.md`](docker/README.md) | Instalación, uso diario, respaldos y recuperación |
 | [`database/README.md`](database/README.md) | Modelo de datos y reglas garantizadas por la base |
 | [`database/migraciones/README.md`](database/migraciones/README.md) | Cada migración, su orden y cómo se ensayó |
-| [`docs/`](docs/) | Contratos de integración del sitio con la API (búsqueda y presupuesto, clientes potenciales, gestión del sitio) |
+| [`docs/pruebas.md`](docs/pruebas.md) | Cómo ejecutar cada nivel de pruebas, el entorno de pruebas y la prueba con Gemini real |
+| [`docs/recorridos-manuales.md`](docs/recorridos-manuales.md) | Revisión manual del panel por rol |
+| [`herramientas/README.md`](herramientas/README.md) | Backend simulado, revisión visual y recorridos de punta a punta |
+| [`docs/`](docs/) | Además, contratos de integración del sitio con la API (búsqueda y presupuesto, clientes potenciales, gestión del sitio) |
