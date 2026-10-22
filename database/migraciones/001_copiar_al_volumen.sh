@@ -24,9 +24,9 @@ esperadas=$(grep -c . "$ORIGEN/SHA256SUMS")
 
 # 1. Las copias de origen deben coincidir con sus huellas antes de copiar nada
 cd "$ORIGEN"
-if ! sha256sum -c SHA256SUMS > /dev/null 2>&1; then
+if ! tr -d '\r' < SHA256SUMS | sha256sum -c - > /dev/null 2>&1; then
     echo "ERROR: las fotos de database/seed/imagenes no coinciden con SHA256SUMS. Nada fue copiado:"
-    sha256sum -c SHA256SUMS 2>&1 | grep -v ': OK$' || true
+    tr -d '\r' < SHA256SUMS | sha256sum -c - 2>&1 | grep -v ': OK$' || true
     exit 1
 fi
 
@@ -34,21 +34,23 @@ fi
 copiadas=0
 existentes=0
 while read -r huella ruta; do
+    [ -n "$ruta" ] || continue
     if [ -e "$DESTINO/$ruta" ]; then
         existentes=$((existentes + 1))
     else
         mkdir -p "$DESTINO/$(dirname "$ruta")"
         cp -p "$ORIGEN/$ruta" "$DESTINO/$ruta.tmp"
-        mv "$DESTINO/$ruta.tmp" "$DESTINO/$ruta"   # el archivo nunca queda a medio escribir
+        mv "$DESTINO/$ruta.tmp" "$DESTINO/$ruta"
         copiadas=$((copiadas + 1))
     fi
-done < "$ORIGEN/SHA256SUMS"
-
+done <<EOF
+$(tr -d '\r' < "$ORIGEN/SHA256SUMS")
+EOF
 # 3. Verificar las 66 huellas dentro del volumen
 cd "$DESTINO"
-if ! sha256sum -c "$ORIGEN/SHA256SUMS" > /dev/null 2>&1; then
+if ! tr -d '\r' < "$ORIGEN/SHA256SUMS" | sha256sum -c - > /dev/null 2>&1; then
     echo "ERROR: hay archivos en el volumen que no coinciden con SHA256SUMS:"
-    sha256sum -c "$ORIGEN/SHA256SUMS" 2>&1 | grep -v ': OK$' || true
+    tr -d '\r' < "$ORIGEN/SHA256SUMS" | sha256sum -c - 2>&1 | grep -v ': OK$' || true
     echo "No se sobrescribió nada. Revise esos archivos antes de continuar con la migración."
     exit 1
 fi
